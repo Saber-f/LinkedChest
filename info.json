@@ -1,0 +1,9 @@
+{
+  "name": "LinkedChest3",
+  "version": "1.3.33",
+  "title": "LinkedChest3",
+  "author": "sabet",
+	"factorio_version": "1.1",
+  "dependencies": ["base >= 1.1", "RealisticFusionWeaponry >= 1.5.8"],
+  "description":"关联箱"
+}
