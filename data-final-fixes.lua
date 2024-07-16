@@ -263,7 +263,11 @@ data.raw.ammo["uranium-rounds-magazine"].ammo_type.action = {      -- 绿子弹
                     {
                         type = "damage",
                         damage = { amount = 100 , type = "physical"}
-                    }
+                    },
+                    {
+                      type = "damage",
+                      damage = {amount = 200, type = "explosion"}
+                    },
                 }
             }
         }
@@ -466,6 +470,14 @@ if data.raw["electric-turret"]["photon-turret"] then
     }
 end
 
+-- 更改插件孔
+data.raw["assembling-machine"]["rfp-gas-mixer"].module_specification = {module_slots = 3}   -- 混合仪
+data.raw["assembling-machine"]["angels-electric-boiler"].module_specification = {module_slots = 3}  -- 锅炉
+data.raw["assembling-machine"]["rfp-electrolyser"].module_specification = {module_slots = 3} -- 电解器
+data.raw["furnace"]["electric-furnace"].module_specification = {module_slots = 3} -- 电炉
+data.raw["lab"]["lab"].module_specification = {module_slots = 3} -- 实验室
+
+
 -- 聚变武器制造机器更改
 data.raw.recipe["rfw-fusion-rounds-magazine"].category = rfp_categories["gas-mixing"]     -- 聚变子弹
 data.raw.recipe["rfw-fusion-cannon-shell"].category = rfp_categories["gas-mixing"]     -- 聚变加农
@@ -539,7 +551,7 @@ data.raw["electric-pole"]["medium-electric-pole"].supply_area_distance= 64
 
 
 
--- 无线科技消耗更改 
+-- 无限科技消耗更改 
 if data.raw.technology["ir-photon-turret-damage-4"] then
     data.raw.technology["ir-photon-turret-damage-4"].unit.count_formula = "(L-3)*20000"
 end
