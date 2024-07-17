@@ -126,6 +126,7 @@ function clear_player()
     global.name2id[force] = {}          -- 初始化团队的name->id
     global.TC[force] = {}               -- 初始化团队常量预算器
     global.Ti[force] = 0               -- 初始化团队的常量计算器id
+    global.virtual[force] = {}          -- 初始化团队的虚拟物品
 
     game.print(force..'团队初始化完成')
 end
@@ -210,8 +211,22 @@ function on_player_join(event)
 
 end
 
+function virtual_remove_force_item(force,name,count)
+    if global.force_item[force][name] == nil then global.force_item[force][name] = {count = 0} end
+    global.force_item[force][name].count = global.force_item[force][name].count - count
+end
+
 function add_force_item(force,name,count)
+    if global.force_item[force][name] == nil then global.force_item[force][name] = {count = 0} end
     global.force_item[force][name].count = global.force_item[force][name].count + count
+end
+
+function virtual_get_force_item_count(force,name)
+    if global.force_item[force] and global.force_item[force][name] ~= nil then
+        return global.force_item[force][name].count
+    else
+        return 0
+    end
 end
 
 function name2id(force,name)
