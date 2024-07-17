@@ -2,6 +2,7 @@
 Util = require("scripts/util") util = Util
 Event = require('scripts/event')
 Grapple = require('scripts/grapple')
+require('scripts/virtual')
 
 -- 初始化团队的常驻关联箱
 local mod_gui = require('__core__/lualib/mod-gui')
@@ -44,7 +45,7 @@ function myinitteam(force)
     global.Ti[force] = 0               -- 初始化团队的常量计算器id
     global.randomId[force] = {}               -- 随机linkiId
 
-    game.print(force..'团队初始化完成')
+    global.virtual[force] = {}          -- 初始化团队的虚拟物品
 end
 
 
@@ -60,21 +61,9 @@ function init_link()
     global.glkn = 0                     -- 团队的常驻关联箱位置
 	global.translation = {}
     global.randomId = {}                -- 随机linkiId
+    global.virtual = {}                 -- 团队的虚拟物品
 
-    -- player初始化
-    local force = "player"
-    global.force_item[force] = {}       -- 初始化团队物资
-    mycreatelinkbox(force)              -- 初始化团队的常驻关联箱
-    global.name2id[force] = {}          -- 初始化团队的name->id
-    global.TC[force] = {}               -- 初始化团队常量预算器
-    global.Ti[force] = 0               -- 初始化团队的常量计算器id
-    global.randomId[force] = {}               -- 随机linkiId
-
-    game.print(force..'团队初始化完成')
-
-    
-     -- Main Force初始化
-     
+    -- Force初始化
     for _, f in pairs(game.forces) do
         myinitteam(f.name)
         global.glkn = global.glkn + 1
@@ -1211,26 +1200,21 @@ remote.add_interface(
 
     -- 注册事件
 script.on_init(init_link)
-script.on_event(defines.events.on_game_created_from_scenario,init_link)
 script.on_configuration_changed(up_name2id)
-script.on_event(defines.events.on_force_created,on_force_creat)
-script.on_event(defines.events.on_player_joined_game,on_player_join)
-script.on_event(defines.events.on_force_friends_changed,clear_player)
 
-script.on_event(defines.events.on_built_entity,set_link)    -- 玩家建造物品
-script.on_event(defines.events.on_robot_built_entity,set_link)  -- 机器人建造物品
-script.on_event(defines.events.on_gui_elem_changed, on_gui_elem_changed)
-script.on_event(defines.events.on_gui_opened, on_gui_opened)
-script.on_event(defines.events.on_gui_closed, on_gui_closed)
-script.on_event(defines.events.on_gui_click, on_gui_click)
-script.on_event(defines.events.on_tick,tongbu)
+Event.addListener(defines.events.on_game_created_from_scenario,init_link)
+Event.addListener(defines.events.on_force_created,on_force_creat)
+Event.addListener(defines.events.on_player_joined_game,on_player_join)
+Event.addListener(defines.events.on_force_friends_changed,clear_player)
+
+Event.addListener(defines.events.on_built_entity,set_link)    -- 玩家建造物品
+Event.addListener(defines.events.on_robot_built_entity,set_link)  -- 机器人建造物品
+Event.addListener(defines.events.on_gui_elem_changed, on_gui_elem_changed)
+Event.addListener(defines.events.on_gui_opened, on_gui_opened)
+Event.addListener(defines.events.on_gui_closed, on_gui_closed)
+Event.addListener(defines.events.on_gui_click, on_gui_click)
+Event.addListener(defines.events.on_tick, tongbu)
 
 
--- script.on_event(defines.events.on_console_chat,on_console_chat)
-script.on_event(defines.events.on_gui_text_changed,on_gui_text_changed)
-script.on_event(defines.events.on_string_translated,on_string_translated)
---[[
-script.on_event(defines.events.on_pre_entity_settings_pasted, on_pre_entity_settings_pasted)
-script.on_event(defines.events.on_player_setup_blueprint,on_player_setup_blueprint)
-script.on_event(defines.events.on_robot_built_entity,on_robot_built_entity)
---]]
+Event.addListener(defines.events.on_gui_text_changed, on_gui_text_changed)
+Event.addListener(defines.events.on_string_translated, on_string_translated)

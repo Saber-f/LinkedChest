@@ -470,6 +470,9 @@ if data.raw["electric-turret"]["photon-turret"] then
     }
 end
 
+-- 修改粘贴
+data.raw.shortcut.paste.action = "copy"
+
 -- 更改插件孔
 data.raw["assembling-machine"]["rfp-gas-mixer"].module_specification = {module_slots = 3}   -- 混合仪
 data.raw["assembling-machine"]["angels-electric-boiler"].module_specification = {module_slots = 3}  -- 锅炉
@@ -719,3 +722,34 @@ data.raw["fluid-wagon"]["fluid-wagon"].capacity = 100000
 data.raw["fluid-wagon"]["fluid-wagon"].max_speed = 5
 data.raw["fluid-wagon"]["fluid-wagon"].friction_force = 0.01    -- 摩擦
 data.raw["fluid-wagon"]["fluid-wagon"].air_resistance = 0.001   -- 空气阻力
+
+
+-- 虚拟化操作
+data:extend
+{ 
+    {
+        type = "selection-tool",
+        name = "virtual",
+        icon = "__LinkedChest3__/graphics/icons/TokenBrandedVra.png",
+        icon_size = 64, icon_mipmaps = 4,
+        flags = {"hidden", "not-stackable", "spawnable"},
+        subgroup = "other",
+        order = "e[automated-construction]-a[blueprint]",
+        stack_size = 1,
+        selection_color = { r = 0, g = 191, b = 255 },
+        alt_selection_color = { r = 230, g = 230, b = 250 },
+        selection_mode = {"blueprint"},
+        alt_selection_mode = {"blueprint"},
+        selection_cursor_box_type = "copy",
+        alt_selection_cursor_box_type = "copy",
+    },
+    {
+        type = "custom-input",
+        name = "virtual",
+        localised_name = "select-units",
+        key_sequence = "SHIFT + F",
+        consuming = "game-only",
+        item_to_spawn = "virtual",
+        action = "spawn-item"
+    }
+}
