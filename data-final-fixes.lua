@@ -15,7 +15,7 @@ data:extend({
         type = "technology",
         name = "virtual",
         icon = "__LinkedChest3__/graphics/icons/TokenBrandedVra.png",
-        icon_size = 64, icon_mipmaps = 4,
+        icon_size = 128,
         effects =
         {
         },
@@ -759,7 +759,7 @@ data:extend
         type = "selection-tool",
         name = "virtual",
         icon = "__LinkedChest3__/graphics/icons/TokenBrandedVra.png",
-        icon_size = 64, icon_mipmaps = 4,
+        icon_size = 128,
         flags = {"hidden", "not-stackable", "spawnable"},
         subgroup = "other",
         order = "e[automated-construction]-a[blueprint]",

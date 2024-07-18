@@ -46,7 +46,8 @@ function myinitteam(force)
     global.randomId[force] = {}               -- 随机linkiId
 
     global.virtual[force] = {}          -- 初始化团队的虚拟物品
-    global.virtual_energy = {}          -- 团队的虚拟能源
+    global.virtual_energy[force] = {}          -- 团队的虚拟能源
+    global.virtual_limit[force] = {}           -- 团队的虚拟物品限制
 end
 
 
@@ -65,6 +66,8 @@ function init_link()
     
     global.virtual = {}                 -- 团队的虚拟物品
     global.virtual_energy = {}          -- 团队的虚拟能源
+    global.virtual_limit = {}           -- 团队的虚拟物品限制
+
 
     -- Force初始化
     for _, f in pairs(game.forces) do
@@ -95,6 +98,15 @@ function up_name2id()
                 end
             end
         end
+    end
+
+    if global.virtual == nil then global.virtual = {} end
+    if global.virtual_energy == nil then global.virtual_energy = {} end
+    if global.virtual_limit == nil then global.virtual_limit = {} end
+    for _, force in pairs(game.forces) do
+        if global.virtual[force.name] == nil then global.virtual[force.name] = {} end
+        if global.virtual_energy[force.name] == nil then global.virtual_energy[force.name] = {} end
+        if global.virtual_limit[force.name] == nil then global.virtual_limit[force.name] = {} end
     end
 end
 
@@ -130,6 +142,7 @@ function clear_player()
     global.TC[force] = {}               -- 初始化团队常量预算器
     global.Ti[force] = 0               -- 初始化团队的常量计算器id
     global.virtual[force] = {}          -- 初始化团队的虚拟物品
+    global.virtual_energy[force] = {}          -- 团队的虚拟能源
 
     game.print(force..'团队初始化完成')
 end
@@ -257,7 +270,9 @@ function get_force_item_count(force,name)
         return 0
     end
     global.glk[force].link_id = name2id(force,name)
-    n = n + global.glk[force].get_item_count(name)
+    if game.item_prototypes[name] ~= nil then
+        n = n + global.glk[force].get_item_count(name)
+    end
     return n
 end
 
@@ -314,13 +329,15 @@ end
 --势力物品创建带有图标按钮
 function add_item_button(player,frames,item_name,num)
 	if frames == nil then return end
+    local type = "item"
+    if game.item_prototypes[item_name] == nil then type = "fluid" end
     local bt =
         frames.add {
         type = 'sprite-button',
-        sprite = 'item/' .. item_name,
+        sprite = type..'/' .. item_name,
         number = num,
         name = 'force_item_' .. item_name,
-        tooltip = game.item_prototypes[item_name].localised_name,
+        tooltip = game[type.."_prototypes"][item_name].localised_name,
         column_count = 2
     }
     bt.enabled = true
@@ -425,6 +442,29 @@ function item_group_main_tab_updata(player,item_group_name)
 		end
 		::continue::
 	end
+
+    for _, item in pairs(game.fluid_prototypes) do
+        num = get_force_item_count(player.force.name,item.name)
+        if num > 0 and item_group_name == item.group.name then
+            if subgroup_name ~= item.subgroup.name and subgroup_number > 0 then
+                if item.group.name ~= group_name then
+                    group_name = item.group.name
+                    group_number = group_number +1
+                    if group_number == 2 then return end
+                end
+                subgroup_name = item.subgroup.name
+                local yu = 10 - subgroup_number % 10 
+                if yu ~= 10 then
+                    add_empty_button(yu,item_group_main_tab)
+                    subgroup_number = 0
+                end
+            end
+            
+            add_item_button(player,item_group_main_tab,item.name,num)
+            subgroup_number = subgroup_number + 1
+            subgroup_name = item.subgroup.name
+        end
+    end
 end
 
 
@@ -518,25 +558,47 @@ function draw_force_items_main_for_player(player)
 		direction = "vertical",
 		column_count = 6
 	}
-		local item_group_name = ''
-		local item_groups = ''
-		for name, item in pairs(game.item_prototypes) do
-			item_group_name = item.group.name
-			if item_groups ~= item_group_name and item_group_name~= "other" then
-				item_groups = item_group_name
-                if item_groups_table == nil then return end
-                local bt =
-                    item_groups_table.add {
-                    type = 'sprite-button',
-                    sprite = 'item-group/' .. item_group_name,
-                    name = 'item_groups_table_' .. item_group_name,
-                    tooltip = ({'item-group-name.' .. item_group_name}),
-                }
-                bt.enabled = true
-                bt.focus()
-                bt.style = 'filter_group_button_tab'
-			end
-		end
+    local item_group_name = ''
+    local item_groups = ''
+    for name, item in pairs(game.item_prototypes) do
+        item_group_name = item.group.name
+        if item_groups ~= item_group_name and item_group_name~= "other" then
+            item_groups = item_group_name
+            if item_groups_table == nil then return end
+            local bt =
+                item_groups_table.add {
+                type = 'sprite-button',
+                sprite = 'item-group/' .. item_group_name,
+                name = 'item_groups_table_' .. item_group_name,
+                tooltip = ({'item-group-name.' .. item_group_name}),
+            }
+            bt.enabled = true
+            bt.focus()
+            bt.style = 'filter_group_button_tab'
+        end
+    end
+
+    
+    local item_group_name = ''
+    local item_groups = ''
+    for name, item in pairs(game.fluid_prototypes) do
+        item_group_name = item.group.name
+        if item_groups ~= item_group_name and item_group_name~= "other" then
+            item_groups = item_group_name
+            if item_groups_table == nil then return end
+            local bt =
+                item_groups_table.add {
+                type = 'sprite-button',
+                sprite = 'item-group/' .. item_group_name,
+                name = 'item_groups_table_' .. item_group_name,
+                tooltip = ({'item-group-name.' .. item_group_name}),
+            }
+            bt.enabled = true
+            bt.focus()
+            bt.style = 'filter_group_button_tab'
+        end
+    end
+    
     local item_group_main = scroll_pane.add{type = "scroll-pane",name = 'item_group_main'}
 	item_group_main.add{type = "table",name = 'item_group_main_tab', direction = "vertical",column_count = 10, style = 'filter_slot_table'}
 	------------------------------------------------------------------------
@@ -582,43 +644,45 @@ function force_items_main_gui_click(event)
     if string.sub(event.element.name, 0, #out_item) == out_item and player.character and player.character.valid then
         local item_name = string.sub(event.element.name, #out_item + 1, #event.element.name)
         local prototypes = game.item_prototypes
-        local item_count = get_force_item_count(player.force.name,item_name)
-        if event.button == defines.mouse_button_type.left and item_count >= 1 then
-            local number = player.insert({name = item_name, count = 1})
-            if number > 0 then
-                remove_force_item(player,item_name,1)
-            else
-                player.print({'','背包已满，无法插入',{'item-name.'..item_name}})
-            end
-        elseif event.button == defines.mouse_button_type.right and item_count >= prototypes[item_name].stack_size then 
-            local number = 0
-            local num =  prototypes[item_name].stack_size
-            if event.control then
-                num =  num*10
-                if item_count < num then num = item_count end
-            end
+        if prototypes[item_name] ~= nil then
+            local item_count = get_force_item_count(player.force.name,item_name)
+            if event.button == defines.mouse_button_type.left and item_count >= 1 then
+                local number = player.insert({name = item_name, count = 1})
+                if number > 0 then
+                    remove_force_item(player,item_name,1)
+                else
+                    player.print({'','背包已满，无法插入',{'item-name.'..item_name}})
+                end
+            elseif event.button == defines.mouse_button_type.right and item_count >= prototypes[item_name].stack_size then 
+                local number = 0
+                local num =  prototypes[item_name].stack_size
+                if event.control then
+                    num =  num*10
+                    if item_count < num then num = item_count end
+                end
 
-            number = player.insert({name = item_name, count = num})
-            if number > 0 then
-                remove_force_item(player,item_name,number)
+                number = player.insert({name = item_name, count = num})
+                if number > 0 then
+                    remove_force_item(player,item_name,number)
+                end
+                if number < num then
+                    player.print({'','背包已满，无法插入',{'item-name.'..item_name}})
+                end
+            elseif item_count < prototypes[item_name].stack_size and item_count >=1 then
+                local number = player.insert({name = item_name, count = item_count})
+                if number > 0 then
+                    remove_force_item(player,item_name,number)
+                end
+                if number < item_count then
+                    player.print({'','背包已满，无法插入',{'item-name.'..item_name}})
+                end
+            elseif item_count == 0 then
+                --player.print('公共区[item=' .. item_name .. '] 为0',{r = 255,g = 0,b = 255})
+                Message_output_onallplayer('关联箱中[item=' .. item_name .. '] 为0',player)
             end
-            if number < num then
-                player.print({'','背包已满，无法插入',{'item-name.'..item_name}})
-            end
-        elseif item_count < prototypes[item_name].stack_size and item_count >=1 then
-            local number = player.insert({name = item_name, count = item_count})
-            if number > 0 then
-                remove_force_item(player,item_name,number)
-            end
-            if number < item_count then
-                player.print({'','背包已满，无法插入',{'item-name.'..item_name}})
-            end
-        elseif item_count == 0 then
-            --player.print('公共区[item=' .. item_name .. '] 为0',{r = 255,g = 0,b = 255})
-            Message_output_onallplayer('关联箱中[item=' .. item_name .. '] 为0',player)
+            player.gui.relative['force_items_main']['scroll_pane']['item_group_main']['item_group_main_tab']['force_item_'..item_name].number = get_force_item_count(player.force.name,item_name)
+            --item_group_main_tab_updata_count(player, global.player_item_group[player.name])
         end
-        player.gui.relative['force_items_main']['scroll_pane']['item_group_main']['item_group_main_tab']['force_item_'..item_name].number = get_force_item_count(player.force.name,item_name)
-        --item_group_main_tab_updata_count(player, global.player_item_group[player.name])
     end
 end
 

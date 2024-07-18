@@ -5,5 +5,5 @@
   "author": "sabet",
 	"factorio_version": "1.1",
   "dependencies": ["base >= 1.1", "? RealisticFusionWeaponry >= 1.5.8",  "? Big-Monsters >= 1.4.0", "? IndustrialRevolution3 >= 3.1.22"],
-  "description":"关联箱"
+  "description":"关联箱,虚拟化:使用SHIFT+F将区域内，有配方的特定实体，转移到虚拟空间进行生产。按住SHIFT反选查看配方虚拟化信息。[item=accumulator]为虚拟空间提供能源。聊天框输入100[item=Oem-linked-chest]设置限容，数字为0取消限容。"
 }
