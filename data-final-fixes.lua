@@ -781,3 +781,11 @@ data:extend
         action = "spawn-item"
     }
 }
+
+-- 上帝插件
+data.raw.module["pure-productivity-module-6"].category = "productivity"
+data.raw.module["pure-productivity-module-6"].tier = 3
+data.raw.module["pure-speed-module-6"].category = "productivity"
+data.raw.module["pure-speed-module-6"].tier = 3
+data.raw.module["god-module"].category = "productivity"
+data.raw.module["god-module"].tier = 4
