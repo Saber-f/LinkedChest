@@ -287,112 +287,118 @@ local function tick()
                         count = count / vinfo.recipe.energy
                     end
 
-                    -- 检测限容
-                    if recipe_name ~= "virtual-lab" then
-                        local limit = global.virtual_limit[force.name][recipe_name]
-                        for _, product in pairs(products) do
-                            if global.virtual_limit[force.name][product.name] ~= nil then
-                                local expected_value = product.amount * count * vinfo.productivity_bonus   -- 期望值
-                                if virtual_get_force_item_count(force.name, product.name) + expected_value > limit then
-                                    count = count * (limit - virtual_get_force_item_count(force.name, product.name)) / expected_value
-                                end
-                            end
-                        end
-                    end
-
                     if count >= 1 then
-                        -- 根据原料数量调整生产数量
-                        for _, ingredient in pairs(ingredients) do
-                            local ingredient_name = ingredient.name
-                            local ingredient_amount = ingredient.amount
-                            if virtual_get_force_item_count(force.name, ingredient_name) < ingredient_amount * count then
-                                count = count * virtual_get_force_item_count(force.name, ingredient_name) / (ingredient_amount * count)
-                            end
-                        end 
-                    end
 
-                    if count >= 1 then
-                        -- 根据能源消耗调整生产数量
-                        local need_energy = vinfo.energy * (game.tick - vinfo.tick)
-                        local used_energy = 0
-                        for _, accumulator in pairs(global.virtual_energy[force.name]) do
-                            if accumulator.valid and accumulator.energy > 0 then
-                                local energy = accumulator.energy
-                                if energy > need_energy then
-                                    accumulator.energy = energy - need_energy
-                                    used_energy = used_energy + need_energy
-                                    break
-                                else
-                                    accumulator.energy = 0
-                                    used_energy = used_energy + energy
-                                    need_energy = need_energy - energy
-                                end
-                            end
-                        end
-                        if used_energy < vinfo.energy then  -- 能源不足
-                            count = math.floor(count * used_energy / vinfo.energy + 0.5)
-                        end
-                    end
-
-                    if count >= 1 then
-                        count = math.floor(count)
-                        for _, ingredient in pairs(ingredients) do
-                            local ingredient_name = ingredient.name
-                            local ingredient_amount = ingredient.amount
-                            -- 移除原料
-                            virtual_remove_force_item(force.name, ingredient_name, ingredient_amount * count)
-
-                            -- 增加消耗记录
-                            if game.item_prototypes[ingredient_name] ~= nil then
-                                force.item_production_statistics.set_output_count(ingredient_name, ingredient_amount * count)
-                            elseif game.fluid_prototypes[ingredient_name] ~= nil then
-                                force.fluid_production_statistics.set_output_count(ingredient_name, ingredient_amount * count)
-                            end
-                        end
-
-                        -- 生产/研究
-                        if recipe_name == "virtual-lab" then
-                            local current_research = force.current_research
-                            if current_research ~= nil then
-                                local add_count = math.floor(count * vinfo.productivity_bonus + 0.5)
-                                local add_progress = add_count / current_research.research_unit_count
-                                -- 增加研究进度
-                                local progress = force.research_progress + add_progress
-                                if progress > 1 then
-                                    progress = 1
-                                end
-                                force.research_progress = progress
-                            end
-                        else
+                        -- 检测限容
+                        if recipe_name ~= "virtual-lab" then
+                            local limit = global.virtual_limit[force.name][recipe_name]
                             for _, product in pairs(products) do
-                                local expected_value = product.amount * count * vinfo.productivity_bonus   -- 期望值
-                                if product.probability ~= nil then
-                                    expected_value = expected_value * product.probability
-                                    if expected_value < 1 then
-                                        if math.random() < expected_value then
-                                            expected_value = 1
-                                        else
-                                            expected_value = 0
+                                if global.virtual_limit[force.name][product.name] ~= nil then
+                                    local expected_value = product.amount * count * vinfo.productivity_bonus   -- 期望值
+                                    if get_force_item_count(force.name, product.name) + expected_value > limit then
+                                        local last_count = count;
+                                        count = count * (limit - get_force_item_count(force.name, product.name)) / expected_value
+                                    end
+                                end
+                            end
+                        end
+
+                        if count >= 1 then
+                            -- 根据原料数量调整生产数量
+                            for _, ingredient in pairs(ingredients) do
+                                local ingredient_name = ingredient.name
+                                local ingredient_amount = ingredient.amount
+                                
+                                if get_force_item_count(force.name, ingredient_name) < ingredient_amount * count then
+                                    count = count * get_force_item_count(force.name, ingredient_name) / (ingredient_amount * count)
+                                end
+                            end 
+                        end
+
+                        if count >= 1 then
+                            -- 根据能源消耗调整生产数量
+                            local need_energy = vinfo.energy * (game.tick - vinfo.tick)
+                            local used_energy = 0
+                            for _, accumulator in pairs(global.virtual_energy[force.name]) do
+                                if accumulator.valid and accumulator.energy > 0 then
+                                    local energy = accumulator.energy
+                                    if energy > need_energy then
+                                        accumulator.energy = energy - need_energy
+                                        used_energy = used_energy + need_energy
+                                        break
+                                    else
+                                        accumulator.energy = 0
+                                        used_energy = used_energy + energy
+                                        need_energy = need_energy - energy
+                                    end
+                                end
+                            end
+                            if used_energy < vinfo.energy then  -- 能源不足
+                                count = math.floor(count * used_energy / vinfo.energy + 0.5)
+                            end
+                        end
+
+                        if count >= 1 then
+                            count = math.floor(count)
+                            local isOut = false
+                            for _, ingredient in pairs(ingredients) do
+                                local ingredient_name = ingredient.name
+                                local ingredient_amount = ingredient.amount
+                                -- 移除原料
+                                virtual_remove_force_item(force.name, ingredient_name, ingredient_amount * count)
+
+                                -- 增加消耗记录
+                                if game.item_prototypes[ingredient_name] ~= nil then
+                                    force.item_production_statistics.set_output_count(ingredient_name, ingredient_amount * count)
+                                elseif game.fluid_prototypes[ingredient_name] ~= nil then
+                                    force.fluid_production_statistics.set_output_count(ingredient_name, ingredient_amount * count)
+                                end
+                            end
+
+                            -- 生产/研究
+                            if recipe_name == "virtual-lab" then
+                                local current_research = force.current_research
+                                if current_research ~= nil then
+                                    local add_count = math.floor(count * vinfo.productivity_bonus + 0.5)
+                                    local add_progress = add_count / current_research.research_unit_count
+                                    -- 增加研究进度
+                                    local progress = force.research_progress + add_progress
+                                    if progress > 1 then
+                                        progress = 1
+                                    end
+                                    force.research_progress = progress
+                                end
+                            else
+                                for _, product in pairs(products) do
+                                    local expected_value = product.amount * count * vinfo.productivity_bonus   -- 期望值
+                                    if product.probability ~= nil then
+                                        expected_value = expected_value * product.probability
+                                        if expected_value < 1 then
+                                            if math.random() < expected_value then
+                                                expected_value = 1
+                                            else
+                                                expected_value = 0
+                                            end
+                                        end
+                                    end
+
+                                    if expected_value >= 1 then
+                                        local product_name = product.name
+                                        local add_count = math.floor(expected_value + 0.5)
+                                        add_force_item(force.name, product_name, add_count)
+                                        
+                                        -- 添加生产记录
+                                        if game.item_prototypes[product_name] ~= nil then
+                                            force.item_production_statistics.set_input_count(product_name, add_count)
+                                        elseif game.fluid_prototypes[product_name] ~= nil then
+                                            force.fluid_production_statistics.set_input_count(product_name, add_count)
                                         end
                                     end
                                 end
-
-                                if expected_value > 1 then
-                                    local product_name = product.name
-                                    local add_count = math.floor(expected_value + 0.5)
-                                    add_force_item(force.name, product_name, add_count)
-                                    
-                                    -- 添加生产记录
-                                    if game.item_prototypes[product_name] ~= nil then
-                                        force.item_production_statistics.set_input_count(product_name, add_count)
-                                    elseif game.fluid_prototypes[product_name] ~= nil then
-                                        force.fluid_production_statistics.set_input_count(product_name, add_count)
-                                    end
-                                end
                             end
-                        end
-                        vinfo.tick = game.tick
-                    end   
+                        end 
+                        vinfo.tick = game.tick  
+                    end
                 end
             end
         end

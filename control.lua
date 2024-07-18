@@ -228,8 +228,18 @@ function on_player_join(event)
 end
 
 function virtual_remove_force_item(force,name,count)
-    if global.force_item[force][name] == nil then global.force_item[force][name] = {count = 0} end
-    global.force_item[force][name].count = global.force_item[force][name].count - count
+    if global.force_item[force][name].count >= count then
+        global.force_item[force][name].count = global.force_item[force][name].count - count
+        return
+    else
+        count = count - global.force_item[force][name].count
+        global.force_item[force][name].count = 0
+    end
+    
+    if game.item_prototypes[name] ~= nil then
+        global.glk[force].link_id = name2id(force,name)
+        global.glk[force].remove_item({name = name, count = count})
+    end
 end
 
 function add_force_item(force,name,count)
@@ -237,13 +247,6 @@ function add_force_item(force,name,count)
     global.force_item[force][name].count = global.force_item[force][name].count + count
 end
 
-function virtual_get_force_item_count(force,name)
-    if global.force_item[force] and global.force_item[force][name] ~= nil then
-        return global.force_item[force][name].count
-    else
-        return 0
-    end
-end
 
 function name2id(force,name)
     if global.name2id[force][name] == nil then
