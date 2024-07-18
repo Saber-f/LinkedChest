@@ -1190,30 +1190,30 @@ remote.add_interface(
 "grappling-gun",
 {
     on_character_swapped = function(data)
-    --[[{
-        new_unit_number = new.unit_number,
-        old_unit_number = old.unit_number,
-        new_character = new,
-        old_character = old
-        }]]
-    if data.new_character and data.new_character.valid and data.old_character and data.old_character.valid then
-        if global.tick_tasks then
-        for _, tick_task in pairs(global.tick_tasks) do
-            if tick_task.type == "grappling-gun" then
-            if tick_task.character and tick_task.character.valid and tick_task.character == data.old_character then
-                tick_task.character = data.new_character
-            end
+        --[[{
+            new_unit_number = new.unit_number,
+            old_unit_number = old.unit_number,
+            new_character = new,
+            old_character = old
+            }]]
+        if data.new_character and data.new_character.valid and data.old_character and data.old_character.valid then
+            if global.tick_tasks then
+                for _, tick_task in pairs(global.tick_tasks) do
+                    if tick_task.type == "grappling-gun" then
+                        if tick_task.character and tick_task.character.valid and tick_task.character == data.old_character then
+                            tick_task.character = data.new_character
+                        end
+                    end
+                end
             end
         end
-        end
-    end
     end,
 }
 )
 ---------------------------------------------------------------------------------------------------------------
 
 
-    -- 注册事件
+-- 注册事件
 script.on_init(init_link)
 script.on_configuration_changed(up_name2id)
 

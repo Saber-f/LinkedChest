@@ -11,7 +11,33 @@ if data.raw.recipe["rfw-fusion-rounds-magazine"] then
 
 --[[Technology]]--
 data:extend({
-    {-- 上帝插件科技
+    {   -- 虚拟化技术
+        type = "technology",
+        name = "god-module",
+        icon = "__LinkedChest3__/graphics/icons/TokenBrandedVra.png",
+        icon_size = 64, icon_mipmaps = 4,
+        effects =
+        {
+        },
+        prerequisites = {"pure-productivity-module-6","effectivity-module-6","pure-speed-module-6","rfp-antimatter-reactor"},
+        unit =
+        {
+        count = settings.startup["god-research"].value,
+        ingredients =
+        {
+            {"automation-science-pack", 1},
+            {"logistic-science-pack", 1},
+            {"chemical-science-pack", 1},
+            {"production-science-pack", 1},
+            {"utility-science-pack", 1},
+            {"space-science-pack", 1},
+            {"rfp-antimatter-science-pack", 1},
+        },
+        time = 120
+        },
+        upgrade = true,
+        order = "i-g-f"
+    },{ -- 上帝插件科技
         type = "technology",
         name = "god-module",
         icon = "__Advanced_Sky_Modules__/graphics/icons/modules/god-module.png",
@@ -276,6 +302,7 @@ data.raw.ammo["uranium-rounds-magazine"].ammo_type.action = {      -- 绿子弹
 
 
 -- 炮塔修正
+data.raw["ammo-turret"]["gun-turret"].max_health = 10000
 data.raw["ammo-turret"]["gun-turret"].prepare_range = 124
 data.raw["ammo-turret"]["gun-turret"].range = 120
 data.raw["ammo-turret"]["gun-turret"].attack_parameters =
@@ -331,6 +358,7 @@ if data.raw["electric-turret"]["arc-turret"] then
     data.raw["electric-turret"]["arc-turret"].prepare_range = 124
     data.raw["electric-turret"]["arc-turret"].attack_parameters.range = 120
 end
+data.raw["electric-turret"]["laser-turret"].max_health = 40000
 data.raw["electric-turret"]["laser-turret"].prepare_range = 124
 data.raw["electric-turret"]["laser-turret"].collision_box = {{ -1.7, -1.7}, {1.7, 1.7}}
 data.raw["electric-turret"]["laser-turret"].selection_box = {{ -2, -2}, {2, 2}}
