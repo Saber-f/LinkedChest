@@ -349,9 +349,9 @@ local function tick()
 
                                 -- 增加消耗记录
                                 if game.item_prototypes[ingredient_name] ~= nil then
-                                    force.item_production_statistics.set_output_count(ingredient_name, ingredient_amount * count)
+                                    force.item_production_statistics.on_flow(ingredient_name, -ingredient_amount * count)
                                 elseif game.fluid_prototypes[ingredient_name] ~= nil then
-                                    force.fluid_production_statistics.set_output_count(ingredient_name, ingredient_amount * count)
+                                    force.fluid_production_statistics.on_flow(ingredient_name, -ingredient_amount * count)
                                 end
                             end
 
@@ -382,16 +382,16 @@ local function tick()
                                         end
                                     end
 
-                                    if expected_value >= 1 then
+                                    local add_count = math.floor(expected_value + 0.5)
+                                    if add_count >= 1 then
                                         local product_name = product.name
-                                        local add_count = math.floor(expected_value + 0.5)
                                         add_force_item(force.name, product_name, add_count)
                                         
                                         -- 添加生产记录
                                         if game.item_prototypes[product_name] ~= nil then
-                                            force.item_production_statistics.set_input_count(product_name, add_count)
+                                            force.item_production_statistics.on_flow(product_name, add_count)
                                         elseif game.fluid_prototypes[product_name] ~= nil then
-                                            force.fluid_production_statistics.set_input_count(product_name, add_count)
+                                            force.fluid_production_statistics.on_flow(product_name, add_count)
                                         end
                                     end
                                 end
