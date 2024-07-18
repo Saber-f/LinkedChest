@@ -13,16 +13,16 @@ if data.raw.recipe["rfw-fusion-rounds-magazine"] then
 data:extend({
     {   -- 虚拟化技术
         type = "technology",
-        name = "god-module",
+        name = "virtual",
         icon = "__LinkedChest3__/graphics/icons/TokenBrandedVra.png",
         icon_size = 64, icon_mipmaps = 4,
         effects =
         {
         },
-        prerequisites = {"pure-productivity-module-6","effectivity-module-6","pure-speed-module-6","rfp-antimatter-reactor"},
+        prerequisites = {"god-module"},
         unit =
         {
-        count = settings.startup["god-research"].value,
+        count = settings.startup["god-research"].value * 10,
         ingredients =
         {
             {"automation-science-pack", 1},

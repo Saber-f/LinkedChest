@@ -46,6 +46,7 @@ function myinitteam(force)
     global.randomId[force] = {}               -- 随机linkiId
 
     global.virtual[force] = {}          -- 初始化团队的虚拟物品
+    global.virtual_energy = {}          -- 团队的虚拟能源
 end
 
 
@@ -61,7 +62,9 @@ function init_link()
     global.glkn = 0                     -- 团队的常驻关联箱位置
 	global.translation = {}
     global.randomId = {}                -- 随机linkiId
+    
     global.virtual = {}                 -- 团队的虚拟物品
+    global.virtual_energy = {}          -- 团队的虚拟能源
 
     -- Force初始化
     for _, f in pairs(game.forces) do
