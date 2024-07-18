@@ -547,10 +547,10 @@ data.raw.recipe["rfw-antimatter-rounds-magazine"].result_count = 6
 data.raw.accumulator.accumulator.energy_source =
  {
    type = "electric",
-   buffer_capacity = "50GJ",
+   buffer_capacity = "100TJ",
    usage_priority = "tertiary",
-   input_flow_limit = "3GW",
-   output_flow_limit = "3GW"
+   input_flow_limit = "10TW",
+   output_flow_limit = "10TW"
  }
 
 

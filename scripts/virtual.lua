@@ -189,15 +189,6 @@ local function add_accumulator(event)
         end
     end
     global.virtual_energy[force.name] = new_virtual_energy
-
-    -- 按postion排序, 从下到上，从左到右
-    table.sort(global.virtual_energy[force.name], function(a, b)
-        if a.position.y == b.position.y then
-            return a.position.x < b.position.x
-        end
-        return a.position.y > b.position.y
-    end)
-
 end
 
 -- 设置虚拟制造先容
@@ -277,7 +268,7 @@ local function tick()
     for _, force in pairs(game.forces) do
         if global.virtual[force.name] ~= nil then
             for recipe_name, vinfo in pairs(global.virtual[force.name]) do
-                if game.tick - vinfo.tick >= 10 then
+                if game.tick - vinfo.tick >= 15 then
                     local ingredients = vinfo.recipe.ingredients
                     local products = vinfo.recipe.products
                     local count = vinfo.speed * (game.tick - vinfo.tick ) / 60
