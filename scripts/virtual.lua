@@ -43,10 +43,14 @@ local function player_selected_area(event)
                 recipe = entity.get_recipe()
                 speed = entity.crafting_speed
             end
-            if recipe ~= nil and entity.electric_drain ~= nil then
+            if recipe ~= nil then
+                local electric_drain = 0
+                if entity.electric_drain ~= nil then
+                    electric_drain = entity.electric_drain
+                end
                 local vinfo
                 local prototype = entity.prototype
-                local energy = (prototype.energy_usage + entity.electric_drain) * (1 + entity.consumption_bonus)
+                local energy = (prototype.energy_usage + electric_drain) * (1 + entity.consumption_bonus)
                 local last_count = 0
                 local last_speed = 0
                 local last_productivity_bonus = 0
