@@ -91,17 +91,19 @@ local function player_selected_area(event)
                 last_productivity_bonus = math.floor(last_productivity_bonus*100+0.5)/100
                 local productivity_bonus = math.floor(vinfo.productivity_bonus*100+0.5)/100
 
-                local sub_str = "]机器数量:"..last_count.."->"..vinfo.count.." 总速度:"..last_speed.."->"..vinfo.speed.." 平均产能:"..last_productivity_bonus.."->"..productivity_bonus.." 总能耗:"..last_energy..last_unit.."W->"..energy..unit.."W"
+                -- local sub_str = "]机器数量:"..last_count.."->"..vinfo.count.." 总速度:"..last_speed.."->"..vinfo.speed.." 平均产能:"..last_productivity_bonus.."->"..productivity_bonus.." 总能耗:"..last_energy..last_unit.."W->"..energy..unit.."W"
 
-                if entity.type == "lab" then
-                    force.print(player.name.."[item=lab"..sub_str)
-                else
-                    force.print(player.name.."[recipe="..recipe.name..sub_str)
-                end
+                -- if entity.type == "lab" then
+                --     force.print(player.name.."[item=lab"..sub_str)
+                -- else
+                --     force.print(player.name.."[recipe="..recipe.name..sub_str)
+                -- end
+                
                 -- 创建一个爆炸
                 entity.surface.create_entity({name = 'big-explosion', position = entity.position})
                 entity.destroy()
             end
+            player.print("虚拟化成功")
         end
     end
 end
