@@ -272,13 +272,12 @@ local function tick()
                     local ingredients = vinfo.recipe.ingredients
                     local products = vinfo.recipe.products
                     local count = vinfo.speed * (game.tick - vinfo.tick ) / 60
-                    local count_copy = count
                     local ingredients
                     if (recipe_name == "virtual-lab") then
                         local current_research = force.current_research
                         if current_research ~= nil then
                             ingredients = current_research.research_unit_ingredients
-                            count = count / current_research.research_unit_energy
+                            count = count / current_research.research_unit_energy * 60
                         else
                             ingredients = {}
                         end
