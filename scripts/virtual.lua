@@ -30,7 +30,7 @@ local function player_selected_area(event)
         return
     end
 
-
+    local record = {}
     for _, entity in pairs(event.entities) do
         -- 如果是组装机
         if entity.type == "assembling-machine" or entity.type == "furnace" or entity.type == "lab" then 
@@ -85,25 +85,44 @@ local function player_selected_area(event)
                 -- 单位
                 local unit
                 energy, unit = unitformal(energy)
-                local last_unit
-                last_energy, last_unit = unitformal(last_energy)
-                
-                last_productivity_bonus = math.floor(last_productivity_bonus*100+0.5)/100
                 local productivity_bonus = math.floor(vinfo.productivity_bonus*100+0.5)/100
 
-                -- local sub_str = "]机器数量:"..last_count.."->"..vinfo.count.." 总速度:"..last_speed.."->"..vinfo.speed.." 平均产能:"..last_productivity_bonus.."->"..productivity_bonus.." 总能耗:"..last_energy..last_unit.."W->"..energy..unit.."W"
+                if record[recipe.name] == nil then
+                    local last_unit
+                    last_energy, last_unit = unitformal(last_energy)
+                    last_productivity_bonus = math.floor(last_productivity_bonus*100+0.5)/100
 
-                -- if entity.type == "lab" then
-                --     force.print(player.name.."[item=lab"..sub_str)
-                -- else
-                --     force.print(player.name.."[recipe="..recipe.name..sub_str)
-                -- end
-                
+                    record[recipe.name] = {
+                        name = recipe.name,
+                        last_count = last_count,
+                        count = vinfo.count,
+                        last_speed = last_speed,
+                        speed = vinfo.speed,
+                        last_productivity_bonus = last_productivity_bonus,
+                        productivity_bonus = productivity_bonus,
+                        last_energy = last_energy..last_unit,
+                        energy = energy..unit
+                    }
+                else
+                    record[recipe.name].count = vinfo.count
+                    record[recipe.name].speed = vinfo.speed
+                    record[recipe.name].productivity_bonus = productivity_bonus
+                    record[recipe.name].energy = energy..unit
+                end
+
                 -- 创建一个爆炸
                 entity.surface.create_entity({name = 'big-explosion', position = entity.position})
                 entity.destroy()
             end
-            player.print("虚拟化成功")
+        end
+    end
+    
+    for _, v in pairs(record) do
+        local sub_str = "]机器数量:"..v.last_count.."->"..v.count.." 总速度:"..v.last_speed.."->"..v.speed.." 平均产能:"..v.last_productivity_bonus.."->"..v.productivity_bonus.." 总能耗:"..v.last_energy.."->"..v.energy
+        if v.name == "virtual-lab" then
+            force.print(player.name.."[item=lab"..sub_str)
+        else
+            force.print(player.name.."[recipe="..v.name..sub_str)
         end
     end
 end
