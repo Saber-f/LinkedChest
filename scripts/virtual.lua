@@ -70,8 +70,11 @@ local function player_selected_area(event)
                         -- tick
                         tick = game.tick,
                         -- 更新帧
-                        update_tick = game.tick + 10 + math.random()*10,
+                        update_tick = game.tick,
                     }
+                    if recipe.name ~= "virtual-lab" then
+                        vinfo.update_tick = game.tick + 10 + math.random()*10
+                    end
                     global.virtual[force.name][recipe.name] = vinfo
                 else
                     vinfo = global.virtual[force.name][recipe.name]
@@ -207,7 +210,7 @@ local function set_virtual_limit(event)
     local type_mode = false
 
 
-    if event.message == "查看限容" or event.message == "限容" then
+    if event.message == "限容信息" then
         for name, limit in pairs(global.virtual_limit[force.name]) do
             local status = ""
             if limit == nil then
@@ -216,7 +219,7 @@ local function set_virtual_limit(event)
                 local fnum, unit = unitformal(limit)
                 status = fnum..unit
             end
-            player.print("虚拟限容[item="..name.."]:"..status)
+            force.print("虚拟限容[item="..name.."]:"..status)
         end
         return
     end
@@ -243,6 +246,14 @@ local function set_virtual_limit(event)
                     local num = tonumber(num_str)
                     if num == nil then return end
 
+                    local last_status = ""
+                    if global.virtual_limit[force.name][name_str] == nil then
+                        last_status = "不限容"
+                    else
+                        local fnum, unit = unitformal(global.virtual_limit[force.name][name_str])
+                        last_status = fnum..unit
+                    end
+
                     local status = ""
                     if num > 0 then
                         local fnum, unit = unitformal(num)
@@ -251,14 +262,6 @@ local function set_virtual_limit(event)
                     else
                         status = "不限容"
                         global.virtual_limit[force.name][name_str] = nil
-                    end
-
-                    local last_status = ""
-                    if global.virtual_limit[force.name][name_str] == nil then
-                        last_status = "不限容"
-                    else
-                        local fnum, unit = unitformal(global.virtual_limit[force.name][name_str])
-                        last_status = fnum..unit
                     end
 
                     force.print(player.name.."修改虚拟限容"..show_str..":"..last_status.."->"..status)
@@ -446,7 +449,11 @@ local function tick()
 
                     -- 更新tick
                     vinfo.tick = game.tick
-                    vinfo.update_tick = game.tick + 10 + math.random()*10
+                    if (recipe_name == "virtual-lab") then
+                        vinfo.update_tick = game.tick
+                    else
+                        vinfo.update_tick = game.tick + 10 + math.random()*10
+                    end
                 end
             end
         end
