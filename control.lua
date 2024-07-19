@@ -45,9 +45,10 @@ function myinitteam(force)
     global.Ti[force] = 0               -- 初始化团队的常量计算器id
     global.randomId[force] = {}               -- 随机linkiId
 
-    global.virtual[force] = {}          -- 初始化团队的虚拟物品
-    global.virtual_energy[force] = {}          -- 团队的虚拟能源
-    global.virtual_limit[force] = {}           -- 团队的虚拟物品限制
+    global.virtual[force]              = {}          -- 初始化团队的虚拟物品
+    global.virtual_energy[force]       = {}          -- 团队的虚拟能源
+    global.virtual_energy_index[force] = 1           -- 团队的虚拟能源索引
+    global.virtual_limit[force]        = {}           -- 团队的虚拟物品限制
 end
 
 
@@ -64,9 +65,10 @@ function init_link()
 	global.translation = {}
     global.randomId = {}                -- 随机linkiId
     
-    global.virtual = {}                 -- 团队的虚拟物品
-    global.virtual_energy = {}          -- 团队的虚拟能源
-    global.virtual_limit = {}           -- 团队的虚拟物品限制
+    global.virtual              = {}                 -- 团队的虚拟物品
+    global.virtual_energy       = {}          -- 团队的虚拟能源
+    global.virtual_energy_index = {}          -- 团队的虚拟能源索引
+    global.virtual_limit        = {}           -- 团队的虚拟物品限制
 
 
     -- Force初始化
@@ -102,10 +104,12 @@ function up_name2id()
 
     if global.virtual == nil then global.virtual = {} end
     if global.virtual_energy == nil then global.virtual_energy = {} end
+    if global.virtual_energy_index == nil then global.virtual_energy_index = {} end
     if global.virtual_limit == nil then global.virtual_limit = {} end
     for _, force in pairs(game.forces) do
         if global.virtual[force.name] == nil then global.virtual[force.name] = {} end
         if global.virtual_energy[force.name] == nil then global.virtual_energy[force.name] = {} end
+        if global.virtual_energy_index[force.name] == nil then global.virtual_energy_index[force.name] = 1 end
         if global.virtual_limit[force.name] == nil then global.virtual_limit[force.name] = {} end
     end
 end
@@ -138,11 +142,12 @@ function clear_player()
     end
     global.randomId[force] = {}               -- 随机linkiId
 
-    global.name2id[force] = {}          -- 初始化团队的name->id
-    global.TC[force] = {}               -- 初始化团队常量预算器
-    global.Ti[force] = 0               -- 初始化团队的常量计算器id
-    global.virtual[force] = {}          -- 初始化团队的虚拟物品
-    global.virtual_energy[force] = {}          -- 团队的虚拟能源
+    global.name2id[force]                   = {}          -- 初始化团队的name->id
+    global.TC[force]                        = {}          -- 初始化团队常量预算器
+    global.Ti[force]                        = 0           -- 初始化团队的常量计算器id
+    global.virtual[force]                   = {}          -- 初始化团队的虚拟物品
+    global.virtual_energy[force]            = {}          -- 团队的虚拟能源
+    global.virtual_energy_index[force.name] = 1           -- 团队的虚拟能源索引
 
     game.print(force..'团队初始化完成')
 end
@@ -228,18 +233,19 @@ function on_player_join(event)
 end
 
 function virtual_remove_force_item(force,name,count)
-    if global.force_item[force][name].count >= count then
-        global.force_item[force][name].count = global.force_item[force][name].count - count
-        return
-    else
-        count = count - global.force_item[force][name].count
-        global.force_item[force][name].count = 0
+    
+    global.force_item[force][name].count = global.force_item[force][name].count - count
+    if global.force_item[force][name].count < 0 then
+        count = math.floor(-global.force_item[force][name].count+1)
+        if game.item_prototypes[name] ~= nil then
+            global.glk[force].link_id = name2id(force,name)
+            global.glk[force].remove_item({name = name, count = count})
+            global.force_item[force][name].count = global.force_item[force][name].count + count
+        else
+            global.force_item[force][name].count = 0
+        end
     end
     
-    if game.item_prototypes[name] ~= nil then
-        global.glk[force].link_id = name2id(force,name)
-        global.glk[force].remove_item({name = name, count = count})
-    end
 end
 
 function add_force_item(force,name,count)
