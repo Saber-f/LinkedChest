@@ -301,15 +301,15 @@ function remove_force_item(player,name,count)
     local force = player.force.name
     if global.force_item[force][name].count >= count then
         global.force_item[force][name].count = global.force_item[force][name].count - count
-        count = 0
         return
     else
         count = count - global.force_item[force][name].count
-        global.force_item[force][name].count = 0
     end
 
+    local  count2 = math.floor(count+1)
     global.glk[force].link_id = name2id(force,name)
-    global.glk[force].remove_item({name = name, count = count})
+    global.glk[force].remove_item({name = name, count = count2})
+    global.force_item[force][name].count = count2-count
 end
 
 --*通知消息

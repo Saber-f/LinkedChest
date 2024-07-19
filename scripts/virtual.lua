@@ -370,10 +370,6 @@ local function do_the_deed(force, vinfo, ingredients, count)
             if add_count > 0 then
                 local product_name = product.name
                 add_force_item(force.name, product_name, add_count)
-
-                if product_name == "god-module" then
-                    force.print("神之模块:"..add_count)
-                end
                 
                 -- 添加生产记录
                 if game.item_prototypes[product_name] ~= nil then
