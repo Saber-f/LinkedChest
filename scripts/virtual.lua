@@ -140,6 +140,7 @@ local function player_alt_selected_area(event)
     local player = game.players[event.player_index]
     local force = player.force
 
+    local record = {}
     for _, entity in pairs(event.entities) do
         -- 如果是组装机
         if entity.type == "assembling-machine" or entity.type == "furnace" or entity.type == "lab" then 
@@ -163,17 +164,20 @@ local function player_alt_selected_area(event)
                     -- 单位
                     local unit
                     energy, unit = unitformal(energy)
-                        local productivity_bonus = math.floor(vinfo.productivity_bonus * 100 + 0.5) / 100
+                    local productivity_bonus = math.floor(vinfo.productivity_bonus * 100 + 0.5) / 100
                     local sub_str = "]机器数量:"..vinfo.count.." 总速度:"..vinfo.speed.." 平均产能:"..productivity_bonus.." 总能耗:"..energy..unit.."W"
 
                     if entity.type == "lab" then
-                        player.print("[item=lab"..sub_str)
+                        record[recipe.name] = "[item=lab"..sub_str
                     else
-                        player.print("[recipe="..recipe.name..sub_str)
+                        record[recipe.name] = "[recipe="..recipe.name..sub_str
                     end
                 end
             end
         end
+    end
+    for _, v in pairs(record) do
+        player.print(v)
     end
 end
 
@@ -202,6 +206,21 @@ local function set_virtual_limit(event)
     local reset_num = false
     local type_mode = false
 
+
+    if event.message == "查看限容" or event.message == "限容" then
+        for name, limit in pairs(global.virtual_limit[force.name]) do
+            local status = ""
+            if limit == nil then
+                status = "不限容"
+            else
+                local fnum, unit = unitformal(limit)
+                status = fnum..unit
+            end
+            player.print("虚拟限容[item="..name.."]:"..status)
+        end
+        return
+    end
+
     -- 解析
     for i = 1,#event.message do
         local char = string.sub(event.message, i, i)
@@ -223,14 +242,26 @@ local function set_virtual_limit(event)
                     show_str = show_str..char
                     local num = tonumber(num_str)
                     if num == nil then return end
-                    local fnum, unit = unitformal(num)
+
+                    local status = ""
                     if num > 0 then
+                        local fnum, unit = unitformal(num)
+                        status = fnum..unit
                         global.virtual_limit[force.name][name_str] = num
-                        force.print(player.name.."设置了虚拟制造限容"..show_str.."<="..fnum..unit)
                     else
+                        status = "不限容"
                         global.virtual_limit[force.name][name_str] = nil
-                        force.print(player.name.."取消了虚拟制造限容"..show_str)
                     end
+
+                    local last_status = ""
+                    if global.virtual_limit[force.name][name_str] == nil then
+                        last_status = "不限容"
+                    else
+                        local fnum, unit = unitformal(num)
+                        last_status = fnum..unit
+                    end
+
+                    force.print(player.name.."修改虚拟限容"..show_str..":"..last_status.."->"..status)
                 end
 
                 type_str = ""
@@ -276,11 +307,6 @@ local function remove_accumulator_energy(force, need_energy)
                 if energy > need_energy then
                     accumulator.energy = energy - need_energy
                     used_energy = used_energy + need_energy
-
-                    index = index - 1
-                    if index < 1 then
-                        index = #global.virtual_energy[force.name]
-                    end
                     break
                 else
                     accumulator.energy = 0
