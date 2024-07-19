@@ -89,6 +89,10 @@ function up_name2id()
         t[item.name] = 1
     end
 
+    for _, item in pairs(game.fluid_prototypes) do
+        t[item.name] = 1
+    end
+
     for _, f in pairs(game.forces) do
         if global.name2id[f.name] ~= nil then
             for name,id in pairs(global.name2id[f.name]) do
@@ -111,6 +115,12 @@ function up_name2id()
         if global.virtual_energy[force.name] == nil then global.virtual_energy[force.name] = {} end
         if global.virtual_energy_index[force.name] == nil then global.virtual_energy_index[force.name] = 1 end
         if global.virtual_limit[force.name] == nil then global.virtual_limit[force.name] = {} end
+        
+        for recipe_name, vinfo in pairs(global.virtual[force.name]) do
+            if vinfo.update_tick == nil then
+                vinfo.update_tick = vinfo.tick + 10 + 10 * math.random()
+            end
+        end
     end
 end
 
@@ -907,6 +917,7 @@ function tongbu(event)
                             num2 = count2
                             num = settings.startup["linkSize"].value*prototypes[name].stack_size - num - count
                             if count2 > num then count2 = num end
+                            count2 = math.floor(count2)
                             if count2 > 0 then
                                 count = global.glk[force].insert({name = name,count = count2})
                                 global.force_item[force][name].count = num2 - count

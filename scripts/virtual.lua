@@ -68,9 +68,9 @@ local function player_selected_area(event)
                         -- 能耗
                         energy = energy,
                         -- tick
-                        tick = game.tick
+                        tick = game.tick,
                         -- 更新帧
-                        update_tick = game.tick + 10 + math.random()*10
+                        update_tick = game.tick + 10 + math.random()*10,
                     }
                     global.virtual[force.name][recipe.name] = vinfo
                 else
@@ -303,7 +303,9 @@ local function remove_accumulator_energy(force, need_energy)
 end
 
 -- 产出or研究
-local function do_the_deed(force, recipe_name, ingredients, products)
+local function do_the_deed(force, vinfo, ingredients, count)
+    local products = vinfo.recipe.products
+
     for _, ingredient in pairs(ingredients) do
         local ingredient_name = ingredient.name
         local ingredient_amount = ingredient.amount
@@ -319,7 +321,7 @@ local function do_the_deed(force, recipe_name, ingredients, products)
     end
 
     -- 生产/研究
-    if recipe_name == "virtual-lab" then
+    if vinfo.recipe.name == "virtual-lab" then
         local current_research = force.current_research
         if current_research ~= nil then
             local add_count = count * vinfo.productivity_bonus
@@ -339,9 +341,13 @@ local function do_the_deed(force, recipe_name, ingredients, products)
             end
 
             local add_count = expected_value
-            if add_count >= 1 then
+            if add_count > 0 then
                 local product_name = product.name
                 add_force_item(force.name, product_name, add_count)
+
+                if product_name == "god-module" then
+                    force.print("神之模块:"..add_count)
+                end
                 
                 -- 添加生产记录
                 if game.item_prototypes[product_name] ~= nil then
@@ -413,7 +419,7 @@ local function tick()
 
                     if count > 0 then
                         -- 产出
-                        do_the_deed(force, recipe_name, ingredients, products)
+                        do_the_deed(force, vinfo, ingredients, count)
                     end 
 
                     -- 更新tick
