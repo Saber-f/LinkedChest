@@ -1237,7 +1237,7 @@ function fill_request_items(player)
 
 	for _,item in pairs(request_items) do
 		if item.short_count>0 then
-			local force_count = get_force_item_count(force, item.name)
+			local force_count = math.floor(get_force_item_count(force, item.name))
 			if force_count > 0 then
 				if force_count > item.short_count then
 					if try_insert(player_inventory,item.name,item.short_count) then remove_force_item(player, item.name, item.short_count) end
