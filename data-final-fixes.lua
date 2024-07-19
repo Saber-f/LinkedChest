@@ -39,7 +39,7 @@ data:extend({
 
 ------------------------------------------------------- 真实聚变修改 -------------------------------------------------------
 -- 真实聚变
-if data.raw.recipe["rfp-d-he3-mixing"] then
+if mods["RealisticFusionPower"]then
     -- 蓄电池
     data.raw.accumulator.accumulator.energy_source =
     {
@@ -68,7 +68,7 @@ end
 
 ------------------------------------------------------- 上帝插件修改 -------------------------------------------------------
 -- 有上帝插件和真实聚变
-if data.raw.recipe["gold-module"] and data.raw.recipe["rfp-d-he3-mixing"] then
+if mods["Advanced_Sky_Modules"] and mods["RealisticFusionPower"]then
 
     -- 上帝插件
     data.raw.module["pure-productivity-module-6"].category = "productivity"
@@ -181,7 +181,7 @@ end
 
 ------------------------------------------------------- 战斗相关修改 -------------------------------------------------------
 -- 有大怪兽和聚变武器
-if data.raw.unit['tc_fake_human_ultimate_boss_cannon_20'] and and data.raw.recipe["rfw-antimatter-rounds-magazine"] then
+if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
     local function weakness(type_name, i, count, ptype)
         local per = i
         if count > 0 then
@@ -575,10 +575,7 @@ if data.raw.unit['tc_fake_human_ultimate_boss_cannon_20'] and and data.raw.recip
 end
 
 
-
 ------------------------------------------------------- 原版修改 -------------------------------------------------------
-
-
 
 -- 爪子
 data.raw.inserter["inserter"].rotation_speed = 1

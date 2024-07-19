@@ -257,7 +257,7 @@ local function set_virtual_limit(event)
                     if global.virtual_limit[force.name][name_str] == nil then
                         last_status = "不限容"
                     else
-                        local fnum, unit = unitformal(num)
+                        local fnum, unit = unitformal(global.virtual_limit[force.name][name_str])
                         last_status = fnum..unit
                     end
 
