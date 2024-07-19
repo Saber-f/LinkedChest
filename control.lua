@@ -157,6 +157,7 @@ function clear_player()
     global.Ti[force]                        = 0           -- 初始化团队的常量计算器id
     global.virtual[force]                   = {}          -- 初始化团队的虚拟物品
     global.virtual_energy[force]            = {}          -- 团队的虚拟能源
+    if global.virtual_energy_index == nil then global.virtual_energy_index = {} end
     global.virtual_energy_index[force.name] = 1           -- 团队的虚拟能源索引
 
     game.print(force..'团队初始化完成')
