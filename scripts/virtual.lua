@@ -304,26 +304,28 @@ local function remove_accumulator_energy(force, need_energy)
     for i = #global.virtual_energy[force.name], 1, -1 do
         local accumulator = global.virtual_energy[force.name][index]
 
-        if accumulator.valid then
-            if accumulator.energy > 0 then
-                local energy = accumulator.energy
-                if energy > need_energy then
-                    accumulator.energy = energy - need_energy
-                    used_energy = used_energy + need_energy
-                    break
-                else
-                    accumulator.energy = 0
-                    used_energy = used_energy + energy
-                    need_energy = need_energy - energy
+        if accumulator then
+            if accumulator.valid then
+                if accumulator.energy > 0 then
+                    local energy = accumulator.energy
+                    if energy > need_energy then
+                        accumulator.energy = energy - need_energy
+                        used_energy = used_energy + need_energy
+                        break
+                    else
+                        accumulator.energy = 0
+                        used_energy = used_energy + energy
+                        need_energy = need_energy - energy
+                    end
                 end
+            else
+                table.remove(global.virtual_energy[force.name], index)
             end
-        else
-            table.remove(global.virtual_energy[force.name], index)
-        end
 
-        index = index - 1
-        if index < 1 then
-            index = #global.virtual_energy[force.name]
+            index = index - 1
+            if index < 1 then
+                index = #global.virtual_energy[force.name]
+            end
         end
     end
     global.virtual_energy_index[force.name] = index
