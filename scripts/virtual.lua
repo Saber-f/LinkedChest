@@ -301,11 +301,13 @@ local function remove_accumulator_energy(force, need_energy)
     local used_energy = 0
     
     local index = global.virtual_energy_index[force.name]
+    local have_accumulator = false
     for i = #global.virtual_energy[force.name], 1, -1 do
         local accumulator = global.virtual_energy[force.name][index]
 
         if accumulator then
             if accumulator.valid then
+                have_accumulator = true
                 if accumulator.energy > 0 then
                     local energy = accumulator.energy
                     if energy > need_energy then
@@ -328,6 +330,14 @@ local function remove_accumulator_energy(force, need_energy)
         end
     end
     global.virtual_energy_index[force.name] = index
+
+    if used_energy == 0 then
+        if have_accumulator then
+            force.print("[item=accumulator]未供电,虚拟化无法运行!")
+        else
+            force.print("[item=accumulator]没有放置,虚拟化无法运行!")
+        end
+    end
 
     return used_energy
 end

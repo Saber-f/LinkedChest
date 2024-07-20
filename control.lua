@@ -157,8 +157,7 @@ function clear_player()
     global.Ti[force]                        = 0           -- 初始化团队的常量计算器id
     global.virtual[force]                   = {}          -- 初始化团队的虚拟物品
     global.virtual_energy[force]            = {}          -- 团队的虚拟能源
-    if global.virtual_energy_index == nil then global.virtual_energy_index = {} end
-    global.virtual_energy_index[force.name] = 1           -- 团队的虚拟能源索引
+    global.virtual_energy_index[force] = 1           -- 团队的虚拟能源索引
 
     game.print(force..'团队初始化完成')
 end
@@ -307,7 +306,10 @@ function remove_force_item(player,name,count)
         count = count - global.force_item[force][name].count
     end
 
-    local  count2 = math.floor(count+1)
+    local count2 = math.floor(count)
+    if count2 ~= count then  -- count是小数
+        count2 = count2 + 1
+    end
     global.glk[force].link_id = name2id(force,name)
     global.glk[force].remove_item({name = name, count = count2})
     global.force_item[force][name].count = count2-count
@@ -913,12 +915,11 @@ function tongbu(event)
                 num = settings.global["row_num"].value*10*prototypes[name].stack_size
                 if count <  num then
                     if global.force_item[force][name] ~= nil then
-                        count2 = global.force_item[force][name].count
+                        count2 = math.floor(global.force_item[force][name].count)
                         if count2 > 0 then
                             num2 = count2
                             num = settings.startup["linkSize"].value*prototypes[name].stack_size - num - count
                             if count2 > num then count2 = num end
-                            count2 = math.floor(count2)
                             if count2 > 0 then
                                 count = global.glk[force].insert({name = name,count = count2})
                                 global.force_item[force][name].count = num2 - count
