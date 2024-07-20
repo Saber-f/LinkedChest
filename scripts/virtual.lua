@@ -420,9 +420,9 @@ local function tick()
 
                     -- 检测限容
                     if recipe_name ~= "virtual-lab" then
-                        local limit = global.virtual_limit[force.name][recipe_name]
                         for _, product in pairs(products) do
-                            if global.virtual_limit[force.name][product.name] ~= nil then
+                            local limit = global.virtual_limit[force.name][product.name]
+                            if limit ~= nil then
                                 local expected_value = product.amount * count * vinfo.productivity_bonus   -- 期望值
                                 if get_force_item_count(force.name, product.name) + expected_value > limit then
                                     local last_count = count;
