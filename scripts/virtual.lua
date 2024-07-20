@@ -321,11 +321,10 @@ local function remove_accumulator_energy(force, need_energy)
             else
                 table.remove(global.virtual_energy[force.name], index)
             end
-
-            index = index - 1
-            if index < 1 then
-                index = #global.virtual_energy[force.name]
-            end
+        end
+        index = index - 1
+        if index < 1 then
+            index = #global.virtual_energy[force.name]
         end
     end
     global.virtual_energy_index[force.name] = index
