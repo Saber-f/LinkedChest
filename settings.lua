@@ -1,5 +1,11 @@
 data:extend({
     {
+        type = "bool-setting",
+        name = "virtual-lock",
+        setting_type = "runtime-global",
+        default_value = true
+    },
+    {
         type = "int-setting",
         name = "update-frequency",
         setting_type = "runtime-global",

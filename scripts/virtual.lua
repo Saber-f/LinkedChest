@@ -25,7 +25,7 @@ local function player_selected_area(event)
     local force = player.force
 
     -- 检测虚拟化科技是否研究完成
-    if not force.technologies["virtual"].researched then
+    if (not force.technologies["virtual"].researched) and settings.global["virtual-lock"].value then
         player.print("[technology=virtual]未研究完成")
         return
     end
@@ -471,7 +471,20 @@ local function tick()
     end
 end
 
+local function runtime_mod_setting_changed(event)
+    for _, f in pairs(game.forces) do
+        if settings.global["virtual-lock"].value then
+            f.print("[technology=virtual]需要研究解锁")
+        else
+            f.print("[technology=virtual]不需要研究解锁")
+        end
+        f.technologies['virtual'].enabled = settings.global["virtual-lock"].value
+    end
+end
 
+script.on_init(runtime_mod_setting_changed)
+Event.addListener(defines.events.on_game_created_from_scenario,runtime_mod_setting_changed)
+Event.addListener(defines.events.on_runtime_mod_setting_changed, runtime_mod_setting_changed)
 Event.addListener(defines.events.on_player_selected_area, player_selected_area)
 Event.addListener(defines.events.on_player_alt_selected_area, player_alt_selected_area)
 Event.addListener(defines.events.on_built_entity,add_accumulator)    -- 玩家建造物品

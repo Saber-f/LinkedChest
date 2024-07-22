@@ -581,11 +581,11 @@ function draw_force_items_main_for_player(player)
 		column_count = 6
 	}
     local item_group_name = ''
-    local item_groups = ''
+    local item_groups = {}
     for name, item in pairs(game.item_prototypes) do
         item_group_name = item.group.name
-        if item_groups ~= item_group_name and item_group_name~= "other" then
-            item_groups = item_group_name
+        if item_groups[item_group_name] == nil and item_group_name ~= "other" then
+            item_groups[item_group_name] = true
             if item_groups_table == nil then return end
             local bt =
                 item_groups_table.add {
@@ -600,13 +600,10 @@ function draw_force_items_main_for_player(player)
         end
     end
 
-    
-    local item_group_name = ''
-    local item_groups = ''
     for name, item in pairs(game.fluid_prototypes) do
         item_group_name = item.group.name
-        if item_groups ~= item_group_name and item_group_name~= "other" then
-            item_groups = item_group_name
+        if item_groups[item_group_name] == nil and item_group_name ~= "other" then
+            item_groups[item_group_name] = true
             if item_groups_table == nil then return end
             local bt =
                 item_groups_table.add {
