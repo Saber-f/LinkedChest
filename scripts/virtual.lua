@@ -193,23 +193,30 @@ local function player_show_selected_area(event)
     local record = {}
     for _, entity in pairs(event.entities) do
         -- 如果是组装机
-        if entity.type == "assembling-machine" or entity.type == "furnace" or entity.type == "lab" then 
-            local recipe
+        if entity.type == "assembling-machine" or entity.type == "furnace" or entity.type == "lab" or entity.type == "boiler" then 
+            local key
             if entity.type == "lab" then
-                recipe = {name = "virtual-lab"}
+                key = "virtual-lab"
+            elseif entity.type == "boiler" then     -- 锅炉
+                key = "virtual-"..entity.name
             else
-                recipe = entity.get_recipe()
+                local recipe2 = entity.get_recipe()
+                if recipe2 ~= nil then
+                    key = recipe2.name
+                end
             end
-            if recipe ~= nil and entity.electric_drain ~= nil then
-
-                vinfo = global.virtual[force.name][recipe.name]
+            if key then
+                local vinfo = global.virtual[force.name][key]
                 if vinfo == nil then
                     if entity.type == "lab" then
                         player.print("[technology=virtual]".."[item=lab]未虚拟化")
+                    elseif entity.type == "boiler" then
+                        player.print("[technology=virtual]".."[item="..entity.name.."]未虚拟化")
                     else
-                        player.print("[technology=virtual]".."[recipe="..recipe.name.."]未虚拟化")
+                        player.print("[technology=virtual]".."[recipe="..key.."]未虚拟化")
                     end
                 else
+                    local recipe = vinfo.recipe
                     energy = vinfo.energy * 60
                     -- 单位
                     local unit
@@ -248,6 +255,59 @@ local function add_accumulator(event)
     table.insert(global.virtual_energy[force.name], entity)
 end
 
+
+-- 范围设置限容
+local function rangeSetLimit(player, start, target, num)
+    local force = player.force
+    local prototypes = game.item_prototypes
+    if prototypes[start] == nil then
+        prototypes = game.fluid_prototypes
+    end
+    if prototypes[start] == nil or prototypes[target] == nil then
+        return
+    end
+    if (prototypes[start].subgroup.name ~= prototypes[target].subgroup.name) then
+        return
+    end
+
+    local isStart = false
+    for _, item in pairs(prototypes) do
+        if item.name == target then
+            break
+        end
+
+        if isStart then
+            local name_str = item.name
+            local last_status = ""
+            if global.virtual_limit[force.name][name_str] == nil then
+                last_status = "不限容"
+            else
+                local fnum, unit = unitformal(global.virtual_limit[force.name][name_str])
+                last_status = fnum..unit
+            end
+
+            local show_str = "["..item.type.."="..item.name.."]"
+            local status = ""
+            if num == nil then
+                force.print("[technology=virtual]"..player.name.."查看虚拟限容"..show_str..":"..last_status)
+            elseif num > 0 then
+                local fnum, unit = unitformal(num)
+                status = fnum..unit
+                global.virtual_limit[force.name][name_str] = num
+                force.print("[technology=virtual]"..player.name.."修改虚拟限容"..show_str..":"..last_status.."->"..status)
+            else
+                status = "不限容"
+                global.virtual_limit[force.name][name_str] = nil
+                force.print("[technology=virtual]"..player.name.."修改虚拟限容"..show_str..":"..last_status.."->"..status)
+            end
+        end
+
+        if item.name == start then
+            isStart = true
+        end
+    end
+end
+
 -- 设置虚拟制造先容
 local function set_virtual_limit(event)
     local player = game.players[event.player_index]
@@ -260,6 +320,9 @@ local function set_virtual_limit(event)
     local type_str = ""
     local reset_num = false
     local type_mode = false
+    
+    local last_name = ""
+    local isRange = false   -- 是否范围显示
 
 
     -- 解析
@@ -276,6 +339,8 @@ local function set_virtual_limit(event)
                 num_mode = false
                 type_mode = true
                 show_str = show_str..char
+            elseif char == "-" then
+                isRange = true
             end
         else
             if char == "]" then     -- 一个结束
@@ -283,6 +348,13 @@ local function set_virtual_limit(event)
                     show_str = show_str..char
                     local num = tonumber(num_str)
 
+
+                    if isRange then
+                        rangeSetLimit(player, last_name, name_str, num)
+                        isRange = false
+                    end
+
+                    
                     local last_status = ""
                     if global.virtual_limit[force.name][name_str] == nil then
                         last_status = "不限容"
@@ -307,6 +379,7 @@ local function set_virtual_limit(event)
 
                 end
 
+                last_name = name_str
                 type_str = ""
                 name_str = ""
                 show_str = ""
@@ -373,9 +446,13 @@ local function remove_accumulator_energy(force, need_energy)
 
     if used_energy == 0 then
         if have_accumulator then
-            force.print("[technology=virtual]".."[item=accumulator]未供电,虚拟化无法运行!")
+            if (game.tick % 8 == 0) then
+                force.print("[technology=virtual]".."[item=accumulator]未供电,虚拟化无法运行!")
+            end
         else
-            force.print("[technology=virtual]".."[item=accumulator]没有放置,虚拟化无法运行!")
+            if (game.tick % 4 == 0) then
+                force.print("[technology=virtual]".."[item=accumulator]没有放置,虚拟化无法运行!")
+            end
         end
     end
 

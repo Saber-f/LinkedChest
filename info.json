@@ -1,9 +1,9 @@
 {
   "name": "LinkedChest3",
-  "version": "1.4.68",
+  "version": "1.4.69",
   "title": "LinkedChest3",
   "author": "sabet",
 	"factorio_version": "1.1",
   "dependencies": ["base >= 1.1", "? Advanced_Sky_Modules >= 0.0.3", "? RealisticFusionPower >= 1.8.17", "? RealisticFusionWeaponry >= 1.5.8",  "? Big-Monsters >= 1.4.0", "? pyalienlife >= 1.4.0"],
-  "description":"关联箱,使用SHIFT+F将区域内，有配方的特定实体，转移到虚拟空间进行生产。SHIF+F后按住SHIFT反选减少配方虚拟化。SHIF+D框选查看配方虚拟化信息。[item=accumulator]为虚拟空间提供能源。聊天框输入100[item=Oem-linked-chest]设置限容，数字为0取消限容，不输入数字查看限容。"
+  "description":"关联箱,使用SHIFT+F将区域内，有配方的特定实体，转移到虚拟空间进行生产。SHIF+F后按住SHIFT反选减少配方虚拟化。SHIF+D框选查看配方虚拟化信息。[item=accumulator]为虚拟空间提供能源。聊天框输入100[item=Oem-linked-chest]设置限容，数字为0取消限容，不输入数字查看限容。同页物品可通过-(减号)范围设置,如100[item=steel-chest]-[item=logistic-chest-requester]"
 }
