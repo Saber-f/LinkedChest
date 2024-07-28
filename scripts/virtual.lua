@@ -18,7 +18,8 @@ local function unitformal(v)
     return v, unit
 end
 
-local function player_selected_area(event)
+-- 虚拟化
+local function virtual(event, isAdd)
     if event.item ~= "virtual" then return end
 
     local player = game.players[event.player_index]
@@ -33,30 +34,57 @@ local function player_selected_area(event)
     local record = {}
     for _, entity in pairs(event.entities) do
         -- 如果是组装机
-        if entity.type == "assembling-machine" or entity.type == "furnace" or entity.type == "lab" then 
+        if entity.type == "assembling-machine" or entity.type == "furnace" or entity.type == "lab" or entity.type == "boiler" then 
             local recipe
-            local speed
+            local typename = "recipe"
+            local speed = 1
+            local productivity_bonus =  1
+            local prototype = entity.prototype
+            local energy = prototype.max_energy_usage
+            local electric_drain = 0
+            if entity.electric_drain ~= nil then        -- 最小能耗
+                electric_drain = entity.electric_drain
+            end
             if entity.type == "lab" then
-                recipe = {name = "virtual-lab"}
+                recipe = {name = "virtual-lab", des = "[item="..entity.name}
+                typename = "lab"
+                productivity_bonus = entity.productivity_bonus + 1
                 speed = entity.prototype.researching_speed*(entity.speed_bonus - force.laboratory_speed_modifier + 1) * (force.laboratory_speed_modifier + 1)
+                energy = (energy + electric_drain) * (1 + entity.consumption_bonus)
+            elseif entity.type == "boiler" then     -- 锅炉
+                typename = "boiler"
+                input = entity.fluidbox.get_locked_fluid(1)
+                output = entity.fluidbox.get_locked_fluid(2)
+                output_heat_capacity = game.fluid_prototypes[output].heat_capacity
+                speed = energy / output_heat_capacity / (prototype.target_temperature - game.fluid_prototypes[input].default_temperature) * 60
+                recipe = {
+                    name = "virtual-"..entity.name,
+                    ingredients = {{name=input, amount=1}},
+                    products = {{name=output, amount=1}},
+                    des = "[fluid="..input.."]->[fluid="..output
+                }
             else
-                recipe = entity.get_recipe()
+                recipe2 = entity.get_recipe()
                 speed = entity.crafting_speed
+                productivity_bonus = entity.productivity_bonus + 1
+                energy = (energy + electric_drain) * (1 + entity.consumption_bonus)
+                recipe = {
+                    name = recipe2.name,
+                    ingredients = recipe2.ingredients,
+                    products = recipe2.products,
+                    des = "[recipe="..recipe2.name,
+                    energy = recipe2.energy
+                }
             end
             if recipe ~= nil then
-                local electric_drain = 0
-                if entity.electric_drain ~= nil then
-                    electric_drain = entity.electric_drain
-                end
                 local vinfo
-                local prototype = entity.prototype
-                local energy = (prototype.energy_usage + electric_drain) * (1 + entity.consumption_bonus)
                 local last_count = 0
                 local last_speed = 0
                 local last_productivity_bonus = 0
                 local last_energy = 0
                 if global.virtual[force.name][recipe.name] == nil then
                     vinfo = {
+                        typename = typename,
                         -- 机器数量
                         count = 1,
                         -- 配方
@@ -64,7 +92,7 @@ local function player_selected_area(event)
                         -- 制作速度
                         speed = speed,
                         -- 产能
-                        productivity_bonus  = entity.productivity_bonus + 1,
+                        productivity_bonus  = productivity_bonus,
                         -- 能耗
                         energy = energy,
                         -- tick
@@ -75,7 +103,14 @@ local function player_selected_area(event)
                     if recipe.name ~= "virtual-lab" then
                         vinfo.update_tick = game.tick + 10 + math.random()*10
                     end
-                    global.virtual[force.name][recipe.name] = vinfo
+                    if isAdd then
+                        global.virtual[force.name][recipe.name] = vinfo
+                    else
+                        vinfo.count = 0
+                        vinfo.speed = 0
+                        vinfo.productivity_bonus = 0
+                        vinfo.energy = 0
+                    end
                 else
                     vinfo = global.virtual[force.name][recipe.name]
 
@@ -84,10 +119,20 @@ local function player_selected_area(event)
                     last_productivity_bonus = vinfo.productivity_bonus
                     last_energy = vinfo.energy
 
-                    vinfo.productivity_bonus  = (vinfo.productivity_bonus * vinfo.speed + (entity.productivity_bonus + 1) * speed) / (vinfo.speed + speed)
-                    vinfo.count = vinfo.count + 1
-                    vinfo.speed = vinfo.speed + speed
-                    vinfo.energy = vinfo.energy + energy
+                    if (isAdd) then -- 加机器
+                        vinfo.productivity_bonus  = (vinfo.productivity_bonus * vinfo.speed + (productivity_bonus) * speed) / (vinfo.speed + speed)
+                        vinfo.count = vinfo.count + 1
+                        vinfo.speed = vinfo.speed + speed
+                        vinfo.energy = vinfo.energy + energy
+                    else        -- 减机器
+                        vinfo.count = vinfo.count - 1
+                        vinfo.speed = vinfo.speed * vinfo.count / last_count
+                        vinfo.energy = vinfo.energy * vinfo.count / last_count
+                        if vinfo.count == 0 then
+                            global.virtual[force.name][recipe.name] = nil
+                            vinfo.productivity_bonus = 0
+                        end
+                    end
                 end
                 energy = vinfo.energy * 60
                 last_energy = last_energy * 60
@@ -102,6 +147,8 @@ local function player_selected_area(event)
                     last_productivity_bonus = math.floor(last_productivity_bonus*100+0.5)/100
 
                     record[recipe.name] = {
+                        typename = typename,
+                        des = recipe.des,
                         name = recipe.name,
                         last_count = last_count,
                         count = vinfo.count,
@@ -120,25 +167,23 @@ local function player_selected_area(event)
                 end
 
                 -- 创建一个爆炸
-                entity.surface.create_entity({name = 'big-explosion', position = entity.position})
-                entity.destroy()
+                if isAdd then
+                    entity.surface.create_entity({name = 'big-explosion', position = entity.position})
+                    entity.destroy()
+                end
             end
         end
     end
     
     for _, v in pairs(record) do
         local sub_str = "]机器数量:"..v.last_count.."->"..v.count.." 总速度:"..v.last_speed.."->"..v.speed.." 平均产能:"..v.last_productivity_bonus.."->"..v.productivity_bonus.." 总能耗:"..v.last_energy.."->"..v.energy
-        if v.name == "virtual-lab" then
-            force.print(player.name.."[item=lab"..sub_str)
-        else
-            force.print(player.name.."[recipe="..v.name..sub_str)
-        end
+        force.print("[technology=virtual]"..player.name..v.des..sub_str)
     end
 end
 
--- 查看配方细腻化信息
-local function player_alt_selected_area(event)
-    if event.item ~= "virtual" then return end
+-- 查看配方虚拟化信息
+local function player_show_selected_area(event)
+    if event.item ~= "showvirtual" then return end
 
     local player = game.players[event.player_index]
     local force = player.force
@@ -158,9 +203,9 @@ local function player_alt_selected_area(event)
                 vinfo = global.virtual[force.name][recipe.name]
                 if vinfo == nil then
                     if entity.type == "lab" then
-                        player.print("[item=lab]未虚拟化")
+                        player.print("[technology=virtual]".."[item=lab]未虚拟化")
                     else
-                        player.print("[recipe="..recipe.name.."]未虚拟化")
+                        player.print("[technology=virtual]".."[recipe="..recipe.name.."]未虚拟化")
                     end
                 else
                     energy = vinfo.energy * 60
@@ -169,19 +214,24 @@ local function player_alt_selected_area(event)
                     energy, unit = unitformal(energy)
                     local productivity_bonus = math.floor(vinfo.productivity_bonus * 100 + 0.5) / 100
                     local sub_str = "]机器数量:"..vinfo.count.." 总速度:"..vinfo.speed.." 平均产能:"..productivity_bonus.." 总能耗:"..energy..unit.."W"
-
-                    if entity.type == "lab" then
-                        record[recipe.name] = "[item=lab"..sub_str
-                    else
-                        record[recipe.name] = "[recipe="..recipe.name..sub_str
-                    end
+                    record[recipe.name] = v.recipe.des..sub_str
                 end
             end
         end
     end
     for _, v in pairs(record) do
-        player.print(v)
+        player.print("[technology=virtual]"..v)
     end
+end
+
+local function player_selected_area(event)
+    virtual(event, true)
+    player_show_selected_area(event)
+end
+
+-- 取消虚拟化
+local function player_alt_selected_area(event)
+    virtual(event, false)
 end
 
 
@@ -210,20 +260,6 @@ local function set_virtual_limit(event)
     local type_mode = false
 
 
-    if event.message == "限容信息" then
-        for name, limit in pairs(global.virtual_limit[force.name]) do
-            local status = ""
-            if limit == nil then
-                status = "不限容"
-            else
-                local fnum, unit = unitformal(limit)
-                status = fnum..unit
-            end
-            force.print("虚拟限容[item="..name.."]:"..status)
-        end
-        return
-    end
-
     -- 解析
     for i = 1,#event.message do
         local char = string.sub(event.message, i, i)
@@ -244,7 +280,6 @@ local function set_virtual_limit(event)
                 if (type_str == "item" and game.item_prototypes[name_str] ~= nil)  or (type_str == "fluid" and game.fluid_prototypes[name_str] ~= nil) then
                     show_str = show_str..char
                     local num = tonumber(num_str)
-                    if num == nil then return end
 
                     local last_status = ""
                     if global.virtual_limit[force.name][name_str] == nil then
@@ -255,16 +290,19 @@ local function set_virtual_limit(event)
                     end
 
                     local status = ""
-                    if num > 0 then
+                    if num == nil then
+                        force.print("[technology=virtual]"..player.name.."查看虚拟限容"..show_str..":"..last_status)
+                    elseif num > 0 then
                         local fnum, unit = unitformal(num)
                         status = fnum..unit
                         global.virtual_limit[force.name][name_str] = num
+                        force.print("[technology=virtual]"..player.name.."修改虚拟限容"..show_str..":"..last_status.."->"..status)
                     else
                         status = "不限容"
                         global.virtual_limit[force.name][name_str] = nil
+                        force.print("[technology=virtual]"..player.name.."修改虚拟限容"..show_str..":"..last_status.."->"..status)
                     end
 
-                    force.print(player.name.."修改虚拟限容"..show_str..":"..last_status.."->"..status)
                 end
 
                 type_str = ""
@@ -333,9 +371,9 @@ local function remove_accumulator_energy(force, need_energy)
 
     if used_energy == 0 then
         if have_accumulator then
-            force.print("[item=accumulator]未供电,虚拟化无法运行!")
+            force.print("[technology=virtual]".."[item=accumulator]未供电,虚拟化无法运行!")
         else
-            force.print("[item=accumulator]没有放置,虚拟化无法运行!")
+            force.print("[technology=virtual]".."[item=accumulator]没有放置,虚拟化无法运行!")
         end
     end
 
@@ -413,6 +451,8 @@ local function tick()
                         else
                             ingredients = {}
                         end
+                    elseif vinfo.typename == "boiler" then
+                        ingredients = vinfo.recipe.ingredients
                     else
                         ingredients = vinfo.recipe.ingredients
                         count = count / vinfo.recipe.energy
@@ -485,8 +525,8 @@ end
 script.on_init(runtime_mod_setting_changed)
 Event.addListener(defines.events.on_game_created_from_scenario,runtime_mod_setting_changed)
 Event.addListener(defines.events.on_runtime_mod_setting_changed, runtime_mod_setting_changed)
-Event.addListener(defines.events.on_player_selected_area, player_selected_area)
-Event.addListener(defines.events.on_player_alt_selected_area, player_alt_selected_area)
+Event.addListener(defines.events.on_player_selected_area, player_selected_area)     -- 玩家选择区域(虚拟化)
+Event.addListener(defines.events.on_player_alt_selected_area, player_alt_selected_area)    -- 玩家反选区域(取消虚拟化)
 Event.addListener(defines.events.on_built_entity,add_accumulator)    -- 玩家建造物品
 Event.addListener(defines.events.on_robot_built_entity,add_accumulator)  -- 机器人建造物品
 Event.addListener(defines.events.on_console_chat, set_virtual_limit) -- 设置虚拟制造限制

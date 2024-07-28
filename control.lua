@@ -848,12 +848,29 @@ end
 
 -- 同步数据
 function tongbu(event)
+    -- 狗爪
+    if global.tick_tasks then
+        for _, tick_task in pairs(global.tick_tasks) do
+        if tick_task.type == "grappling-gun" then
+            Grapple.tick_task_grappling_gun(tick_task)
+        else
+            tick_task.valid = false
+        end
+        if not tick_task.valid then
+            global.tick_tasks[tick_task.id] = nil
+        end
+        end
+    end
+
     -- 遍历AddID
     for key,entity in pairs(AddID) do
         if entity.valid then
             global.randomId[entity.force.name][entity.link_id] = true
         end
     end
+
+    if not settings.global["isTongBu"].value then return end
+
     local tick = game.tick
     if tick % settings.global["update-frequency"].value == 3 then
         for force in pairs(game.forces) do
@@ -878,19 +895,6 @@ function tongbu(event)
         end
     end
 
-    -- 狗爪
-    if global.tick_tasks then
-        for _, tick_task in pairs(global.tick_tasks) do
-        if tick_task.type == "grappling-gun" then
-            Grapple.tick_task_grappling_gun(tick_task)
-        else
-            tick_task.valid = false
-        end
-        if not tick_task.valid then
-            global.tick_tasks[tick_task.id] = nil
-        end
-        end
-    end
 
 
     if global.CURR_INDEX == nil or global.ITEM_COUNT == nil or global.NAME_TALBE == nil then return end --如果没有初始化完成，不执行

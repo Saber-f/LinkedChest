@@ -40,17 +40,6 @@ data:extend({
 ------------------------------------------------------- 真实聚变修改 -------------------------------------------------------
 -- 真实聚变
 if mods["RealisticFusionPower"]then
-    -- 蓄电池
-    data.raw.accumulator.accumulator.energy_source =
-    {
-    type = "electric",
-    buffer_capacity = "100TJ",
-    usage_priority = "tertiary",
-    input_flow_limit = "10TW",
-    output_flow_limit = "10TW"
-    }
-
-
     -- 更改插件孔
     data.raw["assembling-machine"]["rfp-gas-mixer"].module_specification = {module_slots = 3}   -- 混合仪
     data.raw["assembling-machine"]["angels-electric-boiler"].module_specification = {module_slots = 3}  -- 锅炉
@@ -661,6 +650,17 @@ data.raw["fluid-wagon"]["fluid-wagon"].max_speed = 5
 data.raw["fluid-wagon"]["fluid-wagon"].friction_force = 0.01    -- 摩擦
 data.raw["fluid-wagon"]["fluid-wagon"].air_resistance = 0.001   -- 空气阻力
 
+
+-- 蓄电池
+data.raw.accumulator.accumulator.energy_source =
+{
+    type = "electric",
+    buffer_capacity = "100TJ",
+    usage_priority = "tertiary",
+    input_flow_limit = "10TW",
+    output_flow_limit = "10TW"
+}
+
 -- 虚拟化操作
 data:extend
 { 
@@ -687,6 +687,31 @@ data:extend
         key_sequence = "SHIFT + F",
         consuming = "game-only",
         item_to_spawn = "virtual",
+        action = "spawn-item"
+    },
+    {
+        type = "selection-tool",
+        name = "showvirtual",
+        icon = "__LinkedChest3__/graphics/icons/TokenBrandedVra.png",
+        icon_size = 128,
+        flags = {"hidden", "not-stackable", "spawnable"},
+        subgroup = "other",
+        order = "e[automated-construction]-a[blueprint]",
+        stack_size = 1,
+        selection_color = { r = 0, g = 191, b = 255 },
+        alt_selection_color = { r = 230, g = 230, b = 250 },
+        selection_mode = {"blueprint"},
+        alt_selection_mode = {"blueprint"},
+        selection_cursor_box_type = "copy",
+        alt_selection_cursor_box_type = "copy",
+    },
+    {
+        type = "custom-input",
+        name = "showvirtual",
+        localised_name = "select-units",
+        key_sequence = "SHIFT + D",
+        consuming = "game-only",
+        item_to_spawn = "showvirtual",
         action = "spawn-item"
     }
 }
