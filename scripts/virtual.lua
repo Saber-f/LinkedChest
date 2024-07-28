@@ -493,10 +493,10 @@ local function do_the_deed(force, vinfo, ingredients, count)
     else
         for _, product in pairs(products) do
             local expected_value
-            if product.amount then
-                expected_value = product.amount * count * vinfo.productivity_bonus   -- 期望值
-            else
+            if product.amount_min and product.amount_max then
                 expected_value = (product.amount_min + product.amount_max) / 2 * count * vinfo.productivity_bonus   -- 期望值
+            else
+                expected_value = product.amount * count * vinfo.productivity_bonus   -- 期望值
             end
             if product.probability ~= nil then
                 expected_value = expected_value * product.probability
@@ -547,7 +547,16 @@ local function tick()
                         for _, product in pairs(products) do
                             local limit = global.virtual_limit[force.name][product.name]
                             if limit ~= nil then
-                                local expected_value = product.amount * count * vinfo.productivity_bonus   -- 期望值
+                                local expected_value
+                                if product.amount_min and product.amount_max then
+                                    expected_value = (product.amount_min + product.amount_max) / 2 * count * vinfo.productivity_bonus   -- 期望值
+                                else
+                                    expected_value = product.amount * count * vinfo.productivity_bonus   -- 期望值
+                                end
+                                
+                                if product.probability ~= nil then
+                                    expected_value = expected_value * product.probability
+                                end
                                 if get_force_item_count(force.name, product.name) + expected_value > limit then
                                     local last_count = count;
                                     count = count * (limit - get_force_item_count(force.name, product.name)) / expected_value
