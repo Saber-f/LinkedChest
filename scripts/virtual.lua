@@ -216,7 +216,7 @@ local function player_show_selected_area(event)
                     energy, unit = unitformal(energy)
                     local productivity_bonus = math.floor(vinfo.productivity_bonus * 100 + 0.5) / 100
                     local sub_str = "]机器数量:"..vinfo.count.." 总速度:"..vinfo.speed.." 平均产能:"..productivity_bonus.." 总能耗:"..energy..unit.."W"
-                    record[recipe.name] = v.recipe.des..sub_str
+                    record[recipe.name] = vinfo.recipe.des..sub_str
                 end
             end
         end
