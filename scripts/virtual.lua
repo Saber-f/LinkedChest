@@ -65,7 +65,7 @@ local function virtual(event, isAdd)
                 }
             else
                 local recipe2 = entity.get_recipe()
-                if recipe2 == nil then
+                if recipe2 ~= nil then
                     speed = entity.crafting_speed
                     productivity_bonus = entity.productivity_bonus + 1
                     energy = (energy + electric_drain) * (1 + entity.consumption_bonus)
