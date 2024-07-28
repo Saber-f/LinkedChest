@@ -447,7 +447,7 @@ local function remove_accumulator_energy(force, need_energy)
     if used_energy == 0 then
         if have_accumulator then
             if (game.tick % 8 == 0) then
-                force.print("[technology=virtual]".."[item=accumulator]未供电,虚拟化无法运行!")
+                force.print("[technology=virtual]".."[item=accumulator]供电不足,虚拟化无法全速运行!")
             end
         else
             if (game.tick % 4 == 0) then
@@ -492,7 +492,12 @@ local function do_the_deed(force, vinfo, ingredients, count)
         end
     else
         for _, product in pairs(products) do
-            local expected_value = product.amount * count * vinfo.productivity_bonus   -- 期望值
+            local expected_value
+            if product.amount then
+                expected_value = product.amount * count * vinfo.productivity_bonus   -- 期望值
+            else
+                expected_value = (product.amount_min + product.amount_max) / 2 * count * vinfo.productivity_bonus   -- 期望值
+            end
             if product.probability ~= nil then
                 expected_value = expected_value * product.probability
             end
