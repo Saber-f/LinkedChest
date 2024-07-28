@@ -64,17 +64,19 @@ local function virtual(event, isAdd)
                     des = "[fluid="..input.."]->[fluid="..output
                 }
             else
-                recipe2 = entity.get_recipe()
-                speed = entity.crafting_speed
-                productivity_bonus = entity.productivity_bonus + 1
-                energy = (energy + electric_drain) * (1 + entity.consumption_bonus)
-                recipe = {
-                    name = recipe2.name,
-                    ingredients = recipe2.ingredients,
-                    products = recipe2.products,
-                    des = "[recipe="..recipe2.name,
-                    energy = recipe2.energy
-                }
+                local recipe2 = entity.get_recipe()
+                if recipe2 == nil then
+                    speed = entity.crafting_speed
+                    productivity_bonus = entity.productivity_bonus + 1
+                    energy = (energy + electric_drain) * (1 + entity.consumption_bonus)
+                    recipe = {
+                        name = recipe2.name,
+                        ingredients = recipe2.ingredients,
+                        products = recipe2.products,
+                        des = "[recipe="..recipe2.name,
+                        energy = recipe2.energy
+                    }
+                end
             end
             if recipe ~= nil then
                 local vinfo
