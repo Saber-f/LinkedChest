@@ -34,7 +34,7 @@ local function virtual(event, isAdd)
     local record = {}
     for _, entity in pairs(event.entities) do
         -- 如果是组装机
-        if entity.type == "assembling-machine" or entity.type == "furnace" or entity.type == "lab" or entity.type == "boiler" then 
+        if entity.type == "assembling-machine" or entity.type == "furnace" or entity.type == "lab" or entity.type == "boiler" or type == "generator" then 
             local recipe
             local typename = "recipe"
             local speed = 1
@@ -288,17 +288,25 @@ local function rangeSetLimit(player, start, target, num)
 
             local show_str = "["..item.type.."="..item.name.."]"
             local status = ""
+
+            -- 库存
+            local storage = get_force_item_count(force.name, name_str)
+            if storage == nil then
+                storage = 0
+            end
+            local fnum2, unit2 = unitformal(storage)
+            local storage_str = "库存:"..fnum2..unit2
             if num == nil then
-                force.print("[technology=virtual]"..player.name.."查看虚拟限容"..show_str..":"..last_status)
+                player.print("[technology=virtual]"..show_str.."限容:"..last_status..storage_str)
             elseif num > 0 then
                 local fnum, unit = unitformal(num)
                 status = fnum..unit
                 global.virtual_limit[force.name][name_str] = num
-                force.print("[technology=virtual]"..player.name.."修改虚拟限容"..show_str..":"..last_status.."->"..status)
+                force.print("[technology=virtual]"..player.name.."修改"..show_str.."限容:"..last_status.."->"..status..storage_str)
             else
                 status = "不限容"
                 global.virtual_limit[force.name][name_str] = nil
-                force.print("[technology=virtual]"..player.name.."修改虚拟限容"..show_str..":"..last_status.."->"..status)
+                force.print("[technology=virtual]"..player.name.."修改"..show_str.."限容:"..last_status.."->"..status..storage_str)
             end
         end
 
@@ -308,8 +316,86 @@ local function rangeSetLimit(player, start, target, num)
     end
 end
 
+local function split_string(input_str, sep)
+    local t = {}
+    for str in string.gmatch(input_str, "([^" .. sep .. "]+)") do
+        table.insert(t, str)
+    end
+    return t
+end
+
+-- 设置同步白名单
+local function set_tongbu_white_list(event)
+    local player = game.players[event.player_index]
+    local force = player.force
+    if event.message == "同步列表" then
+        if global.tongbu_white_list == nil then
+            global.tongbu_white_list = {}
+        end
+        if global.tongbu_white_list[force.name] == nil then
+            global.tongbu_white_list[force.name] = {}
+        end
+        local whitelist = global.tongbu_white_list[force.name]
+        if whitelist == nil then
+            whitelist = {}
+        end
+        if #whitelist == 0 then
+            player.print("同步列表为空")
+            return true
+        end
+        local str = "同步列表:"
+        for k, v in pairs(whitelist) do
+            force.print("[item="..v.name.."]")
+        end
+        return true
+    end
+
+    -- 如果前两个字符是"同步"，则是同步白名单
+    local is_add = true
+    if string.find(event.message, "取消同步") then
+        force.print(player.name.."从同步列表移除:")
+        is_add = false
+    elseif string.find(event.message, "同步") then
+        force.print(player.name.."向同步列表添加:")
+        is_add = true
+    else
+        game.print("同步列表格式错误")
+        return false
+    end
+    
+    if global.tongbu_white_list == nil then
+        global.tongbu_white_list = {}
+    end
+    if global.tongbu_white_list[force.name] == nil then
+        global.tongbu_white_list[force.name] = {}
+    end
+    
+    -- 按[分割
+    local items = split_string(event.message, "[")
+    for _, item in pairs(items) do
+        -- 取item=和]之间的字符串
+        item_name = string.match(item, "item=(.*)]")
+        if item_name and game.item_prototypes[item_name] ~= nil then
+            if is_add then
+                table.insert(global.tongbu_white_list[force.name], {name = item_name, update_tick = game.tick})
+            else
+                for i = #global.tongbu_white_list[force.name], 1, -1 do
+                    if global.tongbu_white_list[force.name][i].name == item_name then
+                        table.remove(global.tongbu_white_list[force.name], i)
+                        break
+                    end
+                end
+            end
+            force.print("[item="..item_name.."]")
+        end
+    end
+
+    return true
+end
+
 -- 设置虚拟制造先容
 local function set_virtual_limit(event)
+    if set_tongbu_white_list(event) then return end
     local player = game.players[event.player_index]
     local force = player.force
     local name_str = ""
@@ -363,18 +449,27 @@ local function set_virtual_limit(event)
                         last_status = fnum..unit
                     end
 
+                    
+                    -- 库存
+                    local storage = get_force_item_count(force.name, name_str)
+                    if storage == nil then
+                        storage = 0
+                    end
+                    local fnum2, unit2 = unitformal(storage)
+                    local storage_str = "库存:"..fnum2..unit2
+
                     local status = ""
                     if num == nil then
-                        force.print("[technology=virtual]"..player.name.."查看虚拟限容"..show_str..":"..last_status)
+                        player.print("[technology=virtual]"..show_str.."限容:"..last_status..storage_str)
                     elseif num > 0 then
                         local fnum, unit = unitformal(num)
                         status = fnum..unit
                         global.virtual_limit[force.name][name_str] = num
-                        force.print("[technology=virtual]"..player.name.."修改虚拟限容"..show_str..":"..last_status.."->"..status)
+                        force.print("[technology=virtual]"..player.name.."修改"..show_str.."限容:"..last_status.."->"..status..storage_st)
                     else
                         status = "不限容"
                         global.virtual_limit[force.name][name_str] = nil
-                        force.print("[technology=virtual]"..player.name.."修改虚拟限容"..show_str..":"..last_status.."->"..status)
+                        force.print("[technology=virtual]"..player.name.."修改"..show_str.."限容:"..last_status.."->"..status..storage_st)
                     end
 
                 end
@@ -520,83 +615,130 @@ end
 
 local function tick()
     for _, force in pairs(game.forces) do
-        if global.virtual[force.name] ~= nil then
-            for recipe_name, vinfo in pairs(global.virtual[force.name]) do
-                if game.tick > vinfo.update_tick then
-                    local ingredients = vinfo.recipe.ingredients
-                    local products = vinfo.recipe.products
-                    local count = vinfo.speed * (game.tick - vinfo.tick ) / 60
-                    local ingredients
-                    if (recipe_name == "virtual-lab") then
-                        local current_research = force.current_research
-                        if current_research ~= nil then
-                            ingredients = current_research.research_unit_ingredients
-                            count = count / current_research.research_unit_energy * 60
+        if force.name ~= "enemy" and force.name ~= "neutral" then
+            if global.virtual[force.name] ~= nil then
+                for recipe_name, vinfo in pairs(global.virtual[force.name]) do
+                    if game.tick > vinfo.update_tick then
+                        local ingredients = vinfo.recipe.ingredients
+                        local products = vinfo.recipe.products
+                        local count = vinfo.speed * (game.tick - vinfo.tick ) / 60
+                        local ingredients
+                        if (recipe_name == "virtual-lab") then
+                            local current_research = force.current_research
+                            if current_research ~= nil then
+                                ingredients = current_research.research_unit_ingredients
+                                count = count / current_research.research_unit_energy * 60
+                            else
+                                ingredients = {}
+                            end
+                        elseif vinfo.typename == "boiler" then
+                            ingredients = vinfo.recipe.ingredients
                         else
-                            ingredients = {}
+                            ingredients = vinfo.recipe.ingredients
+                            count = count / vinfo.recipe.energy
                         end
-                    elseif vinfo.typename == "boiler" then
-                        ingredients = vinfo.recipe.ingredients
-                    else
-                        ingredients = vinfo.recipe.ingredients
-                        count = count / vinfo.recipe.energy
-                    end
 
-                    -- 检测限容
-                    if recipe_name ~= "virtual-lab" then
-                        for _, product in pairs(products) do
-                            local limit = global.virtual_limit[force.name][product.name]
-                            if limit ~= nil then
-                                local expected_value
-                                if product.amount_min and product.amount_max then
-                                    expected_value = (product.amount_min + product.amount_max) / 2 * count * vinfo.productivity_bonus   -- 期望值
-                                else
-                                    expected_value = product.amount * count * vinfo.productivity_bonus   -- 期望值
+                        -- 检测限容
+                        if recipe_name ~= "virtual-lab" then
+                            for _, product in pairs(products) do
+                                local limit = global.virtual_limit[force.name][product.name]
+                                if limit ~= nil then
+                                    local expected_value
+                                    if product.amount_min and product.amount_max then
+                                        expected_value = (product.amount_min + product.amount_max) / 2 * count * vinfo.productivity_bonus   -- 期望值
+                                    else
+                                        expected_value = product.amount * count * vinfo.productivity_bonus   -- 期望值
+                                    end
+                                    
+                                    if product.probability ~= nil then
+                                        expected_value = expected_value * product.probability
+                                    end
+                                    if get_force_item_count(force.name, product.name) + expected_value > limit then
+                                        local last_count = count;
+                                        count = count * (limit - get_force_item_count(force.name, product.name)) / expected_value
+                                    end
                                 end
+                            end
+                        end
+
+                        if count > 0 then
+                            -- 根据原料数量调整生产数量
+                            for _, ingredient in pairs(ingredients) do
+                                local ingredient_name = ingredient.name
+                                local ingredient_amount = ingredient.amount
                                 
-                                if product.probability ~= nil then
-                                    expected_value = expected_value * product.probability
+                                if get_force_item_count(force.name, ingredient_name) < ingredient_amount * count then
+                                    count = count * get_force_item_count(force.name, ingredient_name) / (ingredient_amount * count)
                                 end
-                                if get_force_item_count(force.name, product.name) + expected_value > limit then
-                                    local last_count = count;
-                                    count = count * (limit - get_force_item_count(force.name, product.name)) / expected_value
-                                end
+                            end 
+                        end
+
+                        if count > 0 then
+                            -- 根据能源消耗调整生产数量
+                            local need_energy = vinfo.energy * (game.tick - vinfo.tick)
+                            local used_energy = remove_accumulator_energy(force, need_energy)
+                            if used_energy < vinfo.energy then  -- 能源不足
+                                count = count * used_energy / vinfo.energy
                             end
                         end
-                    end
 
-                    if count > 0 then
-                        -- 根据原料数量调整生产数量
-                        for _, ingredient in pairs(ingredients) do
-                            local ingredient_name = ingredient.name
-                            local ingredient_amount = ingredient.amount
-                            
-                            if get_force_item_count(force.name, ingredient_name) < ingredient_amount * count then
-                                count = count * get_force_item_count(force.name, ingredient_name) / (ingredient_amount * count)
-                            end
+                        if count > 0 then
+                            -- 产出
+                            do_the_deed(force, vinfo, ingredients, count)
                         end 
-                    end
 
-                    if count > 0 then
-                        -- 根据能源消耗调整生产数量
-                        local need_energy = vinfo.energy * (game.tick - vinfo.tick)
-                        local used_energy = remove_accumulator_energy(force, need_energy)
-                        if used_energy < vinfo.energy then  -- 能源不足
-                            count = count * used_energy / vinfo.energy
+                        -- 更新tick
+                        vinfo.tick = game.tick
+                        if (recipe_name == "virtual-lab") then
+                            vinfo.update_tick = game.tick
+                        else
+                            vinfo.update_tick = game.tick + 10 + math.random()*10
                         end
                     end
+                end
+            end
+        end
+    end
 
-                    if count > 0 then
-                        -- 产出
-                        do_the_deed(force, vinfo, ingredients, count)
-                    end 
-
-                    -- 更新tick
-                    vinfo.tick = game.tick
-                    if (recipe_name == "virtual-lab") then
-                        vinfo.update_tick = game.tick
-                    else
-                        vinfo.update_tick = game.tick + 10 + math.random()*10
+    -- 同步白名单
+    if not settings.global["isTongBu"].value then
+        local prototypes = game.item_prototypes
+        for _, force in pairs(game.forces) do
+            if force.name ~= "enemy" and force.name ~= "neutral" then
+                if global.tongbu_white_list[force.name] ~= nil then
+                    for _, item in pairs(global.tongbu_white_list[force.name]) do
+                        if game.item_prototypes[item.name] ~= nil and item.update_tick < game.tick then
+                            local name = item.name
+                            local force_name = force.name
+                            local id = global.name2id[force_name][name]
+                            if id then
+                                global.glk[force_name].link_id = id
+                                count = global.glk[force_name].get_item_count(name)
+                                num = settings.global["row_num"].value*10*prototypes[name].stack_size
+                                if count <  num then
+                                    if global.force_item[force_name][name] ~= nil then
+                                        count2 = math.floor(global.force_item[force_name][name].count)
+                                        if count2 > 0 then
+                                            num2 = count2
+                                            num = settings.startup["linkSize"].value*prototypes[name].stack_size - num - count
+                                            if count2 > num then count2 = num end
+                                            if count2 > 0 then
+                                                count = global.glk[force_name].insert({name = name,count = count2})
+                                                global.force_item[force_name][name].count = num2 - count
+                                            end
+                                        end
+                                    else
+                                        global.force_item[force_name][name] = {count = 0}
+                                    end
+                                elseif count > settings.startup["linkSize"].value*prototypes[name].stack_size - num then
+                                    num2 = global.glk[force_name].remove_item({name = name,count = count})
+                                    num = global.glk[force_name].insert({name = name,count = num})
+                                    if global.force_item[force_name][name] == nil then global.force_item[force_name][name] = {count = 0} end
+                                    add_force_item(force_name,name,num2-num)
+                                end
+                            end
+                            item.update_tick = game.tick + 10 + math.random()*5
+                        end
                     end
                 end
             end
@@ -607,19 +749,50 @@ end
 -- 游戏设置更改
 local function runtime_mod_setting_changed(event)
     for _, f in pairs(game.forces) do
-        if settings.global["virtual-lock"].value then
-            f.print("[technology=virtual]需要研究解锁")
-        else
-            f.print("[technology=virtual]不需要研究解锁")
+        if force.name ~= "enemy" and force.name ~= "neutral" then
+            if settings.global["virtual-lock"].value then
+                f.print("[technology=virtual]需要研究解锁")
+            else
+                f.print("[technology=virtual]不需要研究解锁")
+            end
+            f.technologies['virtual'].enabled = settings.global["virtual-lock"].value
         end
-        f.technologies['virtual'].enabled = settings.global["virtual-lock"].value
     end
 end
 
+
 -- 点击gui
 local function gui_click(event)
-    game.print("naem:"..event.element.name.." name:"..event.name)
+    local ename = event.element.name
+    local name = string.match(ename, "fnei\trecipe\t(.*)-label")
+    if not name then 
+        return 
+    end
+    local format_name = ""
+    if game.item_prototypes[name] ~= nil then
+        format_name = "[item="..name.."]"
+    elseif game.fluid_prototypes[name] ~= nil then
+        format_name = "[fluid="..name.."]"
+    end
+    if format_name == "" then
+        return
+    end
 
+    local player = game.players[event.player_index]
+
+    -- 打印机器上限，库存
+    local force = player.force
+    local limit = global.virtual_limit[force.name][name]
+    local count = get_force_item_count(force.name, name)
+    local fnum, unit = unitformal(count)
+    local limit_str = ""
+    if limit == nil then
+        limit_str = "不限容"
+    else
+        local fnum, unit = unitformal(limit)
+        limit_str = fnum..unit
+    end
+    player.print("[technology=virtual]"..format_name.." 限容:"..limit_str.."库存:"..fnum..unit)
 end
 
 script.on_init(runtime_mod_setting_changed)
