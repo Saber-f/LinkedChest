@@ -359,7 +359,6 @@ local function set_tongbu_white_list(event)
         force.print(player.name.."向同步列表添加:")
         is_add = true
     else
-        game.print("同步列表格式错误")
         return false
     end
     
@@ -465,11 +464,11 @@ local function set_virtual_limit(event)
                         local fnum, unit = unitformal(num)
                         status = fnum..unit
                         global.virtual_limit[force.name][name_str] = num
-                        force.print("[technology=virtual]"..player.name.."修改"..show_str.."限容:"..last_status.."->"..status..storage_st)
+                        force.print("[technology=virtual]"..player.name.."修改"..show_str.."限容:"..last_status.."->"..status..storage_str)
                     else
                         status = "不限容"
                         global.virtual_limit[force.name][name_str] = nil
-                        force.print("[technology=virtual]"..player.name.."修改"..show_str.."限容:"..last_status.."->"..status..storage_st)
+                        force.print("[technology=virtual]"..player.name.."修改"..show_str.."限容:"..last_status.."->"..status..storage_str)
                     end
 
                 end
