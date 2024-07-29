@@ -76,7 +76,7 @@ function init_link()
 
     -- Force初始化
     for _, f in pairs(game.forces) do
-        if force.name ~= "enemy" and force.name ~= "neutral" then
+        if f.name ~= "enemy" and f.name ~= "neutral" then
             myinitteam(f.name)
             global.glkn = global.glkn + 1
         end
@@ -99,7 +99,7 @@ function up_name2id()
     end
 
     for _, f in pairs(game.forces) do
-        if force.name ~= "enemy" and force.name ~= "neutral" then
+        if f.name ~= "enemy" and f.name ~= "neutral" then
             if global.name2id[f.name] ~= nil then
                 for name,id in pairs(global.name2id[f.name]) do
                     -- 如果物品列表中没有
