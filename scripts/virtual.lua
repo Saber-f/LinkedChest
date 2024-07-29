@@ -266,7 +266,7 @@ local function rangeSetLimit(player, start, target, num)
     if prototypes[start] == nil or prototypes[target] == nil then
         return
     end
-    if (prototypes[start].subgroup.name ~= prototypes[target].subgroup.name) then
+    if (prototypes[start].group.name ~= prototypes[target].group.name) then
         return
     end
 
@@ -604,6 +604,7 @@ local function tick()
     end
 end
 
+-- 游戏设置更改
 local function runtime_mod_setting_changed(event)
     for _, f in pairs(game.forces) do
         if settings.global["virtual-lock"].value then
@@ -615,6 +616,12 @@ local function runtime_mod_setting_changed(event)
     end
 end
 
+-- 点击gui
+local function gui_click(event)
+    game.print("naem:"..event.element.name.." name:"..event.name)
+
+end
+
 script.on_init(runtime_mod_setting_changed)
 Event.addListener(defines.events.on_game_created_from_scenario,runtime_mod_setting_changed)
 Event.addListener(defines.events.on_runtime_mod_setting_changed, runtime_mod_setting_changed)
@@ -624,3 +631,4 @@ Event.addListener(defines.events.on_built_entity,add_accumulator)    -- 玩家�
 Event.addListener(defines.events.on_robot_built_entity,add_accumulator)  -- 机器人建造物品
 Event.addListener(defines.events.on_console_chat, set_virtual_limit) -- 设置虚拟制造限制
 Event.addListener(defines.events.on_tick, tick)
+Event.addListener(defines.events.on_gui_click, gui_click)
