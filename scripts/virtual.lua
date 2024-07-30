@@ -759,7 +759,7 @@ end
 -- 游戏设置更改
 local function runtime_mod_setting_changed(event)
     for _, f in pairs(game.forces) do
-        if force.name ~= "enemy" and force.name ~= "neutral" then
+        if f.name ~= "enemy" and force.name ~= "neutral" then
             if settings.global["virtual-lock"].value then
                 f.print("[technology=virtual]需要研究解锁")
             else
