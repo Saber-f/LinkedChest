@@ -49,6 +49,7 @@ function myinitteam(force)
     global.virtual_energy[force]       = {}          -- 团队的虚拟能源
     global.virtual_energy_index[force] = 1           -- 团队的虚拟能源索引
     global.virtual_limit[force]        = {}           -- 团队的虚拟物品限制
+    golbal.min_limit[force] = {}        -- 团队的最小限制
     global.tongbu_white_list[force] = {} -- 同步白名单
 end
 
@@ -70,6 +71,7 @@ function init_link()
     global.virtual_energy       = {}          -- 团队的虚拟能源
     global.virtual_energy_index = {}          -- 团队的虚拟能源索引
     global.virtual_limit        = {}           -- 团队的虚拟物品限制
+    global.min_limit ={}        -- 团队的最小限制
     -- 同步白名单
     global.tongbu_white_list = {}
 
@@ -117,6 +119,7 @@ function up_name2id()
     if global.virtual_energy == nil then global.virtual_energy = {} end
     if global.virtual_energy_index == nil then global.virtual_energy_index = {} end
     if global.virtual_limit == nil then global.virtual_limit = {} end
+    if global.min_limit == nil then global.min_limit = {} end
     if global.tongbu_white_list == nil then global.tongbu_white_list = {} end
     for _, force in pairs(game.forces) do
         if force.name ~= "enemy" and force.name ~= "neutral" then
@@ -124,6 +127,7 @@ function up_name2id()
             if global.virtual_energy[force.name] == nil then global.virtual_energy[force.name] = {} end
             if global.virtual_energy_index[force.name] == nil then global.virtual_energy_index[force.name] = 1 end
             if global.virtual_limit[force.name] == nil then global.virtual_limit[force.name] = {} end
+            if global.min_limit[force.name] == nil then global.min_limit[force.name] = {} end
             if global.tongbu_white_list[force.name] == nil then global.tongbu_white_list[force.name] = {} end
             
             for recipe_name, vinfo in pairs(global.virtual[force.name]) do
