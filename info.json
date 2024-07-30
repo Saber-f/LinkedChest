@@ -5,5 +5,5 @@
   "author": "sabet",
 	"factorio_version": "1.1",
   "dependencies": ["base >= 1.1", "? Advanced_Sky_Modules >= 0.0.3", "? RealisticFusionPower >= 1.8.17", "? RealisticFusionWeaponry >= 1.5.8",  "? Big-Monsters >= 1.4.0", "? pyalienlife >= 1.4.0"],
-  "description":"关联箱\n虚拟化:按下SHIFT+F框选，有配方的实体，转移到虚拟空间进行生产。\n按下SHIFT+F后按住SHIFT取消该配方的虚拟化。\n按下SHIFT+D后框选查看配方虚拟化信息\n[item=accumulator]为虚拟空间提供能源。\n聊天框输入100[item=steel-chest]-[item=logistic-chest-requester]设置同页两个物品之前所有物品的限容。\nFNEI配方中点击物品文字标签打印库存和限容。\n当关联箱同步不可用时聊天框输入同步[item=logistic-chest-requester]将其添加到同步列表。\n聊天框输入取消同步[item=logistic-chest-requester]将其从同步列表移除。\n聊天框输入同步列表查看所用同步物品。"
+  "description":"关联箱\n虚拟化:1、按下SHIFT+F框选，有配方的实体，转移到虚拟空间进行生产。\n2、按下SHIFT+F后按住SHIFT取消该配方的虚拟化。\n3、按下SHIFT+D后框选查看配方虚拟化信息\n4、[item=accumulator]为虚拟空间提供能源。\n5、聊天框输入上限(或下限)100[item=steel-chest]-[item=logistic-chest-requester]设置同页两个物品之前所有物品的限容。\n6、FNEI配方中点击物品文字标签打印库存和限容。\n7、当关联箱同步不可用时聊天框输入同步[item=logistic-chest-requester]将其添加到同步列表。\n8、聊天框输入取消同步[item=logistic-chest-requester]将其从同步列表移除。\n9、聊天框输入同步列表查看所用同步物品。"
 }

@@ -353,6 +353,12 @@ end
 local function set_tongbu_white_list(event)
     local player = game.players[event.player_index]
     local force = player.force
+
+    if string.find(event.message, "虚拟化") or string.find(event.message, "怎么玩") then
+        force.print("你是在问虚拟化怎么玩吗？偷偷告诉你:")
+        force.print("1、按下SHIFT+F框选，有配方的实体，转移到虚拟空间进行生产。\n2、按下SHIFT+F后按住SHIFT取消该配方的虚拟化。\n3、按下SHIFT+D后框选查看配方虚拟化信息\n4、[item=accumulator]为虚拟空间提供能源。\n5、聊天框输入上限(或下限)100[item=steel-chest]-[item=logistic-chest-requester]设置同页两个物品之前所有物品的限容。\n6、FNEI配方中点击物品文字标签打印库存和限容。\n7、当关联箱同步不可用时聊天框输入同步[item=logistic-chest-requester]将其添加到同步列表。\n8、聊天框输入取消同步[item=logistic-chest-requester]将其从同步列表移除。\n9、聊天框输入同步列表查看所用同步物品。")
+    end
+
     if event.message == "同步列表" then
         if global.tongbu_white_list == nil then
             global.tongbu_white_list = {}
@@ -368,7 +374,6 @@ local function set_tongbu_white_list(event)
             player.print("同步列表为空")
             return true
         end
-        local str = "同步列表:"
         for k, v in pairs(whitelist) do
             force.print("[item="..v.name.."]")
         end
