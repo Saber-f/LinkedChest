@@ -432,13 +432,19 @@ local function what_no_enough(player)
     local force = player.force
     local no_enough = global.no_enough[force.name]
     if no_enough == nil then
-        force.print("啥都不缺，所有配方全速运行，完美o(*￣▽￣*)ブ")
+        force.print("啥都不缺，所有配方全速生产，完美o(*￣▽￣*)ブ")
         return
     end
     local no_enough_list = {}
+    local recipes_map = {}
+    local recipes_count = 0
     for name, recipes in pairs(no_enough) do
         local count = 0
         for _, recipe in pairs(recipes) do
+            if recipes_map[recipe] == nil then
+                recipes_map[recipe] = true
+                recipes_count = recipes_count + 1
+            end
             count = count + 1
         end
         if count > 0 then
@@ -446,7 +452,7 @@ local function what_no_enough(player)
         end
     end
     if #no_enough_list == 0 then
-        force.print("啥都不缺，所有配方全速运行，完美o(*￣▽￣*)ブ")
+        force.print("啥都不缺，所有配方全速生产，完美o(*￣▽￣*)ブ")
         return
     end
 
@@ -461,6 +467,7 @@ local function what_no_enough(player)
         end
         show_inventory_info(player, format_name, item.name, nil, nil, item.recipes_count)
     end
+    force.print("共有"..#no_enough_list.."种物品产量不足,导致"..recipes_count.."个配方无法全速生产")
 end
 
 -- 设置同步白名单
@@ -469,7 +476,7 @@ local function set_tongbu_white_list(event)
     local force = player.force
 
     if string.find(event.message, "虚拟化") or string.find(event.message, "怎么玩") then
-        force.print("你是在问虚拟化怎么玩吗？\n1、按下SHIFT+F框选有配方的实体，转移到虚拟空间进行生产，[item=accumulator]为提供电力。\n2、按下SHIFT+F后按住SHIFT取消该配方的虚拟化。\n3、按下SHIFT+D后框选查看配方虚拟化信息\n4、FNEI配方中点击物品文字标签打印库存和限容。\n5、FNEI配方中按住SHIFT点击物品文字标签将物品添加到快捷文本编辑框。\n6、聊天框输入查看命令获取命令说明。")
+        force.print("你是在问虚拟化怎么玩吗？\n1、按下SHIFT+F框选有配方的实体，转移到虚拟空间进行生产，[item=accumulator]提供电力。\n2、按下SHIFT+F后按住SHIFT取消该配方的虚拟化。\n3、按下SHIFT+D后框选查看配方虚拟化信息\n4、FNEI配方中点击物品文字标签打印库存和限容。\n5、FNEI配方中按住SHIFT点击物品文字标签将物品添加到快捷文本编辑框。\n6、聊天框输入查看命令获取命令说明。")
         return true
     elseif string.find(event.message, "查看命令") then
         force.print("聊天框输入\n1、上限(下限)1000[item=burner-inserter]-[item=stack-filter-inserter]=>设置物品上限或下限\n2、查看[item=burner-inserter]-[item=stack-filter-inserter]=>查看上限，下限和库存\n3、同步(取消同步)[item=burner-inserter]=>在关联箱库存同步禁用时手动开启(关闭)\n4、同步列表=>查看所有手动开启的同步物品\n5、缺啥(缺什么)=>查看所有产量不足的物品")
