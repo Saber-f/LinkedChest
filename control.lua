@@ -684,8 +684,6 @@ function force_items_main_gui_click(event)
                 local number = player.insert({name = item_name, count = 1})
                 if number > 0 then
                     remove_force_item(player,item_name,1)
-                else
-                    player.print({'','背包已满，无法插入',{'item-name.'..item_name}})
                 end
             elseif event.button == defines.mouse_button_type.right and item_count >= prototypes[item_name].stack_size then 
                 local number = 0
@@ -699,16 +697,10 @@ function force_items_main_gui_click(event)
                 if number > 0 then
                     remove_force_item(player,item_name,number)
                 end
-                if number < num then
-                    player.print({'','背包已满，无法插入',{'item-name.'..item_name}})
-                end
             elseif item_count < prototypes[item_name].stack_size and item_count >=1 then
                 local number = player.insert({name = item_name, count = item_count})
                 if number > 0 then
                     remove_force_item(player,item_name,number)
-                end
-                if number < item_count then
-                    player.print({'','背包已满，无法插入',{'item-name.'..item_name}})
                 end
             elseif item_count == 0 then
                 --player.print('公共区[item=' .. item_name .. '] 为0',{r = 255,g = 0,b = 255})
@@ -863,6 +855,10 @@ end
 
 -- 同步数据
 function tongbu(event)
+    -- for _, player in pairs(game.players) do
+    --     fill_request_items(player)
+    -- end
+
     -- 狗爪
     if global.tick_tasks then
         for _, tick_task in pairs(global.tick_tasks) do
@@ -1231,7 +1227,7 @@ end
 
 
 function fill_request_items(player)
-    if player.character == nil then return end
+    if player.character == nil or player.character_personal_logistic_requests_enabled == false then return end
 	local request_count = player.character.request_slot_count  -- 玩家的请求区存且有请求则继续
 	if not request_count or request_count == 0 then
 		return
