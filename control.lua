@@ -49,7 +49,7 @@ function myinitteam(force)
     global.virtual_energy[force]       = {}          -- 团队的虚拟能源
     global.virtual_energy_index[force] = 1           -- 团队的虚拟能源索引
     global.virtual_limit[force]        = {}           -- 团队的虚拟物品限制
-    golbal.min_limit[force] = {}        -- 团队的最小限制
+    global.min_limit[force] = {}        -- 团队的最小限制
     global.tongbu_white_list[force] = {} -- 同步白名单
 end
 
@@ -78,7 +78,7 @@ function init_link()
 
     -- Force初始化
     for _, f in pairs(game.forces) do
-        if f.name ~= "enemy" and f.name ~= "neutral" then
+        if f.name ~= "enemy" and f.name ~= "neutral" and f.name ~= nil then
             myinitteam(f.name)
             global.glkn = global.glkn + 1
         end
@@ -101,7 +101,7 @@ function up_name2id()
     end
 
     for _, f in pairs(game.forces) do
-        if f.name ~= "enemy" and f.name ~= "neutral" then
+        if f.name ~= "enemy" and f.name ~= "neutral" and f.name ~= nil then
             if global.name2id[f.name] ~= nil then
                 for name,id in pairs(global.name2id[f.name]) do
                     -- 如果物品列表中没有
@@ -122,7 +122,7 @@ function up_name2id()
     if global.min_limit == nil then global.min_limit = {} end
     if global.tongbu_white_list == nil then global.tongbu_white_list = {} end
     for _, force in pairs(game.forces) do
-        if force.name ~= "enemy" and force.name ~= "neutral" then
+        if force.name ~= "enemy" and force.name ~= "neutral" and force.name ~= nil then
             if global.virtual[force.name] == nil then global.virtual[force.name] = {} end
             if global.virtual_energy[force.name] == nil then global.virtual_energy[force.name] = {} end
             if global.virtual_energy_index[force.name] == nil then global.virtual_energy_index[force.name] = 1 end
@@ -884,22 +884,22 @@ function tongbu(event)
 
     local tick = game.tick
     if tick % settings.global["update-frequency"].value == 3 then
-        for force in pairs(game.forces) do
-            if force.name ~= "enemy" and force.name ~= "neutral" then
+        for force_name in pairs(game.forces) do
+            if force_name ~= "enemy" and force_name ~= "neutral" and force_name ~= nil then
                 -- 同步关联库存输出
-                if global.TC[force] ~= nil then
-                    for key,cc in pairs(global.TC[force]) do
+                if global.TC[force_name] ~= nil then
+                    for key,cc in pairs(global.TC[force_name]) do
                         if cc.valid then
                             local cb = cc.get_or_create_control_behavior()
                             for i=1,cb.signals_count do
                                 local sig = cb.get_signal(i)
                                 if ((sig ~= nil) and (sig.signal ~= nil) and (sig.signal.type == "item")) then
-                                    sig.count = get_force_item_count(force,sig.signal.name)
+                                    sig.count = get_force_item_count(force_name,sig.signal.name)
                                     cb.set_signal(i,sig)
                                 end
                             end
                         else
-                            global.TC[force][key] = nil
+                            global.TC[force_name][key] = nil
                             game.print(key..'关联网络信号输出['..key..']已被移除')
                         end
                     end
@@ -918,36 +918,37 @@ function tongbu(event)
     local num = 0
     local num2 = 0
 
-    for force in pairs(game.forces) do
-        if force.name ~= "enemy" and force.name ~= "neutral" then
+    for force_name in pairs(game.forces) do
+        if force_name ~= "enemy" and force_name ~= "neutral" and force_name ~= nil then
             for index = global.CURR_INDEX,global.CURR_INDEX + settings.global["update-num"].value do
                 index = index % global.ITEM_COUNT
                 local name = global.NAME_TALBE[index]
-                local id = global.name2id[force][name]
+                local id = global.name2id[force_name][name]
+                game.print(id)
                 if id then
-                    global.glk[force].link_id = id
-                    count = global.glk[force].get_item_count(name)
+                    global.glk[force_name].link_id = id
+                    count = global.glk[force_name].get_item_count(name)
                     num = settings.global["row_num"].value*10*prototypes[name].stack_size
                     if count <  num then
-                        if global.force_item[force][name] ~= nil then
-                            count2 = math.floor(global.force_item[force][name].count)
+                        if global.force_item[force_name][name] ~= nil then
+                            count2 = math.floor(global.force_item[force_name][name].count)
                             if count2 > 0 then
                                 num2 = count2
                                 num = settings.startup["linkSize"].value*prototypes[name].stack_size - num - count
                                 if count2 > num then count2 = num end
                                 if count2 > 0 then
-                                    count = global.glk[force].insert({name = name,count = count2})
-                                    global.force_item[force][name].count = num2 - count
+                                    count = global.glk[force_name].insert({name = name,count = count2})
+                                    global.force_item[force_name][name].count = num2 - count
                                 end
                             end
                         else
-                            global.force_item[force][name] = {count = 0}
+                            global.force_item[force_name][name] = {count = 0}
                         end
                     elseif count > settings.startup["linkSize"].value*prototypes[name].stack_size - num then
-                        num2 = global.glk[force].remove_item({name = name,count = count})
-                        num = global.glk[force].insert({name = name,count = num})
-                        if global.force_item[force][name] == nil then global.force_item[force][name] = {count = 0} end
-                        add_force_item(force,name,num2-num)
+                        num2 = global.glk[force_name].remove_item({name = name,count = count})
+                        num = global.glk[force_name].insert({name = name,count = num})
+                        if global.force_item[force_name][name] == nil then global.force_item[force_name][name] = {count = 0} end
+                        add_force_item(force_name,name,num2-num)
                     end
                 end
             end

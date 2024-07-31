@@ -618,11 +618,10 @@ end
 
 local function tick()
     for _, force in pairs(game.forces) do
-        if force.name ~= "enemy" and force.name ~= "neutral" then
+        if force.name ~= "enemy" and force.name ~= "neutral" and force.name ~= nil then
             if global.virtual[force.name] ~= nil then
                 for recipe_name, vinfo in pairs(global.virtual[force.name]) do
                     if game.tick > vinfo.update_tick then
-                        local ingredients = vinfo.recipe.ingredients
                         local products = vinfo.recipe.products
                         local count = vinfo.speed * (game.tick - vinfo.tick ) / 60
                         local ingredients
@@ -714,7 +713,7 @@ local function tick()
     if not settings.global["isTongBu"].value then
         local prototypes = game.item_prototypes
         for _, force in pairs(game.forces) do
-            if force.name ~= "enemy" and force.name ~= "neutral" then
+            if force.name ~= "enemy" and force.name ~= "neutral" and force.name ~= nil then
                 if global.tongbu_white_list[force.name] ~= nil then
                     for _, item in pairs(global.tongbu_white_list[force.name]) do
                         if game.item_prototypes[item.name] ~= nil and item.update_tick < game.tick then
@@ -759,7 +758,7 @@ end
 -- 游戏设置更改
 local function runtime_mod_setting_changed(event)
     for _, f in pairs(game.forces) do
-        if f.name ~= "enemy" and f.name ~= "neutral" then
+        if f.name ~= "enemy" and f.name ~= "neutral" and f.name ~= nil then
             if settings.global["virtual-lock"].value then
                 f.print("[technology=virtual]需要研究解锁")
             else
