@@ -14,6 +14,8 @@ local function unitformal(v)
         end
         v = v / 1000
     end
+    -- v保留三位小数
+    v = math.floor(v * 1000+0.5) / 1000
     return v, unit
 end
 
@@ -269,62 +271,124 @@ local function add_accumulator(event)
     table.insert(global.virtual_energy[force.name], entity)
 end
 
+-- 显示库存信息
+local function show_inventory_info(player, show_str, name, last_min, last_limit, recipes_count)
+    -- 打印机器上限，库存
+    local force = player.force
+    local limit = global.virtual_limit[force.name][name]
+    local count = get_force_item_count(force.name, name)
+    local fnum, unit = unitformal(count)
+    local limit_str = ""
+    if limit == nil then
+        limit_str = "无"
+    else
+        local fnum, unit = unitformal(limit)
+        limit_str = fnum..unit
+    end
+    local last_player = "(无)"
+    if global.virtual_limit_last_player[force.name][name] ~= nil then
+        last_player = global.virtual_limit_last_player[force.name][name]
+    end
+    limit_str = limit_str..last_player
+
+    -- 同样显示下限
+    local limit2 = global.min_limit[force.name][name]
+    local limit_str2 = ""
+    if limit2 == nil then
+        limit_str2 = "无"
+    else
+        local fnum, unit = unitformal(limit2)
+        limit_str2 = fnum..unit
+    end
+    local last_player2 = "(无)"
+    if global.min_limit_last_player[force.name][name] ~= nil then
+        last_player2 = global.min_limit_last_player[force.name][name]
+    end
+    limit_str2 = limit_str2..last_player2
+
+    if last_min ~= nil then
+        force.print("[technology=virtual]"..show_str.."上限:"..limit_str.." 下限:"..last_min.."->"..limit_str2.." 库存:"..fnum..unit)
+    elseif last_limit ~= nil then
+        force.print("[technology=virtual]"..show_str.."上限:"..last_limit.."->"..limit_str.." 下限:"..limit_str2.. " 库存:"..fnum..unit)
+    else
+        if recipes_count ~= nil then
+            force.print("[technology=virtual]"..show_str.."上限:"..limit_str.." 下限:"..limit_str2.." 库存:"..fnum..unit.." 产量不足导致"..recipes_count.."个配方无法全速生产")
+        else
+            player.print("[technology=virtual]"..show_str.."上限:"..limit_str.." 下限:"..limit_str2.." 库存:"..fnum..unit)
+        end
+    end
+
+end
+
 -- 设置限容
-local function setLimit(player, show_str, name_str, num, isMin)
+local function setLimit(player, show_str, name_str, num, isMin, isView)
     local last_status = ""
     local force = player.force
 
     local limit_table
-    local show_type
-    if isMin then
-        show_type = "下限:"
+    local last_player
+    local isLimit = false -- 是否为上限
+    if isView then
+        show_inventory_info(player, show_str, name_str)
+        return
+    elseif isMin then
         limit_table = global.min_limit[force.name]
+        last_player = global.min_limit_last_player[force.name][name_str]
+        isLimit = false
     else
-        show_type = "上限:"
         limit_table = global.virtual_limit[force.name]
+        last_player = global.virtual_limit_last_player[force.name][name_str]
+        isLimit = true
     end
+    
+    if last_player == nil then last_player = "(无)" end
 
     if limit_table[name_str] == nil then
-        last_status = "无"
+        last_status = "无"..last_player
     else
         local fnum, unit = unitformal(limit_table[name_str])
-        last_status = fnum..unit
+        last_status = fnum..unit..last_player
     end
 
-    
-    -- 库存
-    local storage = get_force_item_count(force.name, name_str)
-    if storage == nil then
-        storage = 0
-    end
-    local fnum2, unit2 = unitformal(storage)
-    local storage_str = "库存:"..fnum2..unit2
 
     local status = ""
     if num == nil then
-        player.print("[technology=virtual]"..show_str..show_type..last_status..","..storage_str)
-    elseif num > 0 then
+        status = "无"
+        if isMin then
+            global.min_limit_last_player[force.name][name_str] = "("..player.name..")"
+            global.min_limit[force.name][name_str] = nil
+        else
+            global.virtual_limit_last_player[force.name][name_str] = "("..player.name..")"
+            global.virtual_limit[force.name][name_str] = nil
+        end
+    elseif num >= 0 then
         local fnum, unit = unitformal(num)
         status = fnum..unit
         if isMin then
+            global.min_limit_last_player[force.name][name_str] = "("..player.name..")"
             global.min_limit[force.name][name_str] = num
         else
+            global.virtual_limit_last_player[force.name][name_str] = "("..player.name..")"
             global.virtual_limit[force.name][name_str] = num
         end
-        force.print("[technology=virtual]"..player.name.."修改"..show_str..show_type..last_status.."->"..status..","..storage_str)
     else
-        status = "无"
-        if isMin then
-            global.min_limit[force.name][name_str] = nil
-        else
-            global.virtual_limit[force.name][name_str] = nil
-        end
-        force.print("[technology=virtual]"..player.name.."修改"..show_str..show_type..last_status.."->"..status..","..storage_str)
+        return
+    end
+    if isLimit then -- 如果是上限
+        show_inventory_info(player, show_str, name_str, nil, last_status)
+    else
+        show_inventory_info(player, show_str, name_str, last_status, nil)
     end
 end
 
 -- 范围设置限容
-local function rangeSetLimit(player, start, target, num, isMin)
+--- @param player LuaPlayer
+--- @param start string
+--- @param target string
+--- @param num number
+--- @param isMin boolean
+--- @param isView boolean
+local function rangeSetLimit(player, start, target, num, isMin, isView)
     local prototypes = game.item_prototypes
     if prototypes[start] == nil then
         prototypes = game.fluid_prototypes
@@ -346,7 +410,7 @@ local function rangeSetLimit(player, start, target, num, isMin)
             local name_str = item.name
             local show_str = "["..item.type.."="..item.name.."]"
             
-            setLimit(player, show_str, name_str, num, isMin)
+            setLimit(player, show_str, name_str, num, isMin, isView)
         end
 
         if item.name == start then
@@ -363,13 +427,56 @@ local function split_string(input_str, sep)
     return t
 end
 
+-- 缺什么
+local function what_no_enough(player)
+    local force = player.force
+    local no_enough = global.no_enough[force.name]
+    if no_enough == nil then
+        force.print("啥都不缺，所有配方全速运行，完美o(*￣▽￣*)ブ")
+        return
+    end
+    local no_enough_list = {}
+    for name, recipes in pairs(no_enough) do
+        local count = 0
+        for _, recipe in pairs(recipes) do
+            count = count + 1
+        end
+        if count > 0 then
+            table.insert(no_enough_list, {name = name, recipes_count = count})
+        end
+    end
+    if #no_enough_list == 0 then
+        force.print("啥都不缺，所有配方全速运行，完美o(*￣▽￣*)ブ")
+        return
+    end
+
+    -- 按recipes_count排序
+    table.sort(no_enough_list, function(a, b)
+        return a.recipes_count < b.recipes_count
+    end)
+    for _, item in pairs(no_enough_list) do
+        local format_name = "[item="..item.name.."]"
+        if game.fluid_prototypes[item.name] ~= nil then
+            format_name = "[fluid="..item.name.."]"
+        end
+        show_inventory_info(player, format_name, item.name, nil, nil, item.recipes_count)
+    end
+end
+
 -- 设置同步白名单
 local function set_tongbu_white_list(event)
     local player = game.players[event.player_index]
     local force = player.force
 
     if string.find(event.message, "虚拟化") or string.find(event.message, "怎么玩") then
-        force.print("你是在问虚拟化怎么玩吗？偷偷告诉你:\n1、按下SHIFT+F框选，有配方的实体，转移到虚拟空间进行生产。\n2、按下SHIFT+F后按住SHIFT取消该配方的虚拟化。\n3、按下SHIFT+D后框选查看配方虚拟化信息\n4、[item=accumulator]为虚拟空间提供能源。\n5、聊天框输入上限(或下限)100[item=steel-chest]-[item=logistic-chest-requester]设置同页两个物品之间所有物品的限容。\n6、FNEI配方中点击物品文字标签打印库存和限容。\n7、当关联箱同步不可用时聊天框输入同步[item=logistic-chest-requester]将其添加到同步列表。\n8、聊天框输入取消同步[item=logistic-chest-requester]将其从同步列表移除。\n9、聊天框输入同步列表查看所用同步物品。")
+        force.print("你是在问虚拟化怎么玩吗？\n1、按下SHIFT+F框选有配方的实体，转移到虚拟空间进行生产，[item=accumulator]为提供电力。\n2、按下SHIFT+F后按住SHIFT取消该配方的虚拟化。\n3、按下SHIFT+D后框选查看配方虚拟化信息\n4、FNEI配方中点击物品文字标签打印库存和限容。\n5、FNEI配方中按住SHIFT点击物品文字标签将物品添加到快捷文本编辑框。\n6、聊天框输入查看命令获取命令说明。")
+        return true
+    elseif string.find(event.message, "查看命令") then
+        force.print("聊天框输入\n1、上限(下限)1000[item=burner-inserter]-[item=stack-filter-inserter]=>设置物品上限或下限\n2、查看[item=burner-inserter]-[item=stack-filter-inserter]=>查看上限，下限和库存\n3、同步(取消同步)[item=burner-inserter]=>在关联箱库存同步禁用时手动开启(关闭)\n4、同步列表=>查看所有手动开启的同步物品\n5、缺啥(缺什么)=>查看所有产量不足的物品")
+        return true
+    elseif string.find(event.message, "缺啥") or string.find(event.message, "缺什么") then
+        what_no_enough(player)
+        return true
     end
 
     if event.message == "同步列表" then
@@ -452,12 +559,13 @@ local function set_virtual_limit(event)
     local isRange = false   -- 是否范围显示
 
     local isMin = false
+    local isView = false    -- 是否查看
     if string.find(event.message, "下限") then
         isMin = true
     elseif string.find(event.message, "上限") then
         isMin = false
-    else
-        return
+    elseif string.find(event.message, "查看") then
+        isView = true
     end
 
     -- 解析
@@ -485,10 +593,10 @@ local function set_virtual_limit(event)
 
 
                     if isRange then
-                        rangeSetLimit(player, last_name, name_str, num, isMin)
+                        rangeSetLimit(player, last_name, name_str, num, isMin, isView)
                         isRange = false
                     end
-                    setLimit(player, show_str, name_str, num, isMin)
+                    setLimit(player, show_str, name_str, num, isMin, isView)
                 end
 
                 last_name = name_str
@@ -691,6 +799,14 @@ local function tick()
                                 end
                                 if curr_count < ingredient_amount * count then
                                     count = count * curr_count / (ingredient_amount * count)
+                                    if global.no_enough[force.name][ingredient_name] == nil then
+                                        global.no_enough[force.name][ingredient_name] = {}
+                                    end
+                                    global.no_enough[force.name][ingredient_name][recipe_name] = true
+                                else
+                                    if global.no_enough[force.name][ingredient_name] ~= nil then
+                                        global.no_enough[force.name][ingredient_name][recipe_name] = nil
+                                    end
                                 end
                             end 
                         end
@@ -772,12 +888,14 @@ end
 local function runtime_mod_setting_changed(event)
     for _, f in pairs(game.forces) do
         if f.name ~= "enemy" and f.name ~= "neutral" and f.name ~= nil then
-            if settings.global["virtual-lock"].value then
-                f.print("[technology=virtual]需要研究解锁")
-            else
-                f.print("[technology=virtual]不需要研究解锁")
+            if f.technologies['virtual'].enabled ~= settings.global["virtual-lock"].value then
+                if settings.global["virtual-lock"].value then
+                    f.print("[technology=virtual]需要研究解锁")
+                else
+                    f.print("[technology=virtual]不需要研究解锁")
+                end
+                f.technologies['virtual'].enabled = settings.global["virtual-lock"].value
             end
-            f.technologies['virtual'].enabled = settings.global["virtual-lock"].value
         end
     end
 end
@@ -835,35 +953,20 @@ local function gui_click(event)
             -- 光标移动到行首
             textfield_child.select(1, 0)
         end
+        return
     end
 
     local player = game.players[event.player_index]
 
-    -- 打印机器上限，库存
-    local force = player.force
-    local limit = global.virtual_limit[force.name][name]
-    local count = get_force_item_count(force.name, name)
-    local fnum, unit = unitformal(count)
-    local limit_str = ""
-    if limit == nil then
-        limit_str = "无"
-    else
-        local fnum, unit = unitformal(limit)
-        limit_str = fnum..unit
+    show_inventory_info(player, format_name, name)
+end
+
+-- 文本编辑框确认
+local function gui_confirmed(event)
+    if event.element.name == "format_name_textfield" then
+        local event2 = {message=event.element.text, player_index=event.player_index}
+        set_virtual_limit(event2)
     end
-
-    -- 同样显示下限
-    local limit2 = global.min_limit[force.name][name]
-    local limit_str2 = ""
-    if limit2 == nil then
-        limit_str2 = "无"
-    else
-        local fnum, unit = unitformal(limit2)
-        limit_str2 = fnum..unit
-    end
-
-
-    player.print("[technology=virtual]"..format_name.."上限:"..limit_str..",下限:"..limit_str2..",库存:"..fnum..unit)
 end
 
 script.on_init(runtime_mod_setting_changed)
@@ -876,3 +979,5 @@ Event.addListener(defines.events.on_robot_built_entity,add_accumulator)  -- 机�
 Event.addListener(defines.events.on_console_chat, set_virtual_limit) -- 设置虚拟制造限制
 Event.addListener(defines.events.on_tick, tick)
 Event.addListener(defines.events.on_gui_click, gui_click)
+-- 注册textfield确认事件
+Event.addListener(defines.events.on_gui_confirmed, gui_confirmed)

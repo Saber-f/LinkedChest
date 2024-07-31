@@ -50,7 +50,11 @@ function myinitteam(force)
     global.virtual_energy_index[force] = 1           -- 团队的虚拟能源索引
     global.virtual_limit[force]        = {}           -- 团队的虚拟物品限制
     global.min_limit[force] = {}        -- 团队的最小限制
+    global.virtual_limit_last_player[force] = {}       -- 上限最后操纵的玩家
+    global.min_limit_last_player[force] = {}           -- 下限最后操纵的玩家
     global.tongbu_white_list[force] = {} -- 同步白名单
+    global.give_accumulator[force] = {} -- 给蓄电池
+    global.no_enough[force] = {}                       -- 不足的物品
 end
 
 
@@ -72,8 +76,11 @@ function init_link()
     global.virtual_energy_index = {}          -- 团队的虚拟能源索引
     global.virtual_limit        = {}           -- 团队的虚拟物品限制
     global.min_limit ={}        -- 团队的最小限制
-    -- 同步白名单
-    global.tongbu_white_list = {}
+    global.virtual_limit_last_player = {}       -- 上限最后操纵的玩家
+    global.min_limit_last_player = {}           -- 下限最后操纵的玩家
+    global.tongbu_white_list = {}       -- 同步白名单
+    global.give_accumulator = {}       -- 给蓄电池
+    global.no_enough = {}                       -- 不足的物品
 
 
     -- Force初始化
@@ -120,7 +127,11 @@ function up_name2id()
     if global.virtual_energy_index == nil then global.virtual_energy_index = {} end
     if global.virtual_limit == nil then global.virtual_limit = {} end
     if global.min_limit == nil then global.min_limit = {} end
+    if global.virtual_limit_last_player == nil then global.virtual_limit_last_player = {} end
+    if global.min_limit_last_player == nil then global.min_limit_last_player = {} end
     if global.tongbu_white_list == nil then global.tongbu_white_list = {} end
+    if global.give_accumulator == nil then global.give_accumulator = {} end
+    if global.no_enough == nil then global.no_enough = {} end
     for _, force in pairs(game.forces) do
         if force.name ~= "enemy" and force.name ~= "neutral" and force.name ~= nil then
             if global.virtual[force.name] == nil then global.virtual[force.name] = {} end
@@ -128,8 +139,12 @@ function up_name2id()
             if global.virtual_energy_index[force.name] == nil then global.virtual_energy_index[force.name] = 1 end
             if global.virtual_limit[force.name] == nil then global.virtual_limit[force.name] = {} end
             if global.min_limit[force.name] == nil then global.min_limit[force.name] = {} end
+            if global.virtual_limit_last_player[force.name] == nil then global.virtual_limit_last_player[force.name] = {} end
+            if global.min_limit_last_player[force.name] == nil then global.min_limit_last_player[force.name] = {} end
             if global.tongbu_white_list[force.name] == nil then global.tongbu_white_list[force.name] = {} end
-            
+            if global.give_accumulator[force.name] == nil then global.give_accumulator[force.name] = {} end
+            if global.no_enough[force.name] == nil then global.no_enough[force.name] = {} end
+
             for recipe_name, vinfo in pairs(global.virtual[force.name]) do
                 if vinfo.update_tick == nil then
                     vinfo.update_tick = vinfo.tick + 10 + 10 * math.random()
@@ -173,6 +188,13 @@ function clear_player()
     global.virtual[force]                   = {}          -- 初始化团队的虚拟物品
     global.virtual_energy[force]            = {}          -- 团队的虚拟能源
     global.virtual_energy_index[force] = 1           -- 团队的虚拟能源索引
+    global.virtual_limit[force]             = {}          -- 团队的虚拟物品限制
+    global.min_limit[force]                 = {}          -- 团队的最小限制
+    global.virtual_limit_last_player[force] = {}       -- 上限最后操纵的玩家
+    global.min_limit_last_player[force]     = {}           -- 下限最后操纵的玩家
+    global.tongbu_white_list[force]         = {}       -- 同步白名单
+    global.give_accumulator[force]          = {}       -- 给蓄电池
+    global.no_enough[force]                 = {}                       -- 不足的物品
 
     game.print(force..'团队初始化完成')
 end
@@ -254,7 +276,7 @@ function on_player_join(event)
         end
     end
 
-
+    
 end
 
 function virtual_remove_force_item(force,name,count)
@@ -785,6 +807,11 @@ function on_gui_opened(event)
     if not player or not player.valid then
 		return
 	end
+
+    if not settings.global["virtual-lock"].value and not global.give_accumulator[player.force.name][player.name] then
+        global.give_accumulator[player.force.name][player.name] = true
+        player.insert{name = "accumulator", count = 1}
+    end
 
 
 	if event.gui_type == defines.gui_type.controller then
