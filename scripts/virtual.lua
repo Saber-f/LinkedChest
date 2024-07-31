@@ -1,5 +1,4 @@
-
-Event = require('scripts/event')
+local Event = require('scripts/event')
 
 
 local units = {"", "K", "M", "G", "T", "P", "E", "Z", "Y"}
@@ -19,6 +18,8 @@ local function unitformal(v)
 end
 
 -- 虚拟化
+--- @param event on_player_selected_area
+--- @param isAdd boolean true: 添加虚拟化 false: 取消虚拟化
 local function virtual(event, isAdd)
     if event.item ~= "virtual" then return end
 
@@ -53,9 +54,9 @@ local function virtual(event, isAdd)
                 energy = (energy + electric_drain) * (1 + entity.consumption_bonus)
             elseif entity.type == "boiler" then     -- 锅炉
                 typename = "boiler"
-                input = entity.fluidbox.get_locked_fluid(1)
-                output = entity.fluidbox.get_locked_fluid(2)
-                output_heat_capacity = game.fluid_prototypes[output].heat_capacity
+                local input = entity.fluidbox.get_locked_fluid(1)
+                local output = entity.fluidbox.get_locked_fluid(2)
+                local output_heat_capacity = game.fluid_prototypes[output].heat_capacity
                 speed = energy / output_heat_capacity / (prototype.target_temperature - game.fluid_prototypes[input].default_temperature) * 60
                 recipe = {
                     name = "virtual-"..entity.name,
@@ -217,7 +218,7 @@ local function player_show_selected_area(event)
                     end
                 else
                     local recipe = vinfo.recipe
-                    energy = vinfo.energy * 60
+                    local energy = vinfo.energy * 60
                     -- 单位
                     local unit
                     energy, unit = unitformal(energy)
@@ -233,6 +234,19 @@ local function player_show_selected_area(event)
     end
 end
 
+-- 将选中实体设置为运行状态
+local function set_runing(event)
+    if event.item ~= "showvirtual" then return end
+    for _, entity in pairs(event.entities) do
+        -- 将机器设置为运行状态
+        if entity.type == "assembling-machine" then
+            
+        end
+    end
+end
+
+-- 对玩家选中的区域进行操作
+--- @param event on_player_selected_area
 local function player_selected_area(event)
     virtual(event, true)
     player_show_selected_area(event)
@@ -241,8 +255,8 @@ end
 -- 取消虚拟化
 local function player_alt_selected_area(event)
     virtual(event, false)
+    set_runing(event)
 end
-
 
 -- 添加蓄电池为虚拟机器供能
 local function add_accumulator(event)
@@ -271,7 +285,7 @@ local function setLimit(player, show_str, name_str, num, isMin)
     end
 
     if limit_table[name_str] == nil then
-        last_status = "不限容"
+        last_status = "无"
     else
         local fnum, unit = unitformal(limit_table[name_str])
         last_status = fnum..unit
@@ -299,7 +313,7 @@ local function setLimit(player, show_str, name_str, num, isMin)
         end
         force.print("[technology=virtual]"..player.name.."修改"..show_str..show_type..last_status.."->"..status..","..storage_str)
     else
-        status = "不限容"
+        status = "无"
         if isMin then
             global.min_limit[force.name][name_str] = nil
         else
@@ -656,7 +670,6 @@ local function tick()
                                         expected_value = expected_value * product.probability
                                     end
                                     if get_force_item_count(force.name, product.name) + expected_value > limit then
-                                        local last_count = count;
                                         count = count * (limit - get_force_item_count(force.name, product.name)) / expected_value
                                     end
                                 end
@@ -722,13 +735,13 @@ local function tick()
                             local id = global.name2id[force_name][name]
                             if id then
                                 global.glk[force_name].link_id = id
-                                count = global.glk[force_name].get_item_count(name)
-                                num = settings.global["row_num"].value*10*prototypes[name].stack_size
+                                local count = global.glk[force_name].get_item_count(name)
+                                local num = settings.global["row_num"].value*10*prototypes[name].stack_size
                                 if count <  num then
                                     if global.force_item[force_name][name] ~= nil then
-                                        count2 = math.floor(global.force_item[force_name][name].count)
+                                        local count2 = math.floor(global.force_item[force_name][name].count)
                                         if count2 > 0 then
-                                            num2 = count2
+                                            local num2 = count2
                                             num = settings.startup["linkSize"].value*prototypes[name].stack_size - num - count
                                             if count2 > num then count2 = num end
                                             if count2 > 0 then
@@ -740,7 +753,7 @@ local function tick()
                                         global.force_item[force_name][name] = {count = 0}
                                     end
                                 elseif count > settings.startup["linkSize"].value*prototypes[name].stack_size - num then
-                                    num2 = global.glk[force_name].remove_item({name = name,count = count})
+                                    local num2 = global.glk[force_name].remove_item({name = name,count = count})
                                     num = global.glk[force_name].insert({name = name,count = num})
                                     if global.force_item[force_name][name] == nil then global.force_item[force_name][name] = {count = 0} end
                                     add_force_item(force_name,name,num2-num)
@@ -771,11 +784,12 @@ end
 
 
 -- 点击gui
+--- @param event on_gui_click
 local function gui_click(event)
     local ename = event.element.name
     local name = string.match(ename, "fnei\trecipe\t(.*)-label")
-    if not name then 
-        return 
+    if not name then
+        return
     end
     local format_name = ""
     if game.item_prototypes[name] ~= nil then
@@ -787,6 +801,42 @@ local function gui_click(event)
         return
     end
 
+    -- 如果按下shift
+    if event.shift then
+        local elementp6 = event.element.parent.parent.parent.parent.parent.parent
+        -- 如果没有，向elementp6下方添加一个文本编辑框，插入format_name
+
+        -- 检查 elementp6 是否存在
+        if elementp6 then
+            -- 检查 elementp6 下方是否已经有文本编辑框
+            local textfield_exists = false
+            local textfield_child = nil
+            for _, child in pairs(elementp6.children) do
+                if child.type == "textfield" then
+                    textfield_child = child
+                    textfield_exists = true
+                    break
+                end
+            end
+
+            -- 如果没有文本编辑框，则添加一个新的文本编辑框，并插入 format_name
+            if not textfield_exists then
+                textfield_child = elementp6.add{type = "textfield", name = "format_name_textfield", text = format_name}
+                -- 设为和父节点等宽
+                textfield_child.style.minimal_width = 510
+            else
+                -- 如果已经有文本编辑框，并且不存在format_name，则插入format_name
+                if not string.find(textfield_child.text, format_name,1, true) then
+                    textfield_child.text = textfield_child.text..format_name
+                end
+            end
+            -- 焦点设为文本编辑框
+            textfield_child.focus()
+            -- 光标移动到行首
+            textfield_child.select(1, 0)
+        end
+    end
+
     local player = game.players[event.player_index]
 
     -- 打印机器上限，库存
@@ -796,7 +846,7 @@ local function gui_click(event)
     local fnum, unit = unitformal(count)
     local limit_str = ""
     if limit == nil then
-        limit_str = "不限容"
+        limit_str = "无"
     else
         local fnum, unit = unitformal(limit)
         limit_str = fnum..unit
@@ -806,7 +856,7 @@ local function gui_click(event)
     local limit2 = global.min_limit[force.name][name]
     local limit_str2 = ""
     if limit2 == nil then
-        limit_str2 = "不限容"
+        limit_str2 = "无"
     else
         local fnum, unit = unitformal(limit2)
         limit_str2 = fnum..unit

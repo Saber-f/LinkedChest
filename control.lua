@@ -1,7 +1,7 @@
 -- 创建功能函数
 Util = require("scripts/util") util = Util
-Event = require('scripts/event')
-Grapple = require('scripts/grapple')
+local Event = require('scripts/event')
+local Grapple = require('scripts/grapple')
 require('scripts/virtual')
 
 -- 初始化团队的常驻关联箱
