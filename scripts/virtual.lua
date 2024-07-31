@@ -437,13 +437,13 @@ local function what_no_enough(player)
     end
     local no_enough_list = {}
     local recipes_map = {}
-    local recipes_count = 0
+    local no_recipes_count = 0
     for name, recipes in pairs(no_enough) do
         local count = 0
-        for _, recipe in pairs(recipes) do
-            if recipes_map[recipe] == nil then
-                recipes_map[recipe] = true
-                recipes_count = recipes_count + 1
+        for recipe_name in pairs(recipes) do
+            if recipes_map[recipe_name] == nil then
+                recipes_map[recipe_name] = true
+                no_recipes_count = no_recipes_count + 1
             end
             count = count + 1
         end
@@ -467,7 +467,7 @@ local function what_no_enough(player)
         end
         show_inventory_info(player, format_name, item.name, nil, nil, item.recipes_count)
     end
-    force.print("共有"..#no_enough_list.."种物品产量不足,导致"..recipes_count.."个配方无法全速生产")
+    force.print("共有"..#no_enough_list.."种物品产量不足,导致"..no_recipes_count.."个配方无法全速生产")
 end
 
 -- 设置同步白名单
