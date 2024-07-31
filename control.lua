@@ -924,7 +924,6 @@ function tongbu(event)
                 index = index % global.ITEM_COUNT
                 local name = global.NAME_TALBE[index]
                 local id = global.name2id[force_name][name]
-                game.print(id)
                 if id then
                     global.glk[force_name].link_id = id
                     count = global.glk[force_name].get_item_count(name)
