@@ -89,7 +89,9 @@ function init_link()
             myinitteam(f.name)
             global.glkn = global.glkn + 1
         end
-    end     
+    end   
+    
+    reresh_circulate_recipe()
 end
 
 
@@ -153,6 +155,8 @@ function up_name2id()
             end
         end
     end
+
+    reresh_circulate_recipe()
 end
 
 -- 清除player
@@ -1349,7 +1353,6 @@ remote.add_interface(
 -- 注册事件
 script.on_init(init_link)
 script.on_configuration_changed(up_name2id)
-
 Event.addListener(defines.events.on_game_created_from_scenario,init_link)
 Event.addListener(defines.events.on_force_created,on_force_creat)
 Event.addListener(defines.events.on_player_joined_game,on_player_join)

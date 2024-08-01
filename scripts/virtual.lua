@@ -26,23 +26,23 @@ local function get_cycle_description(force, des)
     local recipe_name = des:gsub("%[recipe=", "")
     des = ""
     if global.circulate_recipe[recipe_name] ~= nil then
-        des = "循环依赖:"
+        des = " 循环依赖:"
         local ingredients = game.recipe_prototypes[recipe_name].ingredients
-        for ingredient_name in pairs(ingredients) do
-            if global.circulate_recipe[recipe_name][ingredient_name] ~= nil then
-                local format_name = des.."[item="..ingredient_name.."]"
-                if game.fluid_prototypes[ingredient_name] ~= nil then
-                    format_name = des.."[fluid="..ingredient_name.."]"
+        for _,ingredient in pairs(ingredients) do
+            if global.circulate_recipe[recipe_name][ingredient.name] ~= nil then
+                local format_name = "[item="..ingredient.name.."]"
+                if game.fluid_prototypes[ingredient.name] ~= nil then
+                    format_name = "[fluid="..ingredient.name.."]"
                 end
-                des = des..format_name
-                local min_limit = global.min_limit[force.name][ingredient_name]
+                des = string.format("%s%s", des, format_name)
+                local min_limit = global.min_limit[force.name][ingredient.name]
                 if min_limit ~= nil then
                     local fnum, unit = unitformal(min_limit)
-                    des = des.."下限:"..fnum..unit
+                    des = string.format("%s%s", des, "(下限:"..fnum..unit)
                     fnum, unit = unitformal(min_limit/2)
-                    des = des.."->"..fnum..unit
+                    des = string.format("%s%s)", des, "->"..fnum..unit)
                 else
-                    des = des.."下限:无"
+                    des = string.format("%s%s", des, "(下限:无)")
                 end
             end
         end
@@ -934,28 +934,29 @@ local function expand_product(reicpe1, recipe2)
         for product in pairs(recipe2.products) do
             if product == ingredient then
                 for product2 in pairs(reicpe1.products) do
-                    recipe2.ingredients[product2] = true
+                    if not recipe2.products[product2] then
+                        recipe2.products[product2] = true
+                    end
+                    
                 end
                 is_expand = true
                 break
             end
-            if is_expand then
-                break
-            end
+        end
+        if is_expand then
+            break
         end
     end
 end
 
 -- 更新循环配方
-local function reresh_circulate_recipe()
-    game.print("[technology=virtual]更新循环配方")
+function reresh_circulate_recipe()
     -- 扩充原料配方
     local expand_products_recipes = {}
     local N = 0
     for reicpe_name,reicpe in pairs(game.recipe_prototypes) do
         if #reicpe.ingredients > 0 and #reicpe.products > 0 then
             N = N + 1
-            game.print(N.."开始扩充:[recipe="..reicpe_name.."]")
             local new_recipe = {
                 ingredients = {},
                 products = {},
@@ -968,8 +969,8 @@ local function reresh_circulate_recipe()
             end
             -- 扩充产物
             for _,expand_recipe in pairs(expand_products_recipes) do
-                expand_product(expand_recipe, new_recipe)
                 expand_product(new_recipe, expand_recipe)
+                expand_product(expand_recipe, new_recipe)
             end
             expand_products_recipes[reicpe_name] = new_recipe
         end
@@ -998,7 +999,6 @@ end
 
 -- 游戏设置更改
 local function runtime_mod_setting_changed(event)
-    reresh_circulate_recipe()
     for _, f in pairs(game.forces) do
         if f.name ~= "enemy" and f.name ~= "neutral" and f.name ~= nil then
             if f.technologies['virtual'].enabled ~= settings.global["virtual-lock"].value then
@@ -1080,8 +1080,6 @@ local function gui_confirmed(event)
         set_virtual_limit(event2)
     end
 end
-
-script.on_init(runtime_mod_setting_changed)
 Event.addListener(defines.events.on_game_created_from_scenario,runtime_mod_setting_changed)
 Event.addListener(defines.events.on_runtime_mod_setting_changed, runtime_mod_setting_changed)
 Event.addListener(defines.events.on_player_selected_area, player_selected_area)     -- 玩家选择区域(虚拟化)
