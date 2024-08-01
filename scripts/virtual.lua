@@ -23,7 +23,7 @@ end
 --- @param force LuaForce
 --- @param des string
 local function get_cycle_description(force, des)
-    local recipe_name = des:gsub("[recipe=", "")
+    local recipe_name = des:gsub("%[recipe=", "")
     des = ""
     if global.circulate_recipe[recipe_name] ~= nil then
         des = "循环依赖:"
@@ -948,36 +948,47 @@ end
 
 -- 更新循环配方
 local function reresh_circulate_recipe()
+    game.print("[technology=virtual]更新循环配方")
     -- 扩充原料配方
     local expand_products_recipes = {}
+    local N = 0
     for reicpe_name,reicpe in pairs(game.recipe_prototypes) do
-        local new_recipe = {
-            ingredients = {},
-            products = {},
-        }
-        for _,ingredient in pairs(reicpe.ingredients) do
-            new_recipe.ingredients[ingredient.name] = true
+        if #reicpe.ingredients > 0 and #reicpe.products > 0 then
+            N = N + 1
+            game.print(N.."开始扩充:[recipe="..reicpe_name.."]")
+            local new_recipe = {
+                ingredients = {},
+                products = {},
+            }
+            for _,ingredient in pairs(reicpe.ingredients) do
+                new_recipe.ingredients[ingredient.name] = true
+            end
+            for _,product in pairs(reicpe.products) do
+                new_recipe.products[product.name] = true
+            end
+            -- 扩充产物
+            for _,expand_recipe in pairs(expand_products_recipes) do
+                expand_product(expand_recipe, new_recipe)
+                expand_product(new_recipe, expand_recipe)
+            end
+            expand_products_recipes[reicpe_name] = new_recipe
         end
-        for _,product in pairs(reicpe.products) do
-            new_recipe.products[product.name] = true
-        end
-        -- 扩充产物
-        for _,expand_recipe in pairs(expand_products_recipes) do
-            expand_product(expand_recipe, new_recipe)
-            expand_product(new_recipe, expand_recipe)
-        end
-        expand_products_recipes[reicpe_name] = new_recipe
     end
 
     -- 检测依赖
     global.circulate_recipe = {}
-    for reicpe_name,reicpe in pairs(game.recipe_prototypes) do
+    for reicpe_name,reicpe in pairs(expand_products_recipes) do
         for ingredient in pairs(reicpe.ingredients) do
             if reicpe.products[ingredient] then
                 if global.circulate_recipe[reicpe_name] == nil then
                     global.circulate_recipe[reicpe_name] = {}
                 end
                 global.circulate_recipe[reicpe_name][ingredient] = true -- 添加循环依赖材料
+                local format_ingredient = "[item="..ingredient.."]"
+                if game.fluid_prototypes[ingredient] ~= nil then
+                    format_ingredient = "[fluid="..ingredient.."]"
+                end
+                game.print("[technology=virtual]".."[recipe="..reicpe_name.."]循环依赖"..format_ingredient)
             end
         end
     end
