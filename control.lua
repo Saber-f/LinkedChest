@@ -81,7 +81,7 @@ function init_link()
     global.tongbu_white_list = {}       -- 同步白名单
     global.give_accumulator = {}       -- 给蓄电池
     global.no_enough = {}                       -- 不足的物品
-
+    global.circulate_recipe = {}            -- 循环配方
 
     -- Force初始化
     for _, f in pairs(game.forces) do
@@ -132,6 +132,7 @@ function up_name2id()
     if global.tongbu_white_list == nil then global.tongbu_white_list = {} end
     if global.give_accumulator == nil then global.give_accumulator = {} end
     if global.no_enough == nil then global.no_enough = {} end
+    if global.circulate_recipe == nil then global.circulate_recipe = {} end
     for _, force in pairs(game.forces) do
         if force.name ~= "enemy" and force.name ~= "neutral" and force.name ~= nil then
             if global.virtual[force.name] == nil then global.virtual[force.name] = {} end
