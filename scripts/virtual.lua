@@ -329,7 +329,7 @@ local function add_accumulator(event)
 end
 
 -- 显示库存信息
-local function show_inventory_info(player, show_str, name, last_min, last_limit, recipes_count)
+local function show_inventory_info(player, show_str, name, last_min, last_limit, recipes_info)
     -- 打印机器上限，库存
     local force = player.force
     local limit = global.virtual_limit[force.name][name]
@@ -368,8 +368,12 @@ local function show_inventory_info(player, show_str, name, last_min, last_limit,
     elseif last_limit ~= nil then
         force.print("[technology=virtual]"..show_str.."上限:"..last_limit.."->"..limit_str.." 下限:"..limit_str2.. " 库存:"..fnum..unit)
     else
-        if recipes_count ~= nil then
-            force.print("[technology=virtual]"..show_str.."上限:"..limit_str.." 下限:"..limit_str2.." 库存:"..fnum..unit.." 产量不足导致"..recipes_count.."个配方无法全速生产")
+        if recipes_info ~= nil then
+            local recipe_list = ""
+            if recipes_info.is_show_recipe then
+                recipe_list = recipes_info.recipe_list
+            end
+            force.print(recipes_info.index.."、"..show_str.."上限:"..limit_str.." 下限:"..limit_str2.." 库存:"..fnum..unit.." 产量不足,影响"..recipes_info.count.."个配方"..recipe_list)
         else
             player.print("[technology=virtual]"..show_str.."上限:"..limit_str.." 下限:"..limit_str2.." 库存:"..fnum..unit)
         end
@@ -485,9 +489,10 @@ local function split_string(input_str, sep)
 end
 
 -- 缺什么
-local function what_no_enough(player)
+local function what_no_enough(player, is_show_recipe)
     local force = player.force
     local no_enough = global.no_enough[force.name]
+    local fvirtual = global.virtual[force.name]
     if no_enough == nil then
         force.print("啥都不缺，所有配方全速生产，完美o(*￣▽￣*)ブ")
         return
@@ -497,15 +502,19 @@ local function what_no_enough(player)
     local no_recipes_count = 0
     for name, recipes in pairs(no_enough) do
         local count = 0
+        local recipe_list = {}
         for recipe_name in pairs(recipes) do
-            if recipes_map[recipe_name] == nil then
-                recipes_map[recipe_name] = true
-                no_recipes_count = no_recipes_count + 1
+            if fvirtual[recipe_name] then
+                if recipes_map[recipe_name] == nil then
+                    recipes_map[recipe_name] = true
+                    no_recipes_count = no_recipes_count + 1
+                end
+                table.insert(recipe_list, recipe_name)
+                count = count + 1
             end
-            count = count + 1
         end
         if count > 0 then
-            table.insert(no_enough_list, {name = name, recipes_count = count})
+            table.insert(no_enough_list, {name = name, recipes_count = count, recipe_list = recipe_list})
         end
     end
     if #no_enough_list == 0 then
@@ -517,14 +526,19 @@ local function what_no_enough(player)
     table.sort(no_enough_list, function(a, b)
         return a.recipes_count < b.recipes_count
     end)
-    for _, item in pairs(no_enough_list) do
+    for i, item in pairs(no_enough_list) do
         local format_name = "[item="..item.name.."]"
         if game.fluid_prototypes[item.name] ~= nil then
             format_name = "[fluid="..item.name.."]"
         end
-        show_inventory_info(player, format_name, item.name, nil, nil, item.recipes_count)
+        local show_str = ""
+        for _, recipe_name in pairs(item.recipe_list) do
+            show_str = show_str.."[recipe="..recipe_name.."]"
+        end
+        local recipes_info = {count = item.recipes_count, recipe_list = show_str, index = i, is_show_recipe = is_show_recipe}
+        show_inventory_info(player, format_name, item.name, nil, nil, recipes_info)
     end
-    force.print("共有"..#no_enough_list.."种物品产量不足,导致"..no_recipes_count.."个配方无法全速生产")
+    force.print("[technology=virtual]共有"..#no_enough_list.."种物品产量不足,导致"..no_recipes_count.."个配方无法全速生产")
 end
 
 -- 设置同步白名单
@@ -539,7 +553,11 @@ local function set_tongbu_white_list(event)
         force.print("聊天框输入\n1、上限(下限)1000[item=burner-inserter]-[item=stack-filter-inserter]=>设置物品上限或下限(循环依赖，原料的下限减半，产品上限翻倍)\n2、查看[item=burner-inserter]-[item=stack-filter-inserter]=>查看上限，下限和库存\n3、同步(取消同步)[item=burner-inserter]=>在关联箱库存同步禁用时手动开启(关闭)\n4、同步列表=>查看所有手动开启的同步物品\n5、缺啥(缺什么)=>查看所有产量不足的物品")
         return true
     elseif string.find(event.message, "缺啥") or string.find(event.message, "缺什么") then
-        what_no_enough(player)
+        local is_show_recipe = false
+        if string.find(event.message, "配方") then
+            is_show_recipe = true
+        end
+        what_no_enough(player, is_show_recipe)
         return true
     end
 
@@ -828,6 +846,43 @@ local function tick()
                             count = count / vinfo.recipe.energy
                         end
 
+                        if count > 0 then
+                            -- 根据原料数量调整生产数量
+                            local new_count = count
+                            for _, ingredient in pairs(ingredients) do
+                                local ingredient_name = ingredient.name
+                                local ingredient_amount = ingredient.amount
+                                local min_limit = 0
+                                if global.min_limit[force.name][ingredient_name] ~= nil then
+                                    min_limit = global.min_limit[force.name][ingredient_name]
+                                end
+                                if global.circulate_recipe.ingredient[recipe_name] ~= nil then
+                                    if global.circulate_recipe.ingredient[recipe_name][ingredient_name] then
+                                        min_limit = min_limit / 2
+                                    end
+                                end
+                                local curr_count = get_force_item_count(force.name, ingredient_name) - min_limit
+                                if curr_count < 0 then
+                                    curr_count = 0
+                                end
+                                if curr_count < ingredient_amount * count then
+                                    local new_value = curr_count / ingredient_amount
+                                    if new_value < new_count then
+                                        new_count = new_value
+                                    end
+                                    if global.no_enough[force.name][ingredient_name] == nil then
+                                        global.no_enough[force.name][ingredient_name] = {}
+                                    end
+                                    global.no_enough[force.name][ingredient_name][recipe_name] = true
+                                else
+                                    if global.no_enough[force.name][ingredient_name] ~= nil then
+                                        global.no_enough[force.name][ingredient_name][recipe_name] = nil
+                                    end
+                                end
+                            end
+                            count = new_count
+                        end
+
                         -- 检测限容
                         if recipe_name ~= "virtual-lab" then
                             for _, product in pairs(products) do
@@ -856,37 +911,6 @@ local function tick()
                             end
                         end
 
-                        if count > 0 then
-                            -- 根据原料数量调整生产数量
-                            for _, ingredient in pairs(ingredients) do
-                                local ingredient_name = ingredient.name
-                                local ingredient_amount = ingredient.amount
-                                local min_limit = 0
-                                if global.min_limit[force.name][ingredient_name] ~= nil then
-                                    min_limit = global.min_limit[force.name][ingredient_name]
-                                end
-                                if global.circulate_recipe.ingredient[recipe_name] ~= nil then
-                                    if global.circulate_recipe.ingredient[recipe_name][ingredient_name] then
-                                        min_limit = min_limit / 2
-                                    end
-                                end
-                                local curr_count = get_force_item_count(force.name, ingredient_name) - min_limit
-                                if curr_count < 0 then
-                                    curr_count = 0
-                                end
-                                if curr_count < ingredient_amount * count then
-                                    count = count * curr_count / (ingredient_amount * count)
-                                    if global.no_enough[force.name][ingredient_name] == nil then
-                                        global.no_enough[force.name][ingredient_name] = {}
-                                    end
-                                    global.no_enough[force.name][ingredient_name][recipe_name] = true
-                                else
-                                    if global.no_enough[force.name][ingredient_name] ~= nil then
-                                        global.no_enough[force.name][ingredient_name][recipe_name] = nil
-                                    end
-                                end
-                            end 
-                        end
 
                         if count > 0 then
                             -- 根据能源消耗调整生产数量
