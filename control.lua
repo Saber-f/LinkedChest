@@ -81,7 +81,7 @@ function init_link()
     global.tongbu_white_list = {}       -- 同步白名单
     global.give_accumulator = {}       -- 给蓄电池
     global.no_enough = {}                       -- 不足的物品
-    global.circulate_recipe = {}            -- 循环配方
+    global.circulate_recipe = {ingredient = {}, product = {}}            -- 循环配方
 
     -- Force初始化
     for _, f in pairs(game.forces) do
@@ -91,7 +91,7 @@ function init_link()
         end
     end   
     
-    reresh_circulate_recipe()
+    -- reresh_circulate_recipe()
 end
 
 
@@ -134,7 +134,7 @@ function up_name2id()
     if global.tongbu_white_list == nil then global.tongbu_white_list = {} end
     if global.give_accumulator == nil then global.give_accumulator = {} end
     if global.no_enough == nil then global.no_enough = {} end
-    if global.circulate_recipe == nil then global.circulate_recipe = {} end
+    if global.circulate_recipe == nil then global.circulate_recipe = {ingredient = {}, product = {}} end
     for _, force in pairs(game.forces) do
         if force.name ~= "enemy" and force.name ~= "neutral" and force.name ~= nil then
             if global.virtual[force.name] == nil then global.virtual[force.name] = {} end
@@ -156,7 +156,7 @@ function up_name2id()
         end
     end
 
-    reresh_circulate_recipe()
+    -- reresh_circulate_recipe()
 end
 
 -- 清除player
@@ -268,7 +268,10 @@ function on_player_join(event)
         item_count = item_count + 1
     end
     global.ITEM_COUNT = item_count    -- 初始化物品总数量
-    player.print("物品总数量:"..item_count)
+    player.print("物品总数:"..item_count.."流体总数:"..(#game.fluid_prototypes))
+    player.print(global.circulate_recipe.des)
+    player.print(global.circulate_recipe.max_path)
+    player.print("虚拟化说明::\n1、按下SHIFT+F框选有配方的实体，转移到虚拟空间进行生产，[item=accumulator]提供电力。\n2、按下SHIFT+F后按住SHIFT取消该配方的虚拟化。\n3、按下ALT+F后框选查看配方虚拟化信息\n4、FNEI配方中点击物品文字标签打印库存和限容。\n5、FNEI配方中按住SHIFT点击物品文字标签将物品添加到快捷文本编辑框。\n6、聊天框输入查看命令获取命令说明。")
 
     if global.CURR_INDEX == nil then global.CURR_INDEX = 0 end
 
@@ -783,6 +786,7 @@ end
 --GUI筛选按钮 变动时事件触发
 -- 关闭gui
 function on_gui_closed(event)
+    reresh_circulate_recipe()
     local player = game.get_player(event.player_index)
     if not player or not player.valid then
 		return
@@ -887,9 +891,11 @@ end
 
 -- 同步数据
 function tongbu(event)
-    -- for _, player in pairs(game.players) do
-    --     fill_request_items(player)
-    -- end
+    if game.tick % settings.global["update-frequency"].value == 0 then
+        for _, player in pairs(game.connected_players) do
+            fill_request_items(player)
+        end
+    end
 
     -- 狗爪
     if global.tick_tasks then
@@ -915,7 +921,7 @@ function tongbu(event)
     if not settings.global["isTongBu"].value then return end
 
     local tick = game.tick
-    if tick % settings.global["update-frequency"].value == 3 then
+    if tick % settings.global["update-frequency"].value == 1 then
         for force_name in pairs(game.forces) do
             if force_name ~= "enemy" and force_name ~= "neutral" and force_name ~= nil then
                 -- 同步关联库存输出

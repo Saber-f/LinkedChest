@@ -16,7 +16,7 @@ data:extend({
         name = "update-frequency",
         setting_type = "runtime-global",
         default_value = 60,
-        minimum_value = 30,
+        minimum_value = 3,
         maximum_value = 360000
     },
     {

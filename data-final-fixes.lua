@@ -718,7 +718,7 @@ data:extend
         type = "custom-input",
         name = "showvirtual",
         localised_name = "select-units",
-        key_sequence = "SHIFT + D",
+        key_sequence = "ALT + F",
         consuming = "game-only",
         item_to_spawn = "showvirtual",
         action = "spawn-item"
