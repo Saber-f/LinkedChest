@@ -91,7 +91,7 @@ function init_link()
         end
     end   
     
-    -- reresh_circulate_recipe()
+    reresh_circulate_recipe()
 end
 
 
@@ -156,7 +156,7 @@ function up_name2id()
         end
     end
 
-    -- reresh_circulate_recipe()
+    reresh_circulate_recipe()
 end
 
 -- 清除player
@@ -268,7 +268,7 @@ function on_player_join(event)
         item_count = item_count + 1
     end
     global.ITEM_COUNT = item_count    -- 初始化物品总数量
-    player.print("物品总数:"..item_count.."流体总数:"..(#game.fluid_prototypes))
+    player.print("物品总数:"..item_count.."流体总数:"..(#game.fluid_prototypes).."配方总数:"..(#game.recipe_prototypes))
     player.print(global.circulate_recipe.des)
     player.print(global.circulate_recipe.max_path)
     player.print("虚拟化说明::\n1、按下SHIFT+F框选有配方的实体，转移到虚拟空间进行生产，[item=accumulator]提供电力。\n2、按下SHIFT+F后按住SHIFT取消该配方的虚拟化。\n3、按下ALT+F后框选查看配方虚拟化信息\n4、FNEI配方中点击物品文字标签打印库存和限容。\n5、FNEI配方中按住SHIFT点击物品文字标签将物品添加到快捷文本编辑框。\n6、聊天框输入查看命令获取命令说明。")
@@ -786,7 +786,7 @@ end
 --GUI筛选按钮 变动时事件触发
 -- 关闭gui
 function on_gui_closed(event)
-    reresh_circulate_recipe()
+    -- reresh_circulate_recipe()
     local player = game.get_player(event.player_index)
     if not player or not player.valid then
 		return

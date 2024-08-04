@@ -1036,14 +1036,12 @@ local function find_circulate_recipe(nodes)
                     local des = "最长循环:"..get_format_name(current);
                     local path_length = 0
                     local is_record = false
-                    local path_key = ""
                     while path[current] do
-                        path_key = path_key..current
                         path_length = path_length + 1
                         des = des.."->"..get_format_name(path[current])
                         cirulate_path[current] = path[current]
                         local last = current
-                        visited[last][current] = nil -- 释放
+                        -- visited[last][current] = nil -- 释放
 
                         current = path[current]
 
@@ -1097,7 +1095,7 @@ local function find_circulate_recipe(nodes)
             end
         end
     end
-    global.circulate_recipe.des = global.circulate_recipe.blacklist.."共有"..#result.."个循环,最长的循环长度为:"..max_path
+    global.circulate_recipe.des = global.circulate_recipe.blacklist.."\n共有"..#result.."个循环,最长的循环长度为:"..max_path
     game.print(global.circulate_recipe.des)
     return result
 end
