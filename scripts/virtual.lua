@@ -265,7 +265,7 @@ local function reresh_circulate_recipe(force)
 
     for reicpe_name,vinfo in pairs(global.virtual[force.name]) do
         local reicpe = vinfo.recipe
-        if reicpe.ingredients and reicpe.products and #reicpe.ingredients > 0 and #reicpe.products > 0 then
+        if reicpe and reicpe.ingredients and reicpe.products and #reicpe.ingredients > 0 and #reicpe.products > 0 then
             for _,product in pairs(reicpe.products) do
                 if not black_list[product.name] then  -- 排除空桶
                     if nodes[product.name] == nil then
@@ -381,14 +381,14 @@ local function virtual(event, isAdd)
                     end
                     if isAdd then
                         global.virtual[force.name][recipe.name] = vinfo
+                        force.print("新配方虚拟化，重新计算循环依赖")
+                        reresh_circulate_recipe(force)
                     else
                         vinfo.count = 0
                         vinfo.speed = 0
                         vinfo.productivity_bonus = 0
                         vinfo.energy = 0
                     end
-                    force.print("新配方虚拟化，重新计算循环依赖")
-                    reresh_circulate_recipe(force)
                 else
                     vinfo = global.virtual[force.name][recipe.name]
 
@@ -905,7 +905,9 @@ local function set_tongbu_white_list(event)
             -- log("[fluid="..fluid_name.."]")
         end
     end
-    reresh_circulate_recipe(force)
+    if is_black then
+        reresh_circulate_recipe(force)
+    end
     return true
 end
 
@@ -1127,7 +1129,7 @@ local function tick()
         if force.name ~= "enemy" and force.name ~= "neutral" and force.name ~= nil then
             if global.virtual[force.name] ~= nil then
                 for recipe_name, vinfo in pairs(global.virtual[force.name]) do
-                    if game.tick > vinfo.update_tick then
+                    if vinfo.recipe and game.tick > vinfo.update_tick then
                         local products = vinfo.recipe.products
                         local count = vinfo.speed * (game.tick - vinfo.tick ) / 60
                         local ingredients
