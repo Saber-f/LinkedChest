@@ -451,8 +451,10 @@ end
 --- @param isView boolean
 local function rangeSetLimit(player, start, target, num, isMin, isView)
     local prototypes = game.item_prototypes
+    local item_fluid = "item"
     if prototypes[start] == nil then
         prototypes = game.fluid_prototypes
+        item_fluid = "fluid"
     end
     if prototypes[start] == nil or prototypes[target] == nil then
         return
@@ -469,7 +471,7 @@ local function rangeSetLimit(player, start, target, num, isMin, isView)
 
         if isStart then
             local name_str = item.name
-            local show_str = "["..item.type.."="..item.name.."]"
+            local show_str = "["..item_fluid.."="..item.name.."]"
             
             setLimit(player, show_str, name_str, num, isMin, isView)
         end
@@ -1233,6 +1235,14 @@ end
 --- @param event on_gui_click
 local function gui_click(event)
     local ename = event.element.name
+    local etype = event.element.type
+
+
+    if ename == "fnei\trecipe\tselected-recipe" and etype == "choose-elem-button" then
+        game.print(event.element.elem_value)
+    end
+
+
     local name = string.match(ename, "fnei\trecipe\t(.*)-label")
     if not name then
         return
