@@ -76,6 +76,183 @@ local function get_cycle_description(force, des)
     return des
 end
 
+-- 获取本地名称
+local function get_format_name(name)
+    local format_name = ""
+    if game.item_prototypes[name] ~= nil then
+        format_name = "[item="..name.."]"
+    elseif game.fluid_prototypes[name] ~= nil then
+        format_name = "[fluid="..name.."]"
+    end
+    return format_name
+end
+
+
+-- 打印路径
+local function print_path(path, head)
+    local des = ""
+    local current = head
+    local record = {}
+    while path[current] do
+        des = des..get_format_name(current).."->"
+        if record[current] then
+            break
+        end
+        record[current] = true
+        current = path[current]
+    end
+    des = des..get_format_name(current)
+    return des
+
+end
+
+-- 寻找有向图中的所有环
+local function find_circulate_recipe(nodes, force)
+    local visited = {}
+    local result = {}
+    local max_path = 0
+    local N = 0
+    global.circulate_recipe[force.name].ingredient = {}
+    global.circulate_recipe[force.name].product = {}
+    global.circulate_recipe[force.name].des = ""
+    global.circulate_recipe[force.name].max_path = ""
+    for node, _ in pairs(nodes) do
+        if visited[node] == nil then
+            visited[node] = {}
+            local path = {}
+            local current = node
+            local head = node      -- 路径头
+            -- game.print(N.."当前路径1:"..print_path(path, head)); N = N + 1
+            while true do
+                local is_next = false
+                for next, _ in pairs(nodes[current]) do
+                    -- 没有走过
+                    if visited[current][next] == nil and nodes[next] then
+                        visited[current][next] = true   -- 标记走过
+                        path[current] = next        -- 记录路径
+                        current = next           -- 移动到下一个节点
+                        -- game.print(N.."当前路径2:"..print_path(path, head)); N = N + 1
+                        -- 如果没有访问过，初始化
+                        if visited[current] == nil then
+                            visited[current] = {}
+                        end
+                        is_next = true
+                        break
+                    end
+                end
+
+                if not is_next then
+                    path[current] = nil
+                end
+
+                local is_circuleate = false
+                if path[current] ~= nil then        -- 找到循环
+                    local cirulate_path = {}
+                    local des = "最长循环:"..get_format_name(current);
+                    local path_length = 0
+                    local is_record = false
+                    while path[current] do
+                        path_length = path_length + 1
+                        des = des.."->"..get_format_name(path[current])
+                        cirulate_path[current] = path[current]
+                        local last = current
+                        -- visited[last][current] = nil -- 释放
+
+                        current = path[current]
+
+                        local repices = nodes[last][current]  -- [product][ingredient] = {recipe1, recipe2}
+                        for _, recipe in pairs(repices) do
+                            if global.circulate_recipe[force.name].ingredient[recipe] == nil then
+                                global.circulate_recipe[force.name].ingredient[recipe] = {}
+                            end
+                            global.circulate_recipe[force.name].ingredient[recipe][current] = true
+
+                            if global.circulate_recipe[force.name].product[recipe] == nil then
+                                global.circulate_recipe[force.name].product[recipe] = {}
+                            end
+                            global.circulate_recipe[force.name].product[recipe][last] = true
+                            -- if recipe == "caged-cottongut-1" then
+                            --     is_record = true
+                            --     N = N + 1
+                            --     des = "\n"..N..des
+                            -- end
+                        end
+
+                        path[last] = nil
+                    end
+                    table.insert(result, cirulate_path) -- 记录循环路径
+                    if (path_length > max_path) and (is_record or true) then
+                        max_path = path_length
+                        -- global.circulate_recipe[force.name].max_path = global.circulate_recipe[force.name].max_path..des
+                    end
+                    -- game.print(des)
+
+                    is_circuleate = true
+                end
+
+
+                -- 退回到上一个节点
+                if (not is_next) or is_circuleate then
+                    current = nil
+                    local last = head
+                    while path[last] do
+                        current = last
+                        last = path[last]
+                        -- game.print(N.."当前路径3:"..get_format_name(current)); N = N + 1
+                    end
+                end
+
+
+                -- node作为起点已经无路可走
+                if (current == nil) then
+                    break
+                end
+            end
+        end
+    end
+    global.circulate_recipe[force.name].des = global.circulate_recipe[force.name].blacklist.."\n共有"..#result.."个循环,最长的循环长度为:"..max_path
+    game.print(global.circulate_recipe[force.name].des)
+    return result
+end
+    
+
+-- 更新循环配方
+local function reresh_circulate_recipe(force)
+    -- 区分配方V,E 原版225,595 PY3602,43128
+    -- 不区分配方V,E 原版217,591(依赖) PY3602,27587 => 3594,27587(产出) => 3525,2490(依赖)
+    local nodes = {}
+    local V = 0
+    local E = 0
+
+    -- 循环排除
+    local black_list = {}
+
+    for reicpe_name,reicpe in pairs(game.recipe_prototypes) do
+        if #reicpe.ingredients > 0 and #reicpe.products > 0 then
+            for _,product in pairs(reicpe.products) do
+                if not black_list[product.name] then  -- 排除空桶
+                    if nodes[product.name] == nil then
+                        V = V + 1
+                        nodes[product.name] = {}
+                    end
+                    for _,ingredient in pairs(reicpe.ingredients) do
+                        if not black_list[ingredient.name] then
+                            if nodes[product.name][ingredient.name] == nil then
+                                E = E + 1
+                                nodes[product.name][ingredient.name] = {}
+                            end
+                            table.insert(nodes[product.name][ingredient.name], reicpe_name)
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    log("V:"..V.." E:"..E)
+    find_circulate_recipe(nodes, force)
+end
+
 -- 虚拟化
 --- @param event on_player_selected_area
 --- @param isAdd boolean true: 添加虚拟化 false: 取消虚拟化
@@ -144,7 +321,7 @@ local function virtual(event, isAdd)
                 local last_speed = 0
                 local last_productivity_bonus = 0
                 local last_energy = 0
-                if global.virtual[force.name][recipe.name] == nil then
+                if global.virtual[force.name][recipe.name] == nil or global.virtual[force.name][recipe.name].recipe == nil then
                     vinfo = {
                         typename = typename,
                         -- 机器数量
@@ -173,6 +350,7 @@ local function virtual(event, isAdd)
                         vinfo.productivity_bonus = 0
                         vinfo.energy = 0
                     end
+                    reresh_circulate_recipe(force)
                 else
                     vinfo = global.virtual[force.name][recipe.name]
 
@@ -191,11 +369,15 @@ local function virtual(event, isAdd)
                         vinfo.speed = vinfo.speed * vinfo.count / last_count
                         vinfo.energy = vinfo.energy * vinfo.count / last_count
                         if vinfo.count == 0 then
-                            global.virtual[force.name][recipe.name] = nil
+                            reresh_circulate_recipe(force)
+                            global.virtual[force.name][recipe.name] = {last_player = player.name}
                             vinfo.productivity_bonus = 0
                         end
                     end
                 end
+                vinfo.last_player = vinfo.current_player
+                vinfo.current_player = player.name
+
                 energy = vinfo.energy * 60
                 last_energy = last_energy * 60
                 -- 单位
@@ -222,6 +404,7 @@ local function virtual(event, isAdd)
                         energy = energy..unit
                     }
                 else
+                    record[recipe.name].last_player = vinfo.last_player or "无"
                     record[recipe.name].count = vinfo.count
                     record[recipe.name].speed = vinfo.speed
                     record[recipe.name].productivity_bonus = productivity_bonus
@@ -238,8 +421,28 @@ local function virtual(event, isAdd)
     end
     
     for _, v in pairs(record) do
+        local player_str = v.last_player.."->"..player.name
         local sub_str = "]机器数量:"..v.last_count.."->"..v.count.." 总速度:"..(math.floor(v.last_speed*1000+0.5)/1000).."->"..(math.floor(v.speed*1000+0.5)/1000).." 平均产能:"..v.last_productivity_bonus.."->"..v.productivity_bonus.." 总能耗:"..v.last_energy.."->"..v.energy
-        force.print("[technology=virtual]"..player.name..v.des..sub_str..get_cycle_description(force, v.des))
+        force.print("[technology=virtual]"..player_str..v.des..sub_str..get_cycle_description(force, v.des))
+    end
+end
+
+-- 获取配方信息
+local function get_recipe_info(player, key)
+    local force = player.force
+    local vinfo = global.virtual[force.name][key]
+    local player_str = (vinfo.last_player or "无").."->"..(vinfo.current_player or "无")
+    if vinfo == nil or vinfo.recipe == nil then
+        return player_str.."[recipe="..key.."]未虚拟化"
+    else
+        local recipe = vinfo.recipe
+        local energy = vinfo.energy * 60
+        -- 单位
+        local unit
+        energy, unit = unitformal(energy)
+        local productivity_bonus = math.floor(vinfo.productivity_bonus * 100 + 0.5) / 100
+        local sub_str = "]机器数量:"..vinfo.count.." 总速度:"..(math.floor(vinfo.speed*1000+0.5)/1000).." 平均产能:"..productivity_bonus.." 总能耗:"..energy..unit.."W"
+        return player_str..vinfo.recipe.des..sub_str..get_cycle_description(force, vinfo.recipe.des)
     end
 end
 
@@ -277,13 +480,7 @@ local function player_show_selected_area(event)
                     end
                 else
                     local recipe = vinfo.recipe
-                    local energy = vinfo.energy * 60
-                    -- 单位
-                    local unit
-                    energy, unit = unitformal(energy)
-                    local productivity_bonus = math.floor(vinfo.productivity_bonus * 100 + 0.5) / 100
-                    local sub_str = "]机器数量:"..vinfo.count.." 总速度:"..(math.floor(vinfo.speed*1000+0.5)/1000).." 平均产能:"..productivity_bonus.." 总能耗:"..energy..unit.."W"
-                    record[recipe.name] = vinfo.recipe.des..sub_str..get_cycle_description(force, vinfo.recipe.des)
+                    record[recipe.name] = get_recipe_info(player, key)
                 end
             end
         end
@@ -293,16 +490,6 @@ local function player_show_selected_area(event)
     end
 end
 
--- 将选中实体设置为运行状态
-local function set_runing(event)
-    if event.item ~= "showvirtual" then return end
-    for _, entity in pairs(event.entities) do
-        -- 将机器设置为运行状态
-        if entity.type == "assembling-machine" then
-            
-        end
-    end
-end
 
 -- 对玩家选中的区域进行操作
 --- @param event on_player_selected_area
@@ -314,7 +501,6 @@ end
 -- 取消虚拟化
 local function player_alt_selected_area(event)
     virtual(event, false)
-    set_runing(event)
 end
 
 -- 添加蓄电池为虚拟机器供能
@@ -549,18 +735,23 @@ local function what_no_enough(player, is_show_recipe)
     force.print("[technology=virtual]共有"..#no_enough_list.."种物品产量不足,导致"..no_recipes_count.."个配方无法全速生产")
 end
 
+local ming_ling_shuo_ming = "聊天框输入:\n1、上限(下限)1000[item=burner-inserter]-[item=stack-filter-inserter]=>设置物品上限或下限(循环依赖，原料的下限减半，产品上限翻倍)\n2、查看[item=burner-inserter]-[item=stack-filter-inserter]=>查看上限，下限和库存\n3、同步(取消同步)[item=burner-inserter]=>在关联箱库存同步禁用时手动开启(关闭)\n4、同步列表=>查看所有手动开启的同步物品\n5、怎么玩(虚拟化)=>查看说明\6、缺啥(缺什么)=>查看所有产量不足的物品"
 -- 设置同步白名单
 local function set_tongbu_white_list(event)
     local player = game.players[event.player_index]
     local force = player.force
 
     if string.find(event.message, "虚拟化") or string.find(event.message, "怎么玩") then
-        force.print("你是在问虚拟化怎么玩吗？\n1、按下SHIFT+F框选有配方的实体，转移到虚拟空间进行生产，[item=accumulator]提供电力。\n2、按下SHIFT+F后按住SHIFT取消该配方的虚拟化。\n3、按下ALT+F后框选查看配方虚拟化信息\n4、FNEI配方中点击物品文字标签打印库存和限容。\n5、FNEI配方中按住SHIFT点击物品文字标签将物品添加到快捷文本编辑框。\n6、聊天框输入查看命令获取命令说明。")
+        force.print("你是在问虚拟化怎么玩吗？\n1、按下SHIFT+F框选有配方的实体，转移到虚拟空间进行生产，[item=accumulator]提供电力。\n2、按下SHIFT+F后按住SHIFT取消该配方的虚拟化。\n3、按下ALT+F后框选查看配方虚拟化信息\n4、FNEI配方中点击物品文字标签打印库存和限容。\n5、FNEI配方中按住SHIFT点击物品文字标签将物品添加到快捷文本编辑框。\n6、FNEI配方中点击配方图标查看配方虚拟化信息。\n7、获取命令说明,聊天框输入:查看命令")
         return true
-    elseif string.find(event.message, "查看命令") then
-        force.print("聊天框输入\n1、上限(下限)1000[item=burner-inserter]-[item=stack-filter-inserter]=>设置物品上限或下限(循环依赖，原料的下限减半，产品上限翻倍)\n2、查看[item=burner-inserter]-[item=stack-filter-inserter]=>查看上限，下限和库存\n3、同步(取消同步)[item=burner-inserter]=>在关联箱库存同步禁用时手动开启(关闭)\n4、同步列表=>查看所有手动开启的同步物品\n5、缺啥(缺什么)=>查看所有产量不足的物品")
+    elseif event.message == "已读不再提醒" then
+        global.no_tip[player.name] = true
+        player.print("提示已关闭")
         return true
-    elseif string.find(event.message, "缺啥") or string.find(event.message, "缺什么") then
+    elseif event.message == "查看命令" then
+        force.print(ming_ling_shuo_ming)
+        return true
+    elseif event.message == "缺啥" or event.message == "缺什么" then
         local is_show_recipe = true
         if string.find(event.message, "配方") then
             is_show_recipe = true
@@ -831,6 +1022,16 @@ local function do_the_deed(force, vinfo, ingredients, count)
 end
 
 local function tick()
+    if game.tick % 300 == 0 then
+        for _, player in pairs(game.connected_players) do
+            if not global.no_tip[player.name] then
+                player.print(ming_ling_shuo_ming)
+                player.print("关闭提示,聊天框输入:已读不再提醒")
+            end
+        end
+    end
+
+
     for _, force in pairs(game.forces) do
         if force.name ~= "enemy" and force.name ~= "neutral" and force.name ~= nil then
             if global.virtual[force.name] ~= nil then
@@ -995,226 +1196,6 @@ local function tick()
     end
 end
 
--- 获取本地名称
-local function get_format_name(name)
-    local format_name = ""
-    if game.item_prototypes[name] ~= nil then
-        format_name = "[item="..name.."]"
-    elseif game.fluid_prototypes[name] ~= nil then
-        format_name = "[fluid="..name.."]"
-    end
-    return format_name
-end
-
-
--- 打印路径
-local function print_path(path, head)
-    local des = ""
-    local current = head
-    local record = {}
-    while path[current] do
-        des = des..get_format_name(current).."->"
-        if record[current] then
-            break
-        end
-        record[current] = true
-        current = path[current]
-    end
-    des = des..get_format_name(current)
-    return des
-
-end
-
--- 寻找有向图中的所有环
-local function find_circulate_recipe(nodes)
-    local visited = {}
-    local result = {}
-    local max_path = 0
-    local N = 0
-    global.circulate_recipe.ingredient = {}
-    global.circulate_recipe.product = {}
-    global.circulate_recipe.des = ""
-    global.circulate_recipe.max_path = ""
-    for node, _ in pairs(nodes) do
-        if visited[node] == nil then
-            visited[node] = {}
-            local path = {}
-            local current = node
-            local head = node      -- 路径头
-            -- game.print(N.."当前路径1:"..print_path(path, head)); N = N + 1
-            while true do
-                local is_next = false
-                for next, _ in pairs(nodes[current]) do
-                    -- 没有走过
-                    if visited[current][next] == nil and nodes[next] then
-                        visited[current][next] = true   -- 标记走过
-                        path[current] = next        -- 记录路径
-                        current = next           -- 移动到下一个节点
-                        -- game.print(N.."当前路径2:"..print_path(path, head)); N = N + 1
-                        -- 如果没有访问过，初始化
-                        if visited[current] == nil then
-                            visited[current] = {}
-                        end
-                        is_next = true
-                        break
-                    end
-                end
-
-                if not is_next then
-                    path[current] = nil
-                end
-
-                local is_circuleate = false
-                if path[current] ~= nil then        -- 找到循环
-                    local cirulate_path = {}
-                    local des = "最长循环:"..get_format_name(current);
-                    local path_length = 0
-                    local is_record = false
-                    while path[current] do
-                        path_length = path_length + 1
-                        des = des.."->"..get_format_name(path[current])
-                        cirulate_path[current] = path[current]
-                        local last = current
-                        -- visited[last][current] = nil -- 释放
-
-                        current = path[current]
-
-                        local repices = nodes[last][current]  -- [product][ingredient] = {recipe1, recipe2}
-                        for _, recipe in pairs(repices) do
-                            if global.circulate_recipe.ingredient[recipe] == nil then
-                                global.circulate_recipe.ingredient[recipe] = {}
-                            end
-                            global.circulate_recipe.ingredient[recipe][current] = true
-
-                            if global.circulate_recipe.product[recipe] == nil then
-                                global.circulate_recipe.product[recipe] = {}
-                            end
-                            global.circulate_recipe.product[recipe][last] = true
-                            -- if recipe == "caged-cottongut-1" then
-                            --     is_record = true
-                            --     N = N + 1
-                            --     des = "\n"..N..des
-                            -- end
-                        end
-
-                        path[last] = nil
-                    end
-                    table.insert(result, cirulate_path) -- 记录循环路径
-                    if (path_length > max_path) and (is_record or true) then
-                        max_path = path_length
-                        -- global.circulate_recipe.max_path = global.circulate_recipe.max_path..des
-                    end
-                    -- game.print(des)
-
-                    is_circuleate = true
-                end
-
-
-                -- 退回到上一个节点
-                if (not is_next) or is_circuleate then
-                    current = nil
-                    local last = head
-                    while path[last] do
-                        current = last
-                        last = path[last]
-                        -- game.print(N.."当前路径3:"..get_format_name(current)); N = N + 1
-                    end
-                end
-
-
-                -- node作为起点已经无路可走
-                if (current == nil) then
-                    break
-                end
-            end
-        end
-    end
-    global.circulate_recipe.des = global.circulate_recipe.blacklist.."\n共有"..#result.."个循环,最长的循环长度为:"..max_path
-    game.print(global.circulate_recipe.des)
-    return result
-end
-    
-
--- 更新循环配方
-function reresh_circulate_recipe()
-    -- 区分配方V,E 原版225,595 PY3602,43128
-    -- 不区分配方V,E 原版217,591(依赖) PY3602,27587 => 3594,27587(产出) => 3525,2490(依赖)
-    local nodes = {}
-    local V = 0
-    local E = 0
-
-    -- 通用物品自动排除
-    local count_record = {} -- 出现次数记录
-    local item_count = 0;
-    local sum_value = 0;
-    for reicpe_name,reicpe in pairs(game.recipe_prototypes) do
-        if #reicpe.ingredients > 0 and #reicpe.products > 0 then
-            for _,product in pairs(reicpe.products) do
-                sum_value = sum_value + 1
-                if count_record[product.name] == nil then
-                    count_record[product.name] = 1
-                    item_count = item_count + 1
-                else
-                    count_record[product.name] = count_record[product.name] + 1
-                end
-            end
-            for _,ingredient in pairs(reicpe.ingredients) do
-                sum_value = sum_value + 1
-                if count_record[ingredient.name] == nil then
-                    count_record[ingredient.name] = 1
-                    item_count = item_count + 1
-                else
-                    count_record[ingredient.name] = count_record[ingredient.name] + 1
-                end
-            end
-        end
-    end
-    local average = sum_value / item_count
-    local black_list = {}
-    local black_sort = {}
-    global.circulate_recipe.blacklist = ""
-    for name, count in pairs(count_record) do
-        if count/average > 40 then
-            black_list[name] = true
-            table.insert(black_sort, {name = name, value = count/average})
-        end
-    end
-    table.sort(black_sort, function(a, b)
-        return a.value > b.value
-    end)
-    for _, item in pairs(black_sort) do
-        global.circulate_recipe.blacklist = global.circulate_recipe.blacklist..get_format_name(item.name)..(math.floor(item.value*100)/100)
-    end
-    if global.circulate_recipe.blacklist ~= "" then
-        global.circulate_recipe.blacklist = "排除:"..global.circulate_recipe.blacklist
-    end
-
-    for reicpe_name,reicpe in pairs(game.recipe_prototypes) do
-        if #reicpe.ingredients > 0 and #reicpe.products > 0 then
-            for _,product in pairs(reicpe.products) do
-                if not black_list[product.name] then  -- 排除空桶
-                    if nodes[product.name] == nil then
-                        V = V + 1
-                        nodes[product.name] = {}
-                    end
-                    for _,ingredient in pairs(reicpe.ingredients) do
-                        if not black_list[ingredient.name] then
-                            if nodes[product.name][ingredient.name] == nil then
-                                E = E + 1
-                                nodes[product.name][ingredient.name] = {}
-                            end
-                            table.insert(nodes[product.name][ingredient.name], reicpe_name)
-                        end
-                    end
-                end
-            end
-        end
-    end
-
-    log("V:"..V.." E:"..E)
-    find_circulate_recipe(nodes)
-end
-
 -- 游戏设置更改
 local function runtime_mod_setting_changed(event)
     for _, f in pairs(game.forces) do
@@ -1237,9 +1218,14 @@ local function gui_click(event)
     local ename = event.element.name
     local etype = event.element.type
 
+    
+    local player = game.players[event.player_index]
 
+    -- 点击配方图标打印配方信息
     if ename == "fnei\trecipe\tselected-recipe" and etype == "choose-elem-button" then
-        game.print(event.element.elem_value)
+        local recipe_name = event.element.elem_value
+        local des = get_recipe_info(player, recipe_name)
+        player.print("[technology=virtual]"..des)
     end
 
 
@@ -1293,8 +1279,6 @@ local function gui_click(event)
         end
         return
     end
-
-    local player = game.players[event.player_index]
 
     show_inventory_info(player, format_name, name)
 end

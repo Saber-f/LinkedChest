@@ -57,7 +57,20 @@ function myinitteam(force)
     global.no_enough[force] = {}                       -- 不足的物品
 end
 
-
+local virtual_key = {
+    "virtual",                  -- 团队的虚拟物品
+    "virtual_energy",           -- 团队的虚拟能源
+    "virtual_energy_index",     -- 团队的虚拟能源索引
+    "virtual_limit",            -- 团队的虚拟物品限制
+    "min_limit",                -- 团队的最小限制
+    "virtual_limit_last_player",    -- 上限最后操纵的玩家
+    "min_limit_last_player",        -- 下限最后操纵的玩家
+    "tongbu_white_list",            -- 同步白名单
+    "give_accumulator",             -- 供电蓄电池
+    "no_enough",                    -- 不足的物品
+    "circulate_recipe",             -- 循环配方
+    "no_tip",                       -- 不提示
+}
 -- 游戏初始化
 function init_link()
     global.players_Linked = {}          -- 玩家的关联箱筛选
@@ -71,17 +84,9 @@ function init_link()
 	global.translation = {}
     global.randomId = {}                -- 随机linkiId
     
-    global.virtual              = {}                 -- 团队的虚拟物品
-    global.virtual_energy       = {}          -- 团队的虚拟能源
-    global.virtual_energy_index = {}          -- 团队的虚拟能源索引
-    global.virtual_limit        = {}           -- 团队的虚拟物品限制
-    global.min_limit ={}        -- 团队的最小限制
-    global.virtual_limit_last_player = {}       -- 上限最后操纵的玩家
-    global.min_limit_last_player = {}           -- 下限最后操纵的玩家
-    global.tongbu_white_list = {}       -- 同步白名单
-    global.give_accumulator = {}       -- 给蓄电池
-    global.no_enough = {}                       -- 不足的物品
-    global.circulate_recipe = {ingredient = {}, product = {}}            -- 循环配方
+    for _, key in pairs(virtual_key) do
+        global[key] = {}
+    end
 
     -- Force初始化
     for _, f in pairs(game.forces) do
@@ -90,8 +95,6 @@ function init_link()
             global.glkn = global.glkn + 1
         end
     end   
-    
-    reresh_circulate_recipe()
 end
 
 
@@ -124,29 +127,14 @@ function up_name2id()
         end
     end
 
-    if global.virtual == nil then global.virtual = {} end
-    if global.virtual_energy == nil then global.virtual_energy = {} end
-    if global.virtual_energy_index == nil then global.virtual_energy_index = {} end
-    if global.virtual_limit == nil then global.virtual_limit = {} end
-    if global.min_limit == nil then global.min_limit = {} end
-    if global.virtual_limit_last_player == nil then global.virtual_limit_last_player = {} end
-    if global.min_limit_last_player == nil then global.min_limit_last_player = {} end
-    if global.tongbu_white_list == nil then global.tongbu_white_list = {} end
-    if global.give_accumulator == nil then global.give_accumulator = {} end
-    if global.no_enough == nil then global.no_enough = {} end
-    if global.circulate_recipe == nil then global.circulate_recipe = {ingredient = {}, product = {}} end
+    for _, key in pairs(virtual_key) do
+        if global[key] == nil then global[key] = {} end
+    end
     for _, force in pairs(game.forces) do
         if force.name ~= "enemy" and force.name ~= "neutral" and force.name ~= nil then
-            if global.virtual[force.name] == nil then global.virtual[force.name] = {} end
-            if global.virtual_energy[force.name] == nil then global.virtual_energy[force.name] = {} end
-            if global.virtual_energy_index[force.name] == nil then global.virtual_energy_index[force.name] = 1 end
-            if global.virtual_limit[force.name] == nil then global.virtual_limit[force.name] = {} end
-            if global.min_limit[force.name] == nil then global.min_limit[force.name] = {} end
-            if global.virtual_limit_last_player[force.name] == nil then global.virtual_limit_last_player[force.name] = {} end
-            if global.min_limit_last_player[force.name] == nil then global.min_limit_last_player[force.name] = {} end
-            if global.tongbu_white_list[force.name] == nil then global.tongbu_white_list[force.name] = {} end
-            if global.give_accumulator[force.name] == nil then global.give_accumulator[force.name] = {} end
-            if global.no_enough[force.name] == nil then global.no_enough[force.name] = {} end
+            for _, key in pairs(virtual_key) do
+                if global[key][force.name] == nil then global[key][force.name] = {} end
+            end
 
             for recipe_name, vinfo in pairs(global.virtual[force.name]) do
                 if vinfo.update_tick == nil then
@@ -155,8 +143,6 @@ function up_name2id()
             end
         end
     end
-
-    reresh_circulate_recipe()
 end
 
 -- 清除player
@@ -190,16 +176,10 @@ function clear_player()
     global.name2id[force]                   = {}          -- 初始化团队的name->id
     global.TC[force]                        = {}          -- 初始化团队常量预算器
     global.Ti[force]                        = 0           -- 初始化团队的常量计算器id
-    global.virtual[force]                   = {}          -- 初始化团队的虚拟物品
-    global.virtual_energy[force]            = {}          -- 团队的虚拟能源
-    global.virtual_energy_index[force] = 1           -- 团队的虚拟能源索引
-    global.virtual_limit[force]             = {}          -- 团队的虚拟物品限制
-    global.min_limit[force]                 = {}          -- 团队的最小限制
-    global.virtual_limit_last_player[force] = {}       -- 上限最后操纵的玩家
-    global.min_limit_last_player[force]     = {}           -- 下限最后操纵的玩家
-    global.tongbu_white_list[force]         = {}       -- 同步白名单
-    global.give_accumulator[force]          = {}       -- 给蓄电池
-    global.no_enough[force]                 = {}                       -- 不足的物品
+
+    for _, key in pairs(virtual_key) do
+        global[key][force] = {}
+    end
 
     game.print(force..'团队初始化完成')
 end
@@ -269,10 +249,7 @@ function on_player_join(event)
     end
     global.ITEM_COUNT = item_count    -- 初始化物品总数量
     player.print("物品总数:"..item_count.."流体总数:"..(#game.fluid_prototypes).."配方总数:"..(#game.recipe_prototypes))
-    player.print(global.circulate_recipe.des)
-    player.print(global.circulate_recipe.max_path)
-    player.print("虚拟化说明::\n1、按下SHIFT+F框选有配方的实体，转移到虚拟空间进行生产，[item=accumulator]提供电力。\n2、按下SHIFT+F后按住SHIFT取消该配方的虚拟化。\n3、按下ALT+F后框选查看配方虚拟化信息\n4、FNEI配方中点击物品文字标签打印库存和限容。\n5、FNEI配方中按住SHIFT点击物品文字标签将物品添加到快捷文本编辑框。\n6、聊天框输入查看命令获取命令说明。")
-
+    global.no_tip[player.name] = nil
     if global.CURR_INDEX == nil then global.CURR_INDEX = 0 end
 
     if global.NAME_TALBE == nil then
@@ -786,7 +763,6 @@ end
 --GUI筛选按钮 变动时事件触发
 -- 关闭gui
 function on_gui_closed(event)
-    -- reresh_circulate_recipe()
     local player = game.get_player(event.player_index)
     if not player or not player.valid then
 		return
