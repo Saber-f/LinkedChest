@@ -131,12 +131,20 @@ function up_name2id()
     end
 
     for _, key in pairs(virtual_key) do
-        if global[key] == nil then global[key] = {} end
+        if global[key] == nil or key == "circulate_recipe" then
+            log("重置全局变量"..key)
+            global[key] = {}
+        end
     end
     for _, force in pairs(game.forces) do
         if force.name ~= "enemy" and force.name ~= "neutral" and force.name ~= nil then
             for _, key in pairs(virtual_key) do
-                if global[key][force.name] == nil then global[key][force.name] = {} end
+                if global[key][force.name] == nil then
+                    global[key][force.name] = {}
+                    if key == "circulate_recipe" then
+                        global[key][force.name] = {ingredient={},product={}}
+                    end
+                end
             end
 
             for recipe_name, vinfo in pairs(global.virtual[force.name]) do
