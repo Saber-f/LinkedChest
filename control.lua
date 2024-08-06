@@ -93,6 +93,9 @@ function init_link()
         if f.name ~= "enemy" and f.name ~= "neutral" and f.name ~= nil then
             myinitteam(f.name)
             global.glkn = global.glkn + 1
+            for _, key in pairs(virtual_key) do
+                global[key][f.name] = {}
+            end
         end
     end   
 end

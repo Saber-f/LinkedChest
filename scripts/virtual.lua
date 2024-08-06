@@ -25,13 +25,13 @@ end
 local function get_cycle_description(force, des)
     local recipe_name = des:gsub("%[recipe=", "")
     des = ""
-    if global.circulate_recipe.ingredient[recipe_name] ~= nil or global.circulate_recipe.product[recipe_name] ~= nil then
+    if global.circulate_recipe[force.name].ingredient[recipe_name] ~= nil or global.circulate_recipe[force.name].product[recipe_name] ~= nil then
         des = "\n循环依赖:"
-        if global.circulate_recipe.ingredient[recipe_name] ~= nil then
+        if global.circulate_recipe[force.name].ingredient[recipe_name] ~= nil then
             des = des.."原料:"
             local ingredients = game.recipe_prototypes[recipe_name].ingredients
             for _,ingredient in pairs(ingredients) do
-                if global.circulate_recipe.ingredient[recipe_name][ingredient.name] ~= nil then
+                if global.circulate_recipe[force.name].ingredient[recipe_name][ingredient.name] ~= nil then
                     local format_name = "[item="..ingredient.name.."]"
                     if game.fluid_prototypes[ingredient.name] ~= nil then
                         format_name = "[fluid="..ingredient.name.."]"
@@ -50,11 +50,11 @@ local function get_cycle_description(force, des)
             end
         end
 
-        if global.circulate_recipe.product[recipe_name] ~= nil then
+        if global.circulate_recipe[force.name].product[recipe_name] ~= nil then
             des = des.." 产物:"
             local products = game.recipe_prototypes[recipe_name].products
             for _,product in pairs(products) do
-                if global.circulate_recipe.product[recipe_name][product.name] ~= nil then
+                if global.circulate_recipe[force.name].product[recipe_name][product.name] ~= nil then
                     local format_name = "[item="..product.name.."]"
                     if game.fluid_prototypes[product.name] ~= nil then
                         format_name = "[fluid="..product.name.."]"
@@ -226,9 +226,12 @@ local function reresh_circulate_recipe(force)
 
     -- 循环排除
     local black_list = {}
+    black_list["ash"] = true
+    black_list["empty-barrel"] = true
+    black_list["cage"] = true
 
     for reicpe_name,reicpe in pairs(game.recipe_prototypes) do
-        if #reicpe.ingredients > 0 and #reicpe.products > 0 then
+        if reicpe.ingredients and reicpe.products and #reicpe.ingredients > 0 and #reicpe.products > 0 then
             for _,product in pairs(reicpe.products) do
                 if not black_list[product.name] then  -- 排除空桶
                     if nodes[product.name] == nil then
@@ -250,6 +253,10 @@ local function reresh_circulate_recipe(force)
     end
 
     log("V:"..V.." E:"..E)
+    global.circulate_recipe[force.name].blacklist = "排除:"
+    for name, _ in pairs(black_list) do
+        global.circulate_recipe[force.name].blacklist = global.circulate_recipe[force.name].blacklist..get_format_name(name)
+    end
     find_circulate_recipe(nodes, force)
 end
 
@@ -350,6 +357,7 @@ local function virtual(event, isAdd)
                         vinfo.productivity_bonus = 0
                         vinfo.energy = 0
                     end
+                    force.print("新配方虚拟化，重新计算循环依赖")
                     reresh_circulate_recipe(force)
                 else
                     vinfo = global.virtual[force.name][recipe.name]
@@ -369,6 +377,7 @@ local function virtual(event, isAdd)
                         vinfo.speed = vinfo.speed * vinfo.count / last_count
                         vinfo.energy = vinfo.energy * vinfo.count / last_count
                         if vinfo.count == 0 then
+                            force.print("删除配方虚拟化，重新计算循环依赖")
                             reresh_circulate_recipe(force)
                             global.virtual[force.name][recipe.name] = {last_player = player.name}
                             vinfo.productivity_bonus = 0
@@ -404,12 +413,12 @@ local function virtual(event, isAdd)
                         energy = energy..unit
                     }
                 else
-                    record[recipe.name].last_player = vinfo.last_player or "无"
                     record[recipe.name].count = vinfo.count
                     record[recipe.name].speed = vinfo.speed
                     record[recipe.name].productivity_bonus = productivity_bonus
                     record[recipe.name].energy = energy..unit
                 end
+                record[recipe.name].last_player = vinfo.last_player or "无"
 
                 -- 创建一个爆炸
                 if isAdd then
@@ -431,7 +440,10 @@ end
 local function get_recipe_info(player, key)
     local force = player.force
     local vinfo = global.virtual[force.name][key]
-    local player_str = (vinfo.last_player or "无").."->"..(vinfo.current_player or "无")
+    local player_str = ""
+    if vinfo then 
+        player_str = (vinfo.last_player or "无").."->"..(vinfo.current_player or "无")
+    end
     if vinfo == nil or vinfo.recipe == nil then
         return player_str.."[recipe="..key.."]未虚拟化"
     else
@@ -735,6 +747,7 @@ local function what_no_enough(player, is_show_recipe)
     force.print("[technology=virtual]共有"..#no_enough_list.."种物品产量不足,导致"..no_recipes_count.."个配方无法全速生产")
 end
 
+local wan_fa_shuo_ming = "1、按下SHIFT+F框选有配方的实体，转移到虚拟空间进行生产，[item=accumulator]提供电力。\n2、按下SHIFT+F后按住SHIFT取消该配方的虚拟化。\n3、按下ALT+F后框选查看配方虚拟化信息\n4、FNEI配方中点击物品文字标签打印库存和限容。\n5、FNEI配方中按住SHIFT点击物品文字标签将物品添加到快捷文本编辑框。\n6、FNEI配方中点击配方图标查看配方虚拟化信息。\n7、获取命令说明,聊天框输入:查看命令"
 local ming_ling_shuo_ming = "聊天框输入:\n1、上限(下限)1000[item=burner-inserter]-[item=stack-filter-inserter]=>设置物品上限或下限(循环依赖，原料的下限减半，产品上限翻倍)\n2、查看[item=burner-inserter]-[item=stack-filter-inserter]=>查看上限，下限和库存\n3、同步(取消同步)[item=burner-inserter]=>在关联箱库存同步禁用时手动开启(关闭)\n4、同步列表=>查看所有手动开启的同步物品\n5、怎么玩(虚拟化)=>查看说明\6、缺啥(缺什么)=>查看所有产量不足的物品"
 -- 设置同步白名单
 local function set_tongbu_white_list(event)
@@ -742,7 +755,7 @@ local function set_tongbu_white_list(event)
     local force = player.force
 
     if string.find(event.message, "虚拟化") or string.find(event.message, "怎么玩") then
-        force.print("你是在问虚拟化怎么玩吗？\n1、按下SHIFT+F框选有配方的实体，转移到虚拟空间进行生产，[item=accumulator]提供电力。\n2、按下SHIFT+F后按住SHIFT取消该配方的虚拟化。\n3、按下ALT+F后框选查看配方虚拟化信息\n4、FNEI配方中点击物品文字标签打印库存和限容。\n5、FNEI配方中按住SHIFT点击物品文字标签将物品添加到快捷文本编辑框。\n6、FNEI配方中点击配方图标查看配方虚拟化信息。\n7、获取命令说明,聊天框输入:查看命令")
+        force.print("你是在问虚拟化怎么玩吗？\n"..wan_fa_shuo_ming)
         return true
     elseif event.message == "已读不再提醒" then
         global.no_tip[player.name] = true
@@ -1025,7 +1038,7 @@ local function tick()
     if game.tick % 300 == 0 then
         for _, player in pairs(game.connected_players) do
             if not global.no_tip[player.name] then
-                player.print(ming_ling_shuo_ming)
+                player.print("玩法说明:\n"..wan_fa_shuo_ming)
                 player.print("关闭提示,聊天框输入:已读不再提醒")
             end
         end
@@ -1060,8 +1073,8 @@ local function tick()
                             for _, product in pairs(products) do
                                 local limit = global.virtual_limit[force.name][product.name]
                                 if limit ~= nil then
-                                    if global.circulate_recipe.product[recipe_name] ~= nil then
-                                        if global.circulate_recipe.product[recipe_name][product.name] then
+                                    if global.circulate_recipe[force.name].product[recipe_name] ~= nil then
+                                        if global.circulate_recipe[force.name].product[recipe_name][product.name] then
                                             limit = limit * 2
                                         end
                                     end
@@ -1096,8 +1109,8 @@ local function tick()
                             if global.min_limit[force.name][ingredient_name] ~= nil then
                                 min_limit = global.min_limit[force.name][ingredient_name]
                             end
-                            if global.circulate_recipe.ingredient[recipe_name] ~= nil then
-                                if global.circulate_recipe.ingredient[recipe_name][ingredient_name] then
+                            if global.circulate_recipe[force.name].ingredient[recipe_name] ~= nil then
+                                if global.circulate_recipe[force.name].ingredient[recipe_name][ingredient_name] then
                                     min_limit = min_limit / 2
                                 end
                             end
