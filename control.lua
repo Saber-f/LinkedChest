@@ -69,7 +69,7 @@ local virtual_key = {
     "give_accumulator",             -- 供电蓄电池
     "no_enough",                    -- 不足的物品
     "circulate_recipe",             -- 循环配方
-    "no_tip",                       -- 不提示
+    "sync_fluid",                   -- 同步流体
 }
 -- 游戏初始化
 function init_link()
@@ -83,6 +83,7 @@ function init_link()
     global.glkn = 0                     -- 团队的常驻关联箱位置
 	global.translation = {}
     global.randomId = {}                -- 随机linkiId
+    global.no_tip = {}                  -- 不提示
     
     for _, key in pairs(virtual_key) do
         global[key] = {}
@@ -130,6 +131,7 @@ function up_name2id()
         end
     end
 
+    if global.no_tip == nil then global.no_tip = {} end
     for _, key in pairs(virtual_key) do
         if global[key] == nil or key == "circulate_recipe" then
             log("重置全局变量"..key)
@@ -260,7 +262,7 @@ function on_player_join(event)
     end
     global.ITEM_COUNT = item_count    -- 初始化物品总数量
     player.print("物品总数:"..item_count.."流体总数:"..(#game.fluid_prototypes).."配方总数:"..(#game.recipe_prototypes))
-    global.no_tip[player.name] = nil
+
     if global.CURR_INDEX == nil then global.CURR_INDEX = 0 end
 
     if global.NAME_TALBE == nil then
@@ -814,74 +816,104 @@ function on_gui_opened(event)
 		draw_force_items_main_for_player(player)
 	end
 
+    item_group_main_tab_updata_count(player, global.player_item_group[player.name])
     
-    --关联箱GUI界面
+    --关联箱GUI界面或者流体储存罐
     if event.gui_type == defines.gui_type.entity then
         local entity = event.entity
         if entity.type == 'linked-container' then
+        
+        elseif entity.type == "storage-tank" then
             AddID[player.name] = entity
-            local gui_name = 'LinkedPassword-'
-            local anchor = {gui = defines.relative_gui_type.linked_container_gui, position = defines.relative_gui_position.top}
-            local panel = player.gui.relative
-            local frame = panel["set-linked-container-password"]
-            if not frame then
-                frame = panel.add {
-                    type = 'frame',
-                    name = "set-linked-container-password",
-                    style = mod_gui.frame_style,
-                    direction = 'horizontal',
-                    --caption = '设置关联箱密码',
-                    anchor = anchor,
-                }
-                global.players_Linked[player.name].Linked = entity
-                
-                local number = 0
-                local link_id = 0
-                link_id = global.players_Linked[player.name].Linked.link_id
 
-                frame.add{type="label", caption="设置关联箱筛选",tooltip = "设置关联箱指定物品"}
-                local field = frame.add{type = "choose-elem-button",name = 'set-item-' .. gui_name .. entity.unit_number, direction = "horizontal", style = "confirm_button", elem_type = 'item',  tooltip = "设置关联箱指定存放物品物品"}
-                
-                for key, item in pairs(game.item_prototypes) do
-                    local number = global.name2id[player.force.name][item.name] 
-                    if number == link_id then
-                        field.elem_value = item.name
-                        break
-                    end
+        else
+            return
+        end
+
+        local gui_name = 'LinkedPassword-'
+        local anchor = {gui = defines.relative_gui_type.linked_container_gui, position = defines.relative_gui_position.top}
+        local panel = player.gui.relative
+        local frame = panel["set-linked-container-password"]
+        if not frame then
+            frame = panel.add {
+                type = 'frame',
+                name = "set-linked-container-password",
+                style = mod_gui.frame_style,
+                direction = 'horizontal',
+                --caption = '设置关联箱密码',
+                anchor = anchor,
+            }
+            global.players_Linked[player.name].Linked = entity
+            
+            local number = 0
+            local link_id = 0
+            link_id = global.players_Linked[player.name].Linked.link_id
+
+            frame.add{type="label", caption="设置关联箱筛选",tooltip = "设置关联箱指定物品"}
+            local field = frame.add{type = "choose-elem-button",name = 'set-item-' .. gui_name .. entity.unit_number, direction = "horizontal", style = "confirm_button", elem_type = 'item',  tooltip = "设置关联箱指定存放物品物品"}
+            
+            for key, item in pairs(game.item_prototypes) do
+                local number = global.name2id[player.force.name][item.name] 
+                if number == link_id then
+                    field.elem_value = item.name
+                    break
                 end
-            else
-                global.players_Linked[player.name].Linked = entity
-                frame.clear()
-                
-                local number = 0
-                local link_id = 0
-                link_id = global.players_Linked[player.name].Linked.link_id
+            end
+        else
+            global.players_Linked[player.name].Linked = entity
+            frame.clear()
+            
+            local number = 0
+            local link_id = 0
+            link_id = global.players_Linked[player.name].Linked.link_id
 
-                frame.add{type="label", caption="设置关联箱筛选",tooltip = "设置关联箱指定物品"}
-                local field = frame.add{type = "choose-elem-button",name = 'set-item-' .. gui_name .. entity.unit_number, direction = "horizontal", style = "confirm_button", elem_type = 'item',  tooltip = "设置关联箱指定存放物品物品"}
-                
-                for key, item in pairs(game.item_prototypes) do
-                    number = name2id(player.force.name,item.name)
-                    if number == link_id then
-                        field.elem_value = item.name
-                        break
-                    end
+            frame.add{type="label", caption="设置关联箱筛选",tooltip = "设置关联箱指定物品"}
+            local field = frame.add{type = "choose-elem-button",name = 'set-item-' .. gui_name .. entity.unit_number, direction = "horizontal", style = "confirm_button", elem_type = 'item',  tooltip = "设置关联箱指定存放物品物品"}
+            
+            for key, item in pairs(game.item_prototypes) do
+                number = name2id(player.force.name,item.name)
+                if number == link_id then
+                    field.elem_value = item.name
+                    break
                 end
             end
         end
     end
-    item_group_main_tab_updata_count(player, global.player_item_group[player.name])
 end
 --打开GUI界面on_gui_opened
 
+-- 同步流体
+local function sync_fluid()
+    for force_name in pairs(game.forces) do
+        if force_name ~= "enemy" and force_name ~= "neutral" and force_name ~= nil then
+            for index, entity in pairs(global.sync_fluid[force_name]) do
+                local revome_list = {}
+                if entity.valid then
+                    -- 同步流体
 
+                else
+                    table.insert(revome_list, index)
+                end
+                for _, index in pairs(revome_list) do
+                    table.remove(global.sync_fluid[force_name], index)
+                end
+            end
+        end
+    end
+end
 
 -- 同步数据
 function tongbu(event)
+    -- 最小3,可用0,1,2
     if game.tick % settings.global["update-frequency"].value == 0 then
         for _, player in pairs(game.connected_players) do
             fill_request_items(player)
         end
+    end
+
+    -- 同步流体
+    if game.tick % settings.global["update-frequency"].value == 1 then
+        sync_fluid()
     end
 
     -- 狗爪
