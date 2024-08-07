@@ -332,7 +332,7 @@ end
 
 
 function remove_force_item(player,name,count)
-    Message_output_onallplayer('' .. player.name .. ' 取走[item=' .. name .. '] ' .. count,player)
+    -- Message_output_onallplayer('' .. player.name .. ' 取走[item=' .. name .. '] ' .. count,player)
     local force = player.force.name
     if global.force_item[force][name].count >= count then
         global.force_item[force][name].count = global.force_item[force][name].count - count
@@ -755,22 +755,34 @@ end
 
 --GUI筛选按钮 变动时事件
 function on_gui_elem_changed(event)
-	local gui_name = 'set-item-LinkedPassword-'
+	local gui_name_item = 'set-item-LinkedPassword-'
+	local gui_name_fluid = 'set-fluid-LinkedPassword-'
 	local element = event.element
 	-- local parent = element.parent
 	local player = game.players[event.player_index]
-    local force = player.force.name
-	if string.sub(element.name, 0, #gui_name) == gui_name then
+    local force = player.force
+	if string.sub(element.name, 0, #gui_name_item) == gui_name_item then
 		local number = 0
 		for key, item in pairs(game.item_prototypes) do
 			if item.name == element.elem_value then
-                if global.force_item[force][item.name] == nil then global.force_item[force][item.name] = {count = 0} end
-                number = name2id(force,item.name)
+                if global.force_item[force.name][item.name] == nil then global.force_item[force.name][item.name] = {count = 0} end
+                number = name2id(force.name,item.name)
 				global.players_Linked[player.name].Linked.link_id = number
-                game.print({"",'['..force..']'..player.name.."手动设置关联ID:"..number.."->",{item.localised_name[1]}},{r = 0, g = 0.75, b = 0.0})
+                force.print({"",player.name.."手动设置关联ID:"..number.."->",{item.localised_name[1]}},{r = 0, g = 0.75, b = 0.0})
                 return
             end
 		end
+    elseif string.sub(element.name, 0, #gui_name_fluid) == gui_name_fluid then
+        local entity = global.players_Linked[player.name].Fluid
+        for _, info in pairs(global.sync_fluid[player.force.name]) do
+            if info.entity == entity then
+                force.print({"",player.name.."更改关联流体[item="..entity.name.."]:[fluid="..info.name.."]->[fluid="..element.elem_value.."]"},{r = 0.75, g = 0.0, b = 0.0})
+                info.name = element.elem_value
+                return
+            end
+        end
+        table.insert(global.sync_fluid[player.force.name], {entity = entity, entity_name = entity.name, name = element.elem_value})
+        force.print({"",player.name.."设置关联流体[item="..entity.name.."]:[fluid="..element.elem_value.."]"},{r = 0.0, g = 0.75, b = 0.0})
 	end
 end
 --GUI筛选按钮 变动时事件触发
@@ -799,6 +811,38 @@ function on_gui_closed(event)
     end
 end
 
+
+-- 设置关联箱筛选
+local function set_link_show(player, frame, gui_name, entity)
+    local number = 0
+    local link_id = 0
+    link_id = global.players_Linked[player.name].Linked.link_id
+
+    frame.add{type="label", caption="设置关联箱筛选",tooltip = "设置关联箱指定物品"}
+    local field = frame.add{type = "choose-elem-button",name = 'set-item-' .. gui_name .. entity.unit_number, direction = "horizontal", style = "confirm_button", elem_type = 'item',  tooltip = "设置关联箱指定存放物品"}
+    
+    for key, item in pairs(game.item_prototypes) do
+        number = name2id(player.force.name,item.name)
+        if number == link_id then
+            field.elem_value = item.name
+            break
+        end
+    end
+end
+
+-- 设置流体筛选
+local function set_fluid_show(player, frame, gui_name, entity)
+    frame.add{type="label", caption="设置关联箱流体",tooltip = "设置储液罐关联箱流体"}
+    local field = frame.add{type = "choose-elem-button",name = 'set-fluid-' .. gui_name .. entity.unit_number, direction = "horizontal", style = "confirm_button", elem_type = 'fluid',  tooltip = "设置关联箱指定存放物品"}
+    
+    for _, info in pairs(global.sync_fluid[player.force.name]) do
+        if info.entity == entity then
+            field.elem_value = info.name
+            break
+        end
+    end
+end
+
 --打开GUI界面on_gui_opened
 function on_gui_opened(event)
     local player = game.get_player(event.player_index)
@@ -812,7 +856,7 @@ function on_gui_opened(event)
     end
 
 
-	if event.gui_type == defines.gui_type.controller then
+	if event.gui_type == defines.gui_type.controller then   
 		draw_force_items_main_for_player(player)
 	end
 
@@ -821,62 +865,47 @@ function on_gui_opened(event)
     --关联箱GUI界面或者流体储存罐
     if event.gui_type == defines.gui_type.entity then
         local entity = event.entity
+        local gui_type = ""
+        local name = ""
+        local anchor = {}
         if entity.type == 'linked-container' then
-        
-        elseif entity.type == "storage-tank" then
             AddID[player.name] = entity
-
+            name = "set-linked-container-password"
+            gui_type = "linked-container"
+            global.players_Linked[player.name].Linked = entity
+            anchor = {gui = defines.relative_gui_type.linked_container_gui, position = defines.relative_gui_position.top}
+        elseif entity.type == "storage-tank" then
+            name = "set-fluid-container-password"
+            gui_type = "storage-tank"
+            global.players_Linked[player.name].Fluid = entity
+            anchor = { gui = defines.relative_gui_type.storage_tank_gui, position = defines.relative_gui_position.top }
         else
             return
         end
 
         local gui_name = 'LinkedPassword-'
-        local anchor = {gui = defines.relative_gui_type.linked_container_gui, position = defines.relative_gui_position.top}
         local panel = player.gui.relative
-        local frame = panel["set-linked-container-password"]
+
+
+        local frame = panel[name]
         if not frame then
             frame = panel.add {
                 type = 'frame',
-                name = "set-linked-container-password",
+                name = name,
                 style = mod_gui.frame_style,
                 direction = 'horizontal',
                 --caption = '设置关联箱密码',
                 anchor = anchor,
             }
-            global.players_Linked[player.name].Linked = entity
-            
-            local number = 0
-            local link_id = 0
-            link_id = global.players_Linked[player.name].Linked.link_id
-
-            frame.add{type="label", caption="设置关联箱筛选",tooltip = "设置关联箱指定物品"}
-            local field = frame.add{type = "choose-elem-button",name = 'set-item-' .. gui_name .. entity.unit_number, direction = "horizontal", style = "confirm_button", elem_type = 'item',  tooltip = "设置关联箱指定存放物品物品"}
-            
-            for key, item in pairs(game.item_prototypes) do
-                local number = global.name2id[player.force.name][item.name] 
-                if number == link_id then
-                    field.elem_value = item.name
-                    break
-                end
-            end
         else
             global.players_Linked[player.name].Linked = entity
             frame.clear()
-            
-            local number = 0
-            local link_id = 0
-            link_id = global.players_Linked[player.name].Linked.link_id
+        end
 
-            frame.add{type="label", caption="设置关联箱筛选",tooltip = "设置关联箱指定物品"}
-            local field = frame.add{type = "choose-elem-button",name = 'set-item-' .. gui_name .. entity.unit_number, direction = "horizontal", style = "confirm_button", elem_type = 'item',  tooltip = "设置关联箱指定存放物品物品"}
-            
-            for key, item in pairs(game.item_prototypes) do
-                number = name2id(player.force.name,item.name)
-                if number == link_id then
-                    field.elem_value = item.name
-                    break
-                end
-            end
+        if gui_type == "linked-container" then
+            set_link_show(player, frame, gui_name, entity)
+        elseif gui_type == "storage-tank" then
+            set_fluid_show(player, frame, gui_name, entity)
         end
     end
 end
@@ -884,17 +913,45 @@ end
 
 -- 同步流体
 local function sync_fluid()
-    for force_name in pairs(game.forces) do
+    for force_name,force in pairs(game.forces) do
         if force_name ~= "enemy" and force_name ~= "neutral" and force_name ~= nil then
-            for index, entity in pairs(global.sync_fluid[force_name]) do
+            for index, info in pairs(global.sync_fluid[force_name]) do
                 local revome_list = {}
-                if entity.valid then
+                if info.entity.valid then
                     -- 同步流体
 
+                    -- 最大容量
+                    local capacity = info.entity.fluidbox.get_capacity(1)
+                    -- 获取储液罐中的液体内容
+                    local fluid_contents = info.entity.get_fluid_contents()
+                    
+                    local amount = info.entity.get_fluid_count(info.name)
+                    local per = amount / capacity
+                    if per > 0.8 then
+                        info.entity.clear_fluid_inside()
+                        info.entity.insert_fluid{name = info.name, amount = 0.2 * capacity, temperature = game.fluid_prototypes[info.name].max_temperature}
+                        add_force_item(force.name, info.name, amount - 0.2 * capacity)
+                    elseif per < 0.2 then
+                        local need = 0.8 * capacity - amount
+                        local min_limit = global.min_limit[force.name][info.name] or 0
+                        local count = get_force_item_count(force.name, info.name) - min_limit
+                        if need > count then
+                            need = count
+                        end
+                        if need > 0 then
+                            info.entity.clear_fluid_inside()
+                            info.entity.insert_fluid{name = info.name, amount = amount + need, temperature = game.fluid_prototypes[info.name].max_temperature}
+                            virtual_remove_force_item(force.name, info.name, need)
+                        end
+                    end
+
+                    
                 else
                     table.insert(revome_list, index)
                 end
                 for _, index in pairs(revome_list) do
+                    local info = global.sync_fluid[force_name][index]
+                    force.print("液体储存罐[item="..info.entity_name.."]:[fluid="..info.name.."]已被移除",{r = 0.75, g = 0.0, b = 0.0})
                     table.remove(global.sync_fluid[force_name], index)
                 end
             end

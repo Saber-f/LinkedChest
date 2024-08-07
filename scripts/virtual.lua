@@ -414,8 +414,10 @@ local function virtual(event, isAdd)
                         end
                     end
                 end
-                vinfo.last_player = vinfo.current_player
-                vinfo.current_player = player.name
+                if player.name ~= vinfo.current_player then
+                    vinfo.last_player = vinfo.current_player
+                    vinfo.current_player = player.name
+                end
 
                 energy = vinfo.energy * 60
                 last_energy = last_energy * 60
