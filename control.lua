@@ -151,7 +151,7 @@ function up_name2id()
 
             for recipe_name, vinfo in pairs(global.virtual[force.name]) do
                 if vinfo.update_tick == nil then
-                    vinfo.update_tick = vinfo.tick + 10 + 10 * math.random()
+                    vinfo.update_tick = game.tick + 10 + 10 * math.random()
                 end
             end
         end
