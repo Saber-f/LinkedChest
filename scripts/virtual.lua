@@ -779,8 +779,8 @@ local function what_no_enough(player, is_show_recipe)
     force.print("[technology=virtual]共有"..#no_enough_list.."种物品产量不足,导致"..no_recipes_count.."个配方无法全速生产")
 end
 
-local wan_fa_shuo_ming = "1、按下SHIFT+F框选有配方的实体，转移到虚拟空间进行生产，[item=accumulator]提供电力。\n2、按下SHIFT+F后按住SHIFT取消该配方的虚拟化。\n3、按下ALT+F后框选查看配方虚拟化信息\n4、FNEI配方中点击物品文字标签打印库存和限容。\n5、FNEI配方中按住SHIFT点击物品文字标签将物品添加到快捷文本编辑框。\n6、FNEI配方中点击配方图标查看配方虚拟化信息。\n7、获取命令说明,聊天框输入:查看命令"
-local ming_ling_shuo_ming = "聊天框输入:\n1、上限(下限)1000[item=burner-inserter]-[item=stack-filter-inserter]=>设置物品上限或下限(循环依赖，原料的下限减半，产品上限翻倍)\n2、查看[item=burner-inserter]-[item=stack-filter-inserter]=>查看上限，下限和库存\n3、同步(取消同步)[item=burner-inserter]=>在关联箱库存同步禁用时手动开启(关闭)\n4、同步列表=>查看所有手动开启的同步物品\n5、循环排除(取消n5、循环排除)[item=empty-barrel]=>在计算循环循环依赖时排除\n6、循环排除列表=>查看计算循环依赖时所有排除的物品\n7、怎么玩(虚拟化)=>查看说明\8、缺啥(缺什么)=>查看所有产量不足的物品"
+local wan_fa_shuo_ming = "1、按下SHIFT+F框选有配方的实体，转移到虚拟空间进行生产，[item=accumulator]提供电力。\n2、按下SHIFT+F后按住SHIFT取消该配方的虚拟化。\n3、按下ALT+F后框选查看配方虚拟化信息\n4、FNEI配方中点击物品文字标签打印库存和限容。\n5、FNEI配方中按住SHIFT点击物品文字标签将物品添加到快捷文本编辑框。\n6、FNEI配方中点击配方图标查看配方虚拟化信息。\n7、获取命令说明,聊天框输入:查看命令\n联机交流群:666437832如果问题可加群反馈"
+local ming_ling_shuo_ming = "聊天框输入:\n1、上限(下限)1000[item=burner-inserter]-[item=stack-filter-inserter]=>设置物品上限或下限(循环依赖，原料的下限减半，产品上限翻倍)\n2、查看[item=burner-inserter]-[item=stack-filter-inserter]=>查看上限，下限和库存\n3、同步(取消同步)[item=burner-inserter]=>在关联箱库存同步禁用时手动开启(关闭)\n4、同步列表=>查看所有手动开启的同步物品\n5、循环排除(取消n5、循环排除)[item=empty-barrel]=>在计算循环循环依赖时排除\n6、循环排除列表=>查看计算循环依赖时所有排除的物品\n7、怎么玩(虚拟化)=>查看说明\8、缺啥(缺什么)=>查看所有产量不足的物品\n联机交流群:666437832如果问题可加群反馈"
 -- 设置同步白名单
 local function set_tongbu_white_list(event)
     local player = game.players[event.player_index]

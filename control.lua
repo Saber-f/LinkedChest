@@ -45,16 +45,7 @@ function myinitteam(force)
     global.Ti[force] = 0               -- 初始化团队的常量计算器id
     global.randomId[force] = {}               -- 随机linkiId
 
-    global.virtual[force]              = {}          -- 初始化团队的虚拟物品
-    global.virtual_energy[force]       = {}          -- 团队的虚拟能源
     global.virtual_energy_index[force] = 1           -- 团队的虚拟能源索引
-    global.virtual_limit[force]        = {}           -- 团队的虚拟物品限制
-    global.min_limit[force] = {}        -- 团队的最小限制
-    global.virtual_limit_last_player[force] = {}       -- 上限最后操纵的玩家
-    global.min_limit_last_player[force] = {}           -- 下限最后操纵的玩家
-    global.tongbu_white_list[force] = {} -- 同步白名单
-    global.give_accumulator[force] = {} -- 给蓄电池
-    global.no_enough[force] = {}                       -- 不足的物品
 end
 
 local virtual_key = {
@@ -92,11 +83,11 @@ function init_link()
     -- Force初始化
     for _, f in pairs(game.forces) do
         if f.name ~= "enemy" and f.name ~= "neutral" and f.name ~= nil then
-            myinitteam(f.name)
-            global.glkn = global.glkn + 1
             for _, key in pairs(virtual_key) do
                 global[key][f.name] = {}
             end
+            myinitteam(f.name)
+            global.glkn = global.glkn + 1
         end
     end   
 end
@@ -146,6 +137,9 @@ function up_name2id()
                     if key == "circulate_recipe" then
                         global[key][force.name] = {ingredient={},product={}}
                     end
+                end
+                if key == "virtual_energy_index" then
+                    global[key][force.name] = 1
                 end
             end
 
