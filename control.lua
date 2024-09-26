@@ -193,26 +193,31 @@ end
 
 -- 团队创立
 function on_force_creat(event)
-    local force = event.force.name
-    global.force_item[force] = {}       -- 初始化团队物资
-    if global.glk[force] == nil or global.glk[force].valid == false then
+    local force_name = event.force.name
+    global.force_item[force_name] = {}       -- 初始化团队物资
+    if global.glk[force_name] == nil or global.glk[force_name].valid == false then
         if global.glkn == nil then global.glkn = 1 end
         global.glkn  = global.glkn + 1
-        mycreatelinkbox(force)              -- 初始化团队的常驻关联箱
-        global.glk[force].destructible = false
-        global.glk[force].minable = false
+        mycreatelinkbox(force_name)              -- 初始化团队的常驻关联箱
+        global.glk[force_name].destructible = false
+        global.glk[force_name].minable = false
     end
 
-    if global.name2id[force] == nil then global.name2id[force] = {} end            -- 初始化团队的name->id
+    if global.name2id[force_name] == nil then global.name2id[force_name] = {} end            -- 初始化团队的name->id
 
-    for name, id in pairs(global.name2id[force]) do
-		global.glk[force].link_id = id
-		global.glk[force].clear_items_inside()
+    for name, id in pairs(global.name2id[force_name]) do
+		global.glk[force_name].link_id = id
+		global.glk[force_name].clear_items_inside()
 	end
     
-    global.name2id[force] = {}          -- 初始化团队的name->id
-    global.TC[force] = {}               -- 初始化团队常量预算器
-    global.Ti[force] = 0               -- 初始化团队的常量计算器id
+    global.name2id[force_name] = {}          -- 初始化团队的name->id
+    global.TC[force_name] = {}               -- 初始化团队常量预算器
+    global.Ti[force_name] = 0               -- 初始化团队的常量计算器id
+
+
+    for _, key in pairs(virtual_key) do
+        global[key][force_name] = {}
+    end
 
     game.print(force..'团队初始化完成')
 end
@@ -1031,6 +1036,7 @@ function tongbu(event)
             for index = global.CURR_INDEX,global.CURR_INDEX + settings.global["update-num"].value do
                 index = index % global.ITEM_COUNT
                 local name = global.NAME_TALBE[index]
+                log(force_name..':'..name)
                 local id = global.name2id[force_name][name]
                 if id then
                     global.glk[force_name].link_id = id

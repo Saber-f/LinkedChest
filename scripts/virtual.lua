@@ -736,7 +736,7 @@ local function what_no_enough(player, is_show_recipe)
         local count = 0
         local recipe_list = {}
         for recipe_name in pairs(recipes) do
-            if fvirtual[recipe_name] then
+            if fvirtual[recipe_name] and fvirtual[recipe_name].recipe then
                 if recipe_name ~= "virtual-lab" or force.current_research ~= nil then
                     if recipes_map[recipe_name] == nil then
                         recipes_map[recipe_name] = true
@@ -1117,7 +1117,7 @@ local function do_the_deed(force, vinfo, ingredients, count)
 end
 
 local function tick()
-    if game.tick % 300 == 0 then
+    if game.tick % 900 == 0 then
         for _, player in pairs(game.connected_players) do
             if not global.no_tip[player.name] then
                 player.print("玩法说明:\n"..wan_fa_shuo_ming)
