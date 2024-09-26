@@ -44,7 +44,9 @@ if mods["RealisticFusionPower"]then
     data.raw["assembling-machine"]["rfp-gas-mixer"].module_specification = {module_slots = 3}   -- 混合仪
     data.raw["assembling-machine"]["angels-electric-boiler"].module_specification = {module_slots = 3}  -- 锅炉
     data.raw["assembling-machine"]["rfp-electrolyser"].module_specification = {module_slots = 3} -- 电解器
-    data.raw["furnace"]["electric-furnace"].module_specification = {module_slots = 3} -- 电炉
+    if data.raw["furnace"] then
+        data.raw["furnace"]["electric-furnace"].module_specification = {module_slots = 3} -- 电炉
+    end
 
     
     -- 插件影响修改

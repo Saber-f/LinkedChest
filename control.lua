@@ -125,7 +125,6 @@ function up_name2id()
     if global.no_tip == nil then global.no_tip = {} end
     for _, key in pairs(virtual_key) do
         if global[key] == nil or key == "circulate_recipe" then
-            log("重置全局变量"..key)
             global[key] = {}
         end
     end
@@ -218,8 +217,6 @@ function on_force_creat(event)
     for _, key in pairs(virtual_key) do
         global[key][force_name] = {}
     end
-
-    game.print(force..'团队初始化完成')
 end
 
 
@@ -1036,7 +1033,6 @@ function tongbu(event)
             for index = global.CURR_INDEX,global.CURR_INDEX + settings.global["update-num"].value do
                 index = index % global.ITEM_COUNT
                 local name = global.NAME_TALBE[index]
-                log(force_name..':'..name)
                 local id = global.name2id[force_name][name]
                 if id then
                     global.glk[force_name].link_id = id
