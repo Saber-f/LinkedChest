@@ -754,6 +754,9 @@ function on_gui_elem_changed(event)
 	local gui_name_item = 'set-item-LinkedPassword-'
 	local gui_name_fluid = 'set-fluid-LinkedPassword-'
 	local element = event.element
+    if (not element) or (not element.valid) then
+        return
+    end
 	-- local parent = element.parent
 	local player = game.players[event.player_index]
     local force = player.force
