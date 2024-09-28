@@ -1011,7 +1011,7 @@ end
 local function remove_accumulator_energy(force, need_energy)
     local used_energy = 0
     
-    local index = global.virtual_energy_index[force.name]
+    local index = #global.virtual_energy_index[force.name]
     local have_accumulator = false
     for i = #global.virtual_energy[force.name], 1, -1 do
         local accumulator = global.virtual_energy[force.name][index]
