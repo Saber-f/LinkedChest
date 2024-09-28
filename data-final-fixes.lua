@@ -569,24 +569,26 @@ end
 ------------------------------------------------------- 原版修改 -------------------------------------------------------
 
 -- 爪子
-data.raw.inserter["burner-inserter"].rotation_speed = 1
-data.raw.inserter["burner-inserter"].extension_speed = 5
-data.raw.inserter["burner-inserter"].stack_size_bonus = 1
-data.raw.inserter["inserter"].rotation_speed = 1
-data.raw.inserter["inserter"].extension_speed = 10
-data.raw.inserter["inserter"].stack_size_bonus = 1
-data.raw.inserter["fast-inserter"].rotation_speed = 1
-data.raw.inserter["fast-inserter"].extension_speed = 10
-data.raw.inserter["fast-inserter"].stack_size_bonus = 50
-data.raw.inserter["filter-inserter"].rotation_speed = 1
-data.raw.inserter["filter-inserter"].extension_speed = 10
-data.raw.inserter["filter-inserter"].stack_size_bonus = 50
-data.raw.inserter["stack-inserter"].rotation_speed = 1
-data.raw.inserter["stack-inserter"].extension_speed = 10
-data.raw.inserter["stack-inserter"].stack_size_bonus = 100
-data.raw.inserter["stack-filter-inserter"].rotation_speed = 1
-data.raw.inserter["stack-filter-inserter"].extension_speed = 10
-data.raw.inserter["stack-filter-inserter"].stack_size_bonus = 100
+if settings.startup["fast-claw"].value then
+    data.raw.inserter["burner-inserter"].rotation_speed = 1
+    data.raw.inserter["burner-inserter"].extension_speed = 5
+    data.raw.inserter["burner-inserter"].stack_size_bonus = 1
+    data.raw.inserter["inserter"].rotation_speed = 1
+    data.raw.inserter["inserter"].extension_speed = 10
+    data.raw.inserter["inserter"].stack_size_bonus = 1
+    data.raw.inserter["fast-inserter"].rotation_speed = 1
+    data.raw.inserter["fast-inserter"].extension_speed = 10
+    data.raw.inserter["fast-inserter"].stack_size_bonus = 50
+    data.raw.inserter["filter-inserter"].rotation_speed = 1
+    data.raw.inserter["filter-inserter"].extension_speed = 10
+    data.raw.inserter["filter-inserter"].stack_size_bonus = 50
+    data.raw.inserter["stack-inserter"].rotation_speed = 1
+    data.raw.inserter["stack-inserter"].extension_speed = 10
+    data.raw.inserter["stack-inserter"].stack_size_bonus = 100
+    data.raw.inserter["stack-filter-inserter"].rotation_speed = 1
+    data.raw.inserter["stack-filter-inserter"].extension_speed = 10
+    data.raw.inserter["stack-filter-inserter"].stack_size_bonus = 100
+end
 
 -- 实验室
 data.raw.lab["lab"].researching_speed = 50

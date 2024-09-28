@@ -95,5 +95,11 @@ data:extend({
     minimum_value = 1,
     maximum_value = 100000000,
     order = "p"
-}
+    },
+    {  -- 超快爪子
+        type = "bool-setting",
+        name = "fast-claw",
+        setting_type = "startup",
+        default_value = true,
+    }
 })
