@@ -25,7 +25,7 @@ end
 local function get_cycle_description(force, des)
     local recipe_name = des:gsub("%[recipe=", "")
     des = ""
-    if global.circulate_recipe[force.name].ingredient[recipe_name] ~= nil or global.circulate_recipe[force.name].product[recipe_name] ~= nil then
+    if global.circulate_recipe[force.name] and (global.circulate_recipe[force.name].ingredient[recipe_name] ~= nil or global.circulate_recipe[force.name].product[recipe_name] ~= nil) then
         des = "\n循环依赖:"
         if global.circulate_recipe[force.name].ingredient[recipe_name] ~= nil then
             des = des.."原料:"
@@ -1011,7 +1011,13 @@ end
 local function remove_accumulator_energy(force, need_energy)
     local used_energy = 0
     
-    local index = #global.virtual_energy_index[force.name]
+    local index = global.virtual_energy_index[force.name]
+    
+    -- 如果index不是number类型
+    if type(index) ~= "number" then
+        index = 1
+    end
+
     local have_accumulator = false
     for i = #global.virtual_energy[force.name], 1, -1 do
         local accumulator = global.virtual_energy[force.name][index]
@@ -1038,6 +1044,9 @@ local function remove_accumulator_energy(force, need_energy)
         index = index - 1
         if index < 1 then
             index = #global.virtual_energy[force.name]
+            if type(index) ~= "number" then
+                index = 1
+            end
         end
     end
     global.virtual_energy_index[force.name] = index
