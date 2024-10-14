@@ -1068,6 +1068,8 @@ end
 
 -- 产出or研究
 local function do_the_deed(force, vinfo, ingredients, count)
+    count = count * settings.global["virtual-out"].value / 100
+
     local products = vinfo.recipe.products
 
     for _, ingredient in pairs(ingredients) do

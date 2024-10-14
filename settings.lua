@@ -87,6 +87,13 @@ data:extend({
         default_value = 10000,
         minimum_value = 1,
         maximum_value = 100000
+    },{ -- 虚拟化产出百分比
+        type = "int-setting",
+        name = "virtual-out",
+        setting_type = "runtime-global",
+        default_value = 100,
+        minimum_value = 1,
+        maximum_value = 10000
     },{ -- 上帝插件研究
     type = "int-setting",
     name = "god-research",

@@ -134,9 +134,9 @@ if mods["Advanced_Sky_Modules"] and mods["RealisticFusionPower"]then
             ingredients =
             {
                 {"pure-productivity-module-6", 1},
-                    {"pure-speed-module-6", 1},
-                    {type="fluid", name=rfp_fluids["antihydrogen"], amount=10},
-                },
+                {"pure-speed-module-6", 1},
+                {type="fluid", name=rfp_fluids["antihydrogen"], amount=10},
+            },
             result = "god-module",
             result_count = 1,
             enabled = false
@@ -173,6 +173,19 @@ end
 ------------------------------------------------------- 战斗相关修改 -------------------------------------------------------
 -- 有大怪兽和聚变武器
 if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
+    local function change_range(name)
+        local attack_parameters = data.raw.unit[name].attack_parameters
+        local range = attack_parameters.range
+        if range >= 60 then
+            range = 30
+        elseif range >= 30 then
+            range = range/2
+        end
+
+        attack_parameters.range = range
+    end
+
+
     local function weakness(type_name, i, count, ptype)
         local per = i
         if count > 0 then
@@ -226,6 +239,7 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
         for i = 1,count do
             local name2 = name..i
             data.raw.unit[name2].resistances = weakness(type_name, i, count, 0)
+            change_range(name2)
         end
     end
     
@@ -233,11 +247,13 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
         for i = 1,count do
             local name2 = name..i
             data.raw.unit[name2].resistances = weakness(type_name, i, count, 1)
+            change_range(name2)
         end
     end
     
-    
-    data.raw.unit['tc_fake_human_ultimate_boss_cannon_20'].resistances = weakness('', 90, 0)
+    local name2 = 'tc_fake_human_ultimate_boss_cannon_20'
+    data.raw.unit[name2].resistances = weakness('', 90, 0)
+    change_range(name2)
     
     local fireOrelectric = 'electric'
     if data.raw["electric-turret"]["photon-turret"] then
@@ -368,8 +384,8 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
 
     -- 炮塔修正
     data.raw["ammo-turret"]["gun-turret"].max_health = 10000
-    data.raw["ammo-turret"]["gun-turret"].prepare_range = 124
-    data.raw["ammo-turret"]["gun-turret"].range = 120
+    data.raw["ammo-turret"]["gun-turret"].prepare_range = 64
+    data.raw["ammo-turret"]["gun-turret"].range = 60
     data.raw["ammo-turret"]["gun-turret"].attack_parameters = {
         type = "projectile",
         ammo_category = "bullet",
@@ -387,7 +403,7 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
         starting_frame_speed = 0.2,
         starting_frame_speed_deviation = 0.1
         },
-        range = 120,
+        range = 60,
         sound = {
             switch_vibration_data =
             {
@@ -420,7 +436,7 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
     }
 
     data.raw["electric-turret"]["laser-turret"].max_health = 40000
-    data.raw["electric-turret"]["laser-turret"].prepare_range = 124
+    data.raw["electric-turret"]["laser-turret"].prepare_range = 64
     data.raw["electric-turret"]["laser-turret"].collision_box = {{ -1.7, -1.7}, {1.7, 1.7}}
     data.raw["electric-turret"]["laser-turret"].selection_box = {{ -2, -2}, {2, 2}}
     data.raw["electric-turret"]["laser-turret"].energy_source =
@@ -431,10 +447,16 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
     drain = "120MW",
     usage_priority = "primary-input"
     }
+    
+    -- 增加{type="fluid", name=rfp_fluids["antihydrogen"], amount=1},
+    
+    data.raw["recipe"]["laser-turret"].category = rfp_categories["antimatter-processing"]
+    data.raw["recipe"]["laser-turret"].ingredients[#(data.raw["recipe"]["laser-turret"].ingredients)+1] = {type="fluid", name=rfp_fluids["antihydrogen"], amount=1}
+    
     data.raw["electric-turret"]["laser-turret"].attack_parameters = {
         type = "beam",
         cooldown = 40,
-        range = 120,
+        range = 60,
         source_direction_count = 64,
         source_offset = {0, -3.423489 / 4},
         damage_modifier = 10000,
@@ -449,7 +471,7 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
         {
             type = "beam",
             beam = "laser-beam",
-            max_length = 120,
+            max_length = 60,
             duration = 30,
             source_offset = {0, -1.31439 }
         }
@@ -465,7 +487,7 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
 
 
     -- 个人模块修改
-    data.raw["active-defense-equipment"]["personal-laser-defense-equipment"].attack_parameters.range = 80
+    data.raw["active-defense-equipment"]["personal-laser-defense-equipment"].attack_parameters.range = 60
     data.raw["active-defense-equipment"]["personal-laser-defense-equipment"].attack_parameters.damage_modifier = 2000
     data.raw["active-defense-equipment"]["personal-laser-defense-equipment"].attack_parameters.ammo_type.action.action_delivery.max_length = 80
     data.raw["active-defense-equipment"]["personal-laser-defense-equipment"].shape = {
