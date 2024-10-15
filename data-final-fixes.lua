@@ -19,7 +19,7 @@ data:extend({
         prerequisites = {},
         unit =
         {
-        count = 100000,
+        count = settings.startup["vitual-research"].value,
         ingredients =
         {
             {"automation-science-pack", 1},
@@ -41,19 +41,15 @@ data:extend({
 -- 真实聚变
 if mods["RealisticFusionPower"]then
     -- 更改插件孔
-    data.raw["assembling-machine"]["rfp-gas-mixer"].module_specification = {module_slots = 3}   -- 混合仪
-    data.raw["assembling-machine"]["angels-electric-boiler"].module_specification = {module_slots = 3}  -- 锅炉
-    data.raw["assembling-machine"]["rfp-electrolyser"].module_specification = {module_slots = 3} -- 电解器
     if data.raw["furnace"] then
         data.raw["furnace"]["electric-furnace"].module_specification = {module_slots = 3} -- 电炉
     end
 
-    
-    -- 插件影响修改
-    data.raw["assembling-machine"]["angels-electric-boiler"].allowed_effects = {"consumption", "speed", "productivity", "pollution"}
-    data.raw["assembling-machine"]["rfp-gas-mixer"].allowed_effects = {"consumption", "speed", "productivity", "pollution"}
-    data.raw["assembling-machine"]["rfp-electrolyser"].allowed_effects = {"consumption", "speed", "productivity", "pollution"}
+    -- 反物质处理器速度
     data.raw["assembling-machine"]["rfp-antimatter-processor"].crafting_speed = 20
+
+    -- 气体混合仪
+    data.raw["assembling-machine"]["rfp-gas-mixer"].crafting_speed = 20
 end
 
 
@@ -78,7 +74,7 @@ if mods["Advanced_Sky_Modules"] and mods["RealisticFusionPower"]then
             effects =
             {
             },
-            prerequisites = {"rfp-antimatter-theory"},
+            prerequisites = {"rfp-particle-deceleration-efficiency-3", "rfp-particle-acceleration-efficiency-3"},
             unit =
             {
             count = settings.startup["vitual-research"].value,
@@ -140,22 +136,11 @@ if mods["Advanced_Sky_Modules"] and mods["RealisticFusionPower"]then
             result = "god-module",
             result_count = 1,
             enabled = false
-        },{-- 氘He3混合气体
-            type = "recipe",
-            name = "rfp-d-he3-mixing",
-            category = rfp_categories["gas-mixing"],
-            icon = "__RealisticFusionPower__/graphics/icons/d-he3-mix.png",
-            icon_size = 256,
-            hide_from_player_crafting = true,
-            energy_required = 1,
-            allow_productivity = true,
-            ingredients = {{type = "fluid", name = rfp_fluids["deuterium"], amount = 10}, {type = "fluid", name = rfp_fluids["helium-3"], amount = 10},},
-            results = {{type = "fluid", name = rfp_fluids["d-he3-mix"], amount = 1000}},
         },{-- 白瓶配方
             type = "recipe",
             name = "space-science-pack",    -- 白瓶
             enabled = true,
-            energy_required = 21,
+            energy_required = 10,
             ingredients =
             {
                 {"rocket-fuel", 100},
@@ -167,6 +152,56 @@ if mods["Advanced_Sky_Modules"] and mods["RealisticFusionPower"]then
             result = "space-science-pack"
         },
     })
+
+    -- 氢气
+    data.raw.recipe["rfp-water-electrolysis"].ingredients = {{type = "fluid", name = "water", amount = 2000}}
+    data.raw.recipe["rfp-water-electrolysis"].results = {{type = "fluid", name = rfp_fluids["hydrogen"], amount = 100}}
+
+    -- 氢电离
+    data.raw.recipe["rfp-hydrogen-ionization"].energy_required = 37
+    data.raw.recipe["rfp-hydrogen-ionization"].ingredients = {{type = "fluid", name = rfp_fluids["hydrogen"], amount = 100}}
+    data.raw.recipe["rfp-hydrogen-ionization"].results = {{type = "fluid", name = rfp_fluids["electrons"], amount = 100}, {type = "fluid", name = rfp_fluids["protons"], amount = 100}}
+
+    -- 重水
+    data.raw.recipe["rfp-water-purification"].energy_required = 1
+    data.raw.recipe["rfp-water-purification"].ingredients = {{type = "fluid", name = "water", amount = 2000}}
+    data.raw.recipe["rfp-water-purification"].results = {{type = "fluid", name = rfp_fluids["heavy-water"], amount = 1500}}
+
+    -- 氘
+    data.raw.recipe["rfp-electrolysis"].ingredients = {{type = "fluid", name = rfp_fluids["heavy-water"], amount = 1500}}
+    data.raw.recipe["rfp-electrolysis"].results = {{type = "fluid", name = rfp_fluids["deuterium"], amount = 800}}
+
+    -- 氘等离子
+    data.raw.recipe["rfp-d-d-heating-0"].ingredients = {{type = "fluid", name = rfp_fluids["deuterium"], amount = 200}}
+    data.raw.recipe["rfp-d-d-heating-0"].results = {{type = "fluid", name = rfp_fluids["d-d-plasma"], amount = 200}}
+
+    -- 氚-He3
+    data.raw.recipe["rfp-d-d-fusion-0-0"].ingredients = {{type = "fluid", name = rfp_fluids["d-d-plasma"], amount = 400}}
+    data.raw.recipe["rfp-d-d-fusion-0-0"].results = {{type = "fluid", name = rfp_fluids["reactor-energy-mj"], amount = 0},{type = "fluid", name = rfp_fluids["helium-3"], amount = 200}, {type = "fluid", name = rfp_fluids["tritium"], amount = 200}}
+
+    -- 氚->He3
+    data.raw.recipe["rfp-tritium-decay"].energy_required = 0.5
+
+    -- 氢->正负电子
+    data.raw.recipe["rfp-hydrogen-ionization"].energy_required = 1
+
+    -- 氘He3混合气体
+    data.raw.recipe["rfp-d-he3-mixing"].ingredients = {{type = "fluid", name = rfp_fluids["deuterium"], amount = 10}, {type = "fluid", name = rfp_fluids["helium-3"], amount = 10}}
+    data.raw.recipe["rfp-d-he3-mixing"].results = {{type = "fluid", name = rfp_fluids["d-he3-mix"], amount = 10}}
+
+    -- 聚变子弹
+    data.raw.recipe["rfw-fusion-rounds-magazine"].energy_required = 1
+    data.raw.recipe["rfw-fusion-rounds-magazine"].ingredients = {{"battery", 20}, {"advanced-circuit", 20}, {"low-density-structure", 20}, {"piercing-rounds-magazine", 20}, {type = "fluid", name = rfp_fluids["d-he3-mix"], amount = 10}}
+    data.raw.recipe["rfw-fusion-rounds-magazine"].results = {{"rfw-fusion-rounds-magazine", 20}}
+
+    -- 氘-He3混合气体
+    data.raw.recipe["rfp-d-he3-heating-0"].ingredients = {{type = "fluid", name = rfp_fluids["deuterium"], amount = 10}, {type = "fluid", name = rfp_fluids["helium-3"], amount = 10}}
+    data.raw.recipe["rfp-d-he3-heating-0"].results = {{type = "fluid", name = rfp_fluids["d-he3-mix"], amount = 10}}
+
+    -- 氘-He3等离子体
+    data.raw.recipe["rfp-d-he3-heating-0"].energy_required = 0.5
+    data.raw.recipe["rfp-d-he3-heating-0"].ingredients = {{type = "fluid", name = rfp_fluids["d-he3-mix"], amount = 100}}
+    data.raw.recipe["rfp-d-he3-heating-0"].results = {{type = "fluid", name = rfp_fluids["d-he3-plasma"], amount = 100}}
 end
 
 
@@ -531,6 +566,10 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
                             {
                                 type = "damage",
                                 damage = {amount = 1000, type = "explosion"}
+                            },
+                            {
+                                type = "damage",
+                                damage = {amount = 1000, type = "laser"}
                             },
                         }
                     },

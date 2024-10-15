@@ -98,17 +98,17 @@ data:extend({
     type = "int-setting",
     name = "god-research",
     setting_type = "startup",
-    default_value = 100000,
+    default_value = 10000000,
     minimum_value = 1,
-    maximum_value = 100000000,
+    maximum_value = 10000000000,
     order = "p"
     },{ -- 虚拟化研究
     type = "int-setting",
     name = "vitual-research",
     setting_type = "startup",
-    default_value = 10000,
+    default_value = 100000000,
     minimum_value = 1,
-    maximum_value = 100000000,
+    maximum_value = 10000000000,
     order = "p"
     },
     {  -- 超快爪子
