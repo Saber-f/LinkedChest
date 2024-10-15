@@ -102,6 +102,14 @@ data:extend({
     minimum_value = 1,
     maximum_value = 100000000,
     order = "p"
+    },{ -- 虚拟化研究
+    type = "int-setting",
+    name = "vitual-research",
+    setting_type = "startup",
+    default_value = 10000,
+    minimum_value = 1,
+    maximum_value = 100000000,
+    order = "p"
     },
     {  -- 超快爪子
         type = "bool-setting",

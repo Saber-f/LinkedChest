@@ -78,10 +78,9 @@ if mods["Advanced_Sky_Modules"] and mods["RealisticFusionPower"]then
             effects =
             {
             },
-            prerequisites = {"god-module"},
             unit =
             {
-            count = settings.startup["god-research"].value * 10,
+            count = settings.startup["vitual-research"].value,
             ingredients =
             {
                 {"automation-science-pack", 1},
