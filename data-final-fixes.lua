@@ -200,16 +200,16 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
         local per3 = per
         local per4 = per
         local per5 = per
-        if (type_name == "physical") then per1 = (9 - count + i) * 1 end
-        if (type_name == "explosion") then per2 = (9 - count + i) * 1 end
-        if (type_name == "laser") then per3 = (9 - count + i) * 1 end
-        if (type_name == "fire") then per5 = (9 - count + i) * 1 end
+        if (type_name == "physical") then per1 = per*0.1 end
+        if (type_name == "explosion") then per2 = per*0.1 end
+        if (type_name == "laser") then per3 = per*0.1 end
+        if (type_name == "fire") then per5 = per*0.1 end
         if (type_name == "electric") then 
-            per1 = per1*0.6
-            per2 = per2*0.6
-            per3 = per3*0.6
-            per5 = per5*0.6
-            per4 = (9 - count + i) * 1
+            per1 = per*0.5
+            per2 = per*0.5
+            per3 = per*0.5
+            per5 = per*0.5
+            per4 = per*0.1
         end
         return {
             {
@@ -255,7 +255,7 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
     data.raw.unit[name2].resistances = weakness('', 90, 0)
     change_range(name2)
     
-    local fireOrelectric = 'electric'
+    local fireOrelectric = 'laser'
     if data.raw["electric-turret"]["photon-turret"] then
         fireOrelectric = 'fire'
     end
