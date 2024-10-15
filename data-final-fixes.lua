@@ -343,7 +343,7 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
                     {
                         {
                             type = "damage",
-                            damage = { amount = 25 , type = "physical"}
+                            damage = { amount = 30 , type = "physical"}
                         }
                     }
                 }
@@ -373,7 +373,7 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
                         },
                         {
                         type = "damage",
-                        damage = {amount = 200, type = "explosion"}
+                        damage = {amount = 100, type = "explosion"}
                         },
                     }
                 }
@@ -526,11 +526,11 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
                         {
                             {
                                 type = "damage",
-                                damage = {amount = 2000, type = "physical"}
+                                damage = {amount = 1000, type = "physical"}
                             },
                             {
                                 type = "damage",
-                                damage = {amount = 4000, type = "explosion"}
+                                damage = {amount = 1000, type = "explosion"}
                             },
                         }
                     },
@@ -567,11 +567,11 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
                                 {
                     {
                     type = "damage",
-                    damage = {amount = 80000, type = "physical"}
+                    damage = {amount = 10000, type = "physical"}
                     },
                     {
                     type = "damage",
-                    damage = {amount = 160000, type = "explosion"}
+                    damage = {amount = 10000, type = "explosion"}
                     },
                 }
                             }
