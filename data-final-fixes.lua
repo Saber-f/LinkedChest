@@ -78,6 +78,7 @@ if mods["Advanced_Sky_Modules"] and mods["RealisticFusionPower"]then
             effects =
             {
             },
+            prerequisites = {"rfp-antimatter-theory"},
             unit =
             {
             count = settings.startup["vitual-research"].value,
@@ -107,7 +108,7 @@ if mods["Advanced_Sky_Modules"] and mods["RealisticFusionPower"]then
                 recipe = "god-module"
             }
             },
-            prerequisites = {"pure-productivity-module-6","effectivity-module-6","pure-speed-module-6","rfp-antimatter-reactor"},
+            prerequisites = {"pure-productivity-module-6","pure-speed-module-6","rfp-antimatter-theory"},
             unit =
             {
             count = settings.startup["god-research"].value,
