@@ -74,7 +74,7 @@ if mods["Advanced_Sky_Modules"] and mods["RealisticFusionPower"]then
             effects =
             {
             },
-            prerequisites = {"rfp-particle-deceleration-efficiency-3", "rfp-particle-acceleration-efficiency-3"},
+            prerequisites = {"fp-antimatter-reactor"},
             unit =
             {
             count = settings.startup["vitual-research"].value,
@@ -104,7 +104,7 @@ if mods["Advanced_Sky_Modules"] and mods["RealisticFusionPower"]then
                 recipe = "god-module"
             }
             },
-            prerequisites = {"pure-productivity-module-6","pure-speed-module-6","rfp-antimatter-theory"},
+            prerequisites = {"virtual"},
             unit =
             {
             count = settings.startup["god-research"].value,
@@ -152,6 +152,9 @@ if mods["Advanced_Sky_Modules"] and mods["RealisticFusionPower"]then
             result = "space-science-pack"
         },
     })
+
+    -- 反物质发电科技
+    data.raw.technology["rfp-antimatter-reactor"].prerequisites = {"rfp-particle-deceleration-efficiency-3", "rfp-particle-acceleration-efficiency-3"}
 
     -- 氢气
     data.raw.recipe["rfp-water-electrolysis"].ingredients = {{type = "fluid", name = "water", amount = 2000}}
