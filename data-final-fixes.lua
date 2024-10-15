@@ -74,7 +74,7 @@ if mods["Advanced_Sky_Modules"] and mods["RealisticFusionPower"]then
             effects =
             {
             },
-            prerequisites = {"fp-antimatter-reactor"},
+            prerequisites = {"rfp-antimatter-reactor"},
             unit =
             {
             count = settings.startup["vitual-research"].value,
