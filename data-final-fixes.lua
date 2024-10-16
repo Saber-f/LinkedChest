@@ -497,7 +497,7 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
         range = 60,
         source_direction_count = 64,
         source_offset = {0, -3.423489 / 4},
-        damage_modifier = 10000,
+        damage_modifier = 1000,
         ammo_type =
         {
         category = "laser",
@@ -526,7 +526,7 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
 
     -- 个人模块修改
     data.raw["active-defense-equipment"]["personal-laser-defense-equipment"].attack_parameters.range = 60
-    data.raw["active-defense-equipment"]["personal-laser-defense-equipment"].attack_parameters.damage_modifier = 2000
+    data.raw["active-defense-equipment"]["personal-laser-defense-equipment"].attack_parameters.damage_modifier = 200
     data.raw["active-defense-equipment"]["personal-laser-defense-equipment"].attack_parameters.ammo_type.action.action_delivery.max_length = 80
     data.raw["active-defense-equipment"]["personal-laser-defense-equipment"].shape = {
     width = 1,
