@@ -757,13 +757,14 @@ function on_gui_elem_changed(event)
     if (not element) or (not element.valid) then
         return
     end
+    local elem_value = element.elem_value
 	-- local parent = element.parent
 	local player = game.players[event.player_index]
     local force = player.force
 	if string.sub(element.name, 0, #gui_name_item) == gui_name_item then
 		local number = 0
 		for key, item in pairs(game.item_prototypes) do
-			if item.name == element.elem_value then
+			if item.name == elem_value then
                 if global.force_item[force.name][item.name] == nil then global.force_item[force.name][item.name] = {count = 0} end
                 number = name2id(force.name,item.name)
 				global.players_Linked[player.name].Linked.link_id = number
@@ -775,13 +776,13 @@ function on_gui_elem_changed(event)
         local entity = global.players_Linked[player.name].Fluid
         for _, info in pairs(global.sync_fluid[player.force.name]) do
             if info.entity == entity then
-                force.print({"",player.name.."更改关联流体[item="..entity.name.."]:[fluid="..info.name.."]->[fluid="..element.elem_value.."]"},{r = 0.75, g = 0.0, b = 0.0})
-                info.name = element.elem_value
+                force.print({"",player.name.."更改关联流体[item="..entity.name.."]:[fluid="..info.name.."]->[fluid="..elem_value.."]"},{r = 0.75, g = 0.0, b = 0.0})
+                info.name = elem_value
                 return
             end
         end
-        table.insert(global.sync_fluid[player.force.name], {entity = entity, entity_name = entity.name, name = element.elem_value})
-        force.print({"",player.name.."设置关联流体[item="..entity.name.."]:[fluid="..element.elem_value.."]"},{r = 0.0, g = 0.75, b = 0.0})
+        table.insert(global.sync_fluid[player.force.name], {entity = entity, entity_name = entity.name, name = elem_value})
+        force.print({"",player.name.."设置关联流体[item="..entity.name.."]:[fluid="..elem_value.."]"},{r = 0.0, g = 0.75, b = 0.0})
 	end
 end
 --GUI筛选按钮 变动时事件触发
