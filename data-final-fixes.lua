@@ -209,6 +209,7 @@ end
 
 
 ------------------------------------------------------- 战斗相关修改 -------------------------------------------------------
+local pers = {99.9, 99.5, 99, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 30, 25, 20}
 -- 有大怪兽和聚变武器
 if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
     local function change_range(name)
@@ -226,28 +227,25 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
 
     local function weakness(type_name, i, count, ptype)
         local per = i
-        if count > 0 then
-            if ptype == 0 then
-                per = 100 - 0.1*2^(count-i)
-            else
-                per = 95 - 5*(count-i)
-            end
+        local index = (count-i) + 1;
+        if ptype == 1 then
+            index = index + 3
         end
-        local per1 = per
-        local per2 = per
-        local per3 = per
-        local per4 = per
-        local per5 = per
-        if (type_name == "physical") then per1 = per*0.1 end
-        if (type_name == "explosion") then per2 = per*0.1 end
-        if (type_name == "laser") then per3 = per*0.1 end
-        if (type_name == "fire") then per5 = per*0.1 end
+        local per1 = pers[index]
+        local per2 = pers[index]
+        local per3 = pers[index]
+        local per4 = pers[index]
+        local per5 = pers[index]
+        if (type_name == "physical") then per1 = pers[index+3] end
+        if (type_name == "explosion") then per2 = pers[index+3] end
+        if (type_name == "laser") then per3 = pers[index+3] end
+        if (type_name == "fire") then per5 = pers[index+3] end
         if (type_name == "electric") then 
-            per1 = per*0.5
-            per2 = per*0.5
-            per3 = per*0.5
-            per5 = per*0.5
-            per4 = per*0.1
+            per1 = pers[index+2]
+            per2 = pers[index+2]
+            per3 = pers[index+2]
+            per5 = pers[index+2]
+            per4 = pers[index+4]
         end
         return {
             {
@@ -290,7 +288,7 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
     end
     
     local name2 = 'tc_fake_human_ultimate_boss_cannon_20'
-    data.raw.unit[name2].resistances = weakness('', 90, 0)
+    data.raw.unit[name2].resistances = weakness('', 1, 4, 0)
     change_range(name2)
     
     local fireOrelectric = 'laser'
@@ -325,17 +323,15 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
     resistance('tc_fake_human_boss_cannon_explosive_',10,'explosion')
     resistance('tc_fake_human_boss_nuke_rocket_',10,'explosion')
     resistance('maf-boss-biter-',10,'physical')
-    resistance('maf-boss-acid-spitter-',10,'physical')
+    resistance('maf-boss-acid-spitter-',10,'laser')
     
     
     resistance('maf-giant-acid-spitter',5,'electric')
-    resistance('maf-giant-fire-spitter',5,'electric')
+    resistance('maf-giant-fire-spitter',5,'explosion')
     resistance('bm-motherbiterzilla',5,'electric')
-    resistance('biterzilla1',5,'electric')
-    resistance('biterzilla3',5,fireOrelectric)
+    resistance('biterzilla1',5,'explosion')
+    resistance('biterzilla3',5,'physical')
     resistance('biterzilla2',5,'laser')
-    resistance('maf-boss-biter-',5,'explosion')
-    resistance('maf-boss-acid-spitter-',5,'physical')
 
     -- 子弹伤害调整
     data.raw.ammo["firearm-magazine"].ammo_type.action = {      -- 黄子弹
