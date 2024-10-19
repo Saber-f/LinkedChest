@@ -74,7 +74,7 @@ if mods["Advanced_Sky_Modules"] and mods["RealisticFusionPower"]then
             effects =
             {
             },
-            prerequisites = {"rfp-antimatter-reactor"},
+            prerequisites = {"god-module"},
             unit =
             {
             count = settings.startup["vitual-research"].value,
@@ -104,7 +104,7 @@ if mods["Advanced_Sky_Modules"] and mods["RealisticFusionPower"]then
                 recipe = "god-module"
             }
             },
-            prerequisites = {"virtual"},
+            prerequisites = {"rfp-antimatter-reactor"},
             unit =
             {
             count = settings.startup["god-research"].value,
@@ -189,6 +189,7 @@ if mods["Advanced_Sky_Modules"] and mods["RealisticFusionPower"]then
     data.raw.recipe["rfp-hydrogen-ionization"].energy_required = 1
 
     -- 氘He3混合气体
+    data.raw.recipe["rfp-d-he3-mixing"].energy_required = 0.5
     data.raw.recipe["rfp-d-he3-mixing"].ingredients = {{type = "fluid", name = rfp_fluids["deuterium"], amount = 10}, {type = "fluid", name = rfp_fluids["helium-3"], amount = 10}}
     data.raw.recipe["rfp-d-he3-mixing"].results = {{type = "fluid", name = rfp_fluids["d-he3-mix"], amount = 10}}
 
@@ -205,6 +206,20 @@ if mods["Advanced_Sky_Modules"] and mods["RealisticFusionPower"]then
     data.raw.recipe["rfp-d-he3-heating-0"].energy_required = 0.5
     data.raw.recipe["rfp-d-he3-heating-0"].ingredients = {{type = "fluid", name = rfp_fluids["d-he3-mix"], amount = 100}}
     data.raw.recipe["rfp-d-he3-heating-0"].results = {{type = "fluid", name = rfp_fluids["d-he3-plasma"], amount = 100}}
+
+    -- 插件制作时间
+    data.raw.recipe["pure-speed-module-1"].energy_required = 2
+    data.raw.recipe["pure-speed-module-2"].energy_required = 4
+    data.raw.recipe["pure-speed-module-3"].energy_required = 8
+    data.raw.recipe["pure-speed-module-4"].energy_required = 16
+    data.raw.recipe["pure-speed-module-5"].energy_required = 32
+    data.raw.recipe["pure-speed-module-6"].energy_required = 64
+    data.raw.recipe["pure-productivity-module-1"].energy_required = 2
+    data.raw.recipe["pure-productivity-module-2"].energy_required = 4
+    data.raw.recipe["pure-productivity-module-3"].energy_required = 8
+    data.raw.recipe["pure-productivity-module-4"].energy_required = 16
+    data.raw.recipe["pure-productivity-module-5"].energy_required = 32
+    data.raw.recipe["pure-productivity-module-6"].energy_required = 64
 end
 
 
