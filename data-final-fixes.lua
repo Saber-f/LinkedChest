@@ -290,7 +290,7 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
     end
 
     -- 虫巢100免疫爆炸,其他99.99
-    data.raw.unit["biter-spawner"].resistances = {
+    data.raw["unit-spawner"]["biter-spawner"].resistances = {
         {
             type = "explosion",
             percent = 100
