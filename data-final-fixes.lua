@@ -222,9 +222,15 @@ if mods["Advanced_Sky_Modules"] and mods["RealisticFusionPower"]then
     data.raw.recipe["pure-productivity-module-6"].energy_required = 64
 end
 
-
 ------------------------------------------------------- 战斗相关修改 -------------------------------------------------------
-local pers = {99.9, 99.5, 99, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 30, 25, 20}
+local function getValue(i)
+    local v = math.floor((100-0.5*1.3^i)*100)/100
+    if v < 0 then
+        v = 0
+    end
+    return v
+end
+
 -- 有大怪兽和聚变武器
 if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
     local function change_range(name)
@@ -240,27 +246,24 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
     end
 
 
-    local function weakness(type_name, i, count, ptype)
+    local function weakness(type_name, i, count, star)
         local per = i
-        local index = (count-i) + 1;
-        if ptype == 1 then
-            index = index + 3
-        end
-        local per1 = pers[index]
-        local per2 = pers[index]
-        local per3 = pers[index]
-        local per4 = pers[index]
-        local per5 = pers[index]
-        if (type_name == "physical") then per1 = pers[index+3] end
-        if (type_name == "explosion") then per2 = pers[index+3] end
-        if (type_name == "laser") then per3 = pers[index+3] end
-        if (type_name == "fire") then per5 = pers[index+3] end
+        local index = (count-i) + star;
+        local per1 = getValue(index)
+        local per2 = getValue(index)
+        local per3 = getValue(index)
+        local per4 = getValue(index)
+        local per5 = getValue(index)
+        if (type_name == "physical") then per1 = getValue(index+9) end
+        if (type_name == "explosion") then per2 = getValue(index+9) end
+        if (type_name == "laser") then per3 = getValue(index+9) end
+        if (type_name == "fire") then per5 = getValue(index+9) end
         if (type_name == "electric") then 
-            per1 = pers[index+2]
-            per2 = pers[index+2]
-            per3 = pers[index+2]
-            per5 = pers[index+2]
-            per4 = pers[index+4]
+            per1 = getValue(index+4)
+            per2 = getValue(index+4)
+            per3 = getValue(index+4)
+            per5 = getValue(index+4)
+            per4 = getValue(index+13)
         end
         return {
             {
@@ -297,13 +300,13 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
     local function resistance2(name, count, type_name)
         for i = 1,count do
             local name2 = name..i
-            data.raw.unit[name2].resistances = weakness(type_name, i, count, 1)
+            data.raw.unit[name2].resistances = weakness(type_name, i, count, 11)
             change_range(name2)
         end
     end
     
     local name2 = 'tc_fake_human_ultimate_boss_cannon_20'
-    data.raw.unit[name2].resistances = weakness('', 1, 4, 0)
+    data.raw.unit[name2].resistances = weakness('', 1, 1, 5)
     change_range(name2)
     
     local fireOrelectric = 'laser'
@@ -508,7 +511,7 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
         range = 60,
         source_direction_count = 64,
         source_offset = {0, -3.423489 / 4},
-        damage_modifier = 1000,
+        damage_modifier = 5000,
         ammo_type =
         {
         category = "laser",
@@ -537,7 +540,7 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
 
     -- 个人模块修改
     data.raw["active-defense-equipment"]["personal-laser-defense-equipment"].attack_parameters.range = 60
-    data.raw["active-defense-equipment"]["personal-laser-defense-equipment"].attack_parameters.damage_modifier = 200
+    data.raw["active-defense-equipment"]["personal-laser-defense-equipment"].attack_parameters.damage_modifier = 500
     data.raw["active-defense-equipment"]["personal-laser-defense-equipment"].attack_parameters.ammo_type.action.action_delivery.max_length = 80
     data.raw["active-defense-equipment"]["personal-laser-defense-equipment"].shape = {
     width = 1,
@@ -620,11 +623,11 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
                                 {
                     {
                     type = "damage",
-                    damage = {amount = 10000, type = "physical"}
+                    damage = {amount = 20000, type = "physical"}
                     },
                     {
                     type = "damage",
-                    damage = {amount = 10000, type = "explosion"}
+                    damage = {amount = 20000, type = "explosion"}
                     },
                 }
                             }
@@ -692,17 +695,17 @@ local effects = {
     {
         type = "ammo-damage",
         ammo_category = "bullet",
-        modifier = 0.4
+        modifier = 0.5
     },
     {
         type = "ammo-damage",
         ammo_category = "shotgun-shell",
-        modifier = 0.4
+        modifier = 0.5
     },
     {
         type = "ammo-damage",
         ammo_category = "cannon-shell",
-        modifier = 1
+        modifier = 0.5
     }
 }
 data.raw.technology["physical-projectile-damage-1"].effects = effects
@@ -712,6 +715,31 @@ data.raw.technology["physical-projectile-damage-4"].effects = effects
 data.raw.technology["physical-projectile-damage-5"].effects = effects
 data.raw.technology["physical-projectile-damage-6"].effects = effects
 data.raw.technology["physical-projectile-damage-7"].effects = effects
+
+local effects2 = {
+    {
+        type = "ammo-damage",
+        ammo_category = "laser",
+        modifier = 0.5
+    },
+    {
+        type = "ammo-damage",
+        ammo_category = "electric",
+        modifier = 0.5
+    },
+    {
+        type = "ammo-damage",
+        ammo_category = "beam",
+        modifier = 0.5
+    }
+}
+data.raw.technology["energy-weapons-damage-1"].effects = effects2
+data.raw.technology["energy-weapons-damage-2"].effects = effects2
+data.raw.technology["energy-weapons-damage-3"].effects = effects2
+data.raw.technology["energy-weapons-damage-4"].effects = effects2
+data.raw.technology["energy-weapons-damage-5"].effects = effects2
+data.raw.technology["energy-weapons-damage-6"].effects = effects2
+data.raw.technology["energy-weapons-damage-7"].effects = effects2
 
 -- 堆叠修改
 data.raw["item"]["rocket-fuel"].stack_size = 200

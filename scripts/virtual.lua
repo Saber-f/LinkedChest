@@ -1131,8 +1131,11 @@ local function tick()
     if game.tick % 900 == 0 then
         for _, player in pairs(game.connected_players) do
             if not global.no_tip[player.name] then
-                player.print("玩法说明:\n"..wan_fa_shuo_ming)
-                player.print("关闭提示,聊天框输入:已读不再提醒")
+                -- 虚拟化已研究
+                if player.force.technologies["virtual"].researched then
+                    player.print("玩法说明:\n"..wan_fa_shuo_ming)
+                    player.print("关闭提示,聊天框输入:已读不再提醒")
+                end
             end
         end
     end
@@ -1396,6 +1399,22 @@ local function gui_confirmed(event)
         set_virtual_limit(event2)
     end
 end
+
+-- 科技研究完成
+local function research_finished(event)
+    local force = event.research.force
+    local name = event.research.name
+    if name == "virtual" then
+        force.print("[technology=virtual]虚拟化技术研究完成")
+
+        -- 打印提示
+        if not global.no_tip[force.name] then
+            force.print("玩法说明:\n"..wan_fa_shuo_ming)
+            force.print("命令说明:\n"..ming_ling_shuo_ming)
+        end
+    end
+end
+
 Event.addListener(defines.events.on_game_created_from_scenario,runtime_mod_setting_changed)
 Event.addListener(defines.events.on_runtime_mod_setting_changed, runtime_mod_setting_changed)
 Event.addListener(defines.events.on_player_selected_area, player_selected_area)     -- 玩家选择区域(虚拟化)
@@ -1407,3 +1426,6 @@ Event.addListener(defines.events.on_tick, tick)
 Event.addListener(defines.events.on_gui_click, gui_click)
 -- 注册textfield确认事件
 Event.addListener(defines.events.on_gui_confirmed, gui_confirmed)
+
+-- 科技研究完成
+Event.addListener(defines.events.on_research_finished, research_finished)
