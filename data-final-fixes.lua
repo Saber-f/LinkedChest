@@ -489,8 +489,8 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
 
     data.raw["electric-turret"]["laser-turret"].max_health = 40000
     data.raw["electric-turret"]["laser-turret"].prepare_range = 64
-    data.raw["electric-turret"]["laser-turret"].collision_box = {{ -1.7, -1.7}, {1.7, 1.7}}
-    data.raw["electric-turret"]["laser-turret"].selection_box = {{ -2, -2}, {2, 2}}
+    data.raw["electric-turret"]["laser-turret"].collision_box = {{ -1.3, -1.3}, {1.3, 1.3}}
+    data.raw["electric-turret"]["laser-turret"].selection_box = {{ -1.5, -1.5}, {1.5, 1.5}}
     data.raw["electric-turret"]["laser-turret"].energy_source =
     {
     type = "electric",
