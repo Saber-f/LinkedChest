@@ -511,7 +511,7 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
         range = 60,
         source_direction_count = 64,
         source_offset = {0, -3.423489 / 4},
-        damage_modifier = 5000,
+        damage_modifier = 3000,
         ammo_type =
         {
         category = "laser",
