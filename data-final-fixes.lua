@@ -288,6 +288,30 @@ if mods["Big-Monsters"] and mods["RealisticFusionWeaponry"] then
             }
         }
     end
+
+    -- 虫巢100免疫爆炸,其他99.99
+    data.raw.unit["biter-spawner"].resistances = {
+        {
+            type = "explosion",
+            percent = 100
+        },
+        {
+            type = "physical",
+            percent = 99.99
+        },
+        {
+            type = "laser",
+            percent = 99.99
+        },
+        {
+            type = "electric",
+            percent = 99.99
+        },
+        {
+            type = "fire",
+            percent = 99.99
+        }
+    }
     
     local function resistance(name, count, type_name)
         for i = 1,count do
