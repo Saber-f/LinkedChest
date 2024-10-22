@@ -249,7 +249,7 @@ function on_gui_opened(event)
         if entity.type == 'linked-container' then
             name = "set-linked-container-password"
             gui_type = "linked-container"
-            if lobal.players_Linked == nil then
+            if global.players_Linked == nil then
                 global.players_Linked = {}
             end
             if global.players_Linked[player.name] == nil then
