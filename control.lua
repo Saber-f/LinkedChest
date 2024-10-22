@@ -377,37 +377,37 @@ function set_linkid(linked_chest,pickup_or_drop)-- pickup_or_drop:"pickup"从联
 	local inserts = get_valid_inserts_machines(linked_chest,pickup_or_drop)
 	if #inserts > 0 then
         local surface = linked_chest.surface
-		for _,insert in pairs(inserts) do
-			filter = insert.inserter_filter_mode
-			if filter.type == "whitelist" and #filter.filter_item ~= 0 then-- 如果有连接着机器的筛选机械臂且设置了白名单，linkchest链接的物品设置为白名单的第一个有效值
-				linked_chest.link_id = name2id(linked_chest.force.name, prototypes.item[filter.filter_item[1]].name, surface)
-				return nil
+		-- for _,insert in pairs(inserts) do
+		-- 	filter = insert.inserter_filter_mode
+		-- 	if filter.type == "whitelist" and #filter.filter_item ~= 0 then-- 如果有连接着机器的筛选机械臂且设置了白名单，linkchest链接的物品设置为白名单的第一个有效值
+		-- 		linked_chest.link_id = name2id(linked_chest.force.name, prototypes.item[filter.filter_item[1]].name, surface)
+		-- 		return nil
 
 
-			elseif filter.type == "whitelist" and #filter.filter_item == 0 then-- 如果有连接着机器的筛选机械臂且未设置了白名单，白名单的第一个槽位设置为linkchest链接的物品
-				inserts = {insert}-- 优先筛选机械臂
-				local machine = insert.machine
-				local parts = {}
-				parts = get_short_parts(machine,pickup_or_drop, surface)
-				if #parts ~= 0 then
-					linked_chest.link_id = name2id(linked_chest.force.name, prototypes.item[parts[1].name].name, surface)
-					insert["entity"].set_filter(1,prototypes.item[parts[1].name].name)
-					return nil
-				end
+		-- 	elseif filter.type == "whitelist" and #filter.filter_item == 0 then-- 如果有连接着机器的筛选机械臂且未设置了白名单，白名单的第一个槽位设置为linkchest链接的物品
+		-- 		inserts = {insert}-- 优先筛选机械臂
+		-- 		local machine = insert.machine
+		-- 		local parts = {}
+		-- 		parts = get_short_parts(machine,pickup_or_drop, surface)
+		-- 		if #parts ~= 0 then
+		-- 			linked_chest.link_id = name2id(linked_chest.force.name, prototypes.item[parts[1].name].name, surface)
+		-- 			insert["entity"].set_filter(1,prototypes.item[parts[1].name].name)
+		-- 			return nil
+		-- 		end
 
 
-			elseif filter.type == "blacklist" and #filter.filter_item ~= 0 then-- 如果有连接着机器的筛选机械臂且设置了黑名单，黑名单的第一个槽位设置为缺少的物品减黑名单的物品
-				inserts = {insert}-- 优先筛选机械臂
-				local machine = insert.machine
-				local parts = {}
-				parts = get_short_parts(machine,pickup_or_drop, surface)
-				parts = table.remove_by_values( parts,filter.filter_item)
-				if #parts ~= 0 then
-					linked_chest.link_id = name2id(linked_chest.force.name, prototypes.item[parts[1].name].name, surface)
-					return nil
-				end
-			end
-		end
+		-- 	elseif filter.type == "blacklist" and #filter.filter_item ~= 0 then-- 如果有连接着机器的筛选机械臂且设置了黑名单，黑名单的第一个槽位设置为缺少的物品减黑名单的物品
+		-- 		inserts = {insert}-- 优先筛选机械臂
+		-- 		local machine = insert.machine
+		-- 		local parts = {}
+		-- 		parts = get_short_parts(machine,pickup_or_drop, surface)
+		-- 		parts = table.remove_by_values( parts,filter.filter_item)
+		-- 		if #parts ~= 0 then
+		-- 			linked_chest.link_id = name2id(linked_chest.force.name, prototypes.item[parts[1].name].name, surface)
+		-- 			return nil
+		-- 		end
+		-- 	end
+		-- end
 
 		local machine = inserts[1].machine
 		local parts = {}
