@@ -249,6 +249,12 @@ function on_gui_opened(event)
         if entity.type == 'linked-container' then
             name = "set-linked-container-password"
             gui_type = "linked-container"
+            if lobal.players_Linked == nil then
+                global.players_Linked = {}
+            end
+            if global.players_Linked[player.name] == nil then
+                global.players_Linked[player.name] = {}
+            end
             global.players_Linked[player.name].Linked = entity
             anchor = {gui = defines.relative_gui_type.linked_container_gui, position = defines.relative_gui_position.top}
         else
@@ -300,6 +306,14 @@ function tongbu(event)
 
     -- 检查关
     local is_circulate = false;
+    if global.linkboxs == nil then
+        global.linkboxs = {}
+    end
+
+    if global.checkIndex == nil then
+        global.checkIndex = 1
+    end
+
     for i = 1, settings.global["checkCount"].value, 1 do
         if global.checkIndex > #global.linkboxs then
             global.checkIndex = 1
@@ -323,7 +337,6 @@ function tongbu(event)
             table.remove(global.linkboxs, global.checkIndex)
         end
     end
-
 end
 
 
