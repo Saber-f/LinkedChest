@@ -18,8 +18,7 @@ data:extend({
       "not-on-map"
     },
     collision_mask = {
-      "player-layer",
-      "item-layer"
+      layers = {player=true, item=true}
     },
     collision_box = {{-0.5, -0.5}, {0.5, 0.5}}
   },

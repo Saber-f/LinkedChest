@@ -1,9 +1,9 @@
 {
   "name": "LinkedChest3",
-  "version": "1.4.110",
+  "version": "2.0.0",
   "title": "LinkedChest3",
   "author": "sabet",
-	"factorio_version": "1.1",
-  "dependencies": ["base >= 1.1", "? Advanced_Sky_Modules >= 0.0.3", "? RealisticFusionPower >= 1.8.17", "? RealisticFusionWeaponry >= 1.5.8",  "? Big-Monsters >= 1.4.0", "? pyalienlife >= 1.4.0", "? FNEI >= 0.4.2"],
-  "description":"关联箱\n虚拟化:1、按下SHIFT+F框选有配方的实体，转移到虚拟空间进行生产，[item=accumulator]提供电力。\n2、按下SHIFT+F后按住SHIFT取消该配方的虚拟化。\n3、按下ALT+F后框选查看配方虚拟化信息\n4、FNEI配方中点击物品文字标签打印库存和限容。\n5、FNEI配方中按住SHIFT点击物品文字标签将物品添加到快捷文本编辑框。\n6、FNEI配方中点击配方图标查看配方虚拟化信息。\n7、获取命令说明,聊天框输入:查看命令\n联机交流群:666437832如果问题可加群反馈"
+	"factorio_version": "2.0",
+  "dependencies": ["base >= 2.0"],
+  "description":"联机交流群:666437832，如果问题可加群反馈"
 }

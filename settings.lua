@@ -1,25 +1,5 @@
 data:extend({
     {
-        type = "bool-setting",
-        name = "isTongBu",
-        setting_type = "runtime-global",
-        default_value = true
-    },
-    {
-        type = "bool-setting",
-        name = "virtual-lock",
-        setting_type = "runtime-global",
-        default_value = true
-    },
-    {
-        type = "int-setting",
-        name = "update-frequency",
-        setting_type = "runtime-global",
-        default_value = 60,
-        minimum_value = 3,
-        maximum_value = 360000
-    },
-    {
         type = "int-setting",
         name = "max-distance",
         setting_type = "runtime-global",
@@ -61,60 +41,29 @@ data:extend({
         default_value = false
     },{
         type = "int-setting",
-        name = "update-num",            -- 每帧更新数量
-        setting_type = "runtime-global",
-        default_value = 50,
-        minimum_value = 1,
-        maximum_value = 10000000000
-    },{
-        type = "int-setting",
-        name = "row_num",            -- 多少行触发缓存
-        setting_type = "runtime-global",
-        default_value = 3,
-        minimum_value = 1,
-        maximum_value = 10000000000
-    },{
-        type = "int-setting",
-        name = "linkSize",            -- 每帧更新数量
+        name = "linkSize",            -- 关联箱容量
         setting_type = "startup",
         default_value = 120,
         minimum_value = 1,
         maximum_value = 100000
     },{
         type = "int-setting",
-        name = "shuaijian",            -- 衰减
+        name = "shuaijian",            -- 飞行衰减
         setting_type = "runtime-global",
         default_value = 10000,
         minimum_value = 1,
         maximum_value = 100000
-    },{ -- 虚拟化产出百分比
+    },{  -- 每帧检测的关联箱数量
         type = "int-setting",
-        name = "virtual-out",
+        name = "checkCount",
         setting_type = "runtime-global",
         default_value = 100,
         minimum_value = 1,
         maximum_value = 10000
-    },{ -- 上帝插件研究
-    type = "int-setting",
-    name = "god-research",
-    setting_type = "startup",
-    default_value = 10000000,
-    minimum_value = 1,
-    maximum_value = 10000000000,
-    order = "p"
-    },{ -- 虚拟化研究
-    type = "int-setting",
-    name = "vitual-research",
-    setting_type = "startup",
-    default_value = 100000000,
-    minimum_value = 1,
-    maximum_value = 10000000000,
-    order = "p"
-    },
-    {  -- 超快爪子
+    },{ -- 是否允许蓝图
         type = "bool-setting",
-        name = "fast-claw",
-        setting_type = "startup",
-        default_value = true,
+        name = "canBluePrint",
+        setting_type = "runtime-global",
+        default_value = true
     }
 })

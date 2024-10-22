@@ -4,26 +4,23 @@ data:extend({
   {
     type = "recipe",
     name = data_util.mod_prefix .. "grappling-gun",
-    result = data_util.mod_prefix .. "grappling-gun",
-    enabled = false,
-    energy_required = 10,
+    results = {{type="item", name=data_util.mod_prefix .. "grappling-gun", amount=1}},
+    enabled = true,
+    energy_required = 1,
     ingredients = {
-      { "steel-plate", 10 },
-      { "iron-gear-wheel", 10 },
-      { "pipe", 5 },
+      {type = "item", name = "copper-plate", amount = 1}
     },
     requester_paste_multiplier = 1,
   },
   {
     type = "recipe",
     name = data_util.mod_prefix .. "grappling-gun-ammo",
-    result = data_util.mod_prefix .. "grappling-gun-ammo",
-    enabled = false,
-    energy_required = 1,
+    results = {{type="item", name=data_util.mod_prefix .. "grappling-gun-ammo", amount=1}},
+    enabled = true,
+    energy_required = 0.5,
     ingredients = {
-      { "iron-stick", 4 },
-      { "coal", 2 },
+      {type = "item", name = "copper-plate", amount = 1}
     },
-    requester_paste_multiplier = 1,
+    requester_paste_multiplier = 10,
   },
 })

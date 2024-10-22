@@ -32,9 +32,9 @@ data:extend({
   {
     type = "ammo",
     name = data_util.mod_prefix .. "grappling-gun-ammo",
+    ammo_category = "grappling",
     ammo_type =
     {
-      category = "grappling",
       target_type = "direction",
       action = {
         {
