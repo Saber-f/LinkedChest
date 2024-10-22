@@ -118,6 +118,12 @@ end
 
 function name2id(force,name,surface)
     local id = 0
+    if global.name2id == nil then
+        global.name2id = {}
+    end
+    if global.name2id[force] == nil then
+        global.name2id[force] = {}
+    end
     if global.name2id[force][name] == nil then
         local n = 0
         for i=1,#name do
