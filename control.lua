@@ -316,7 +316,7 @@ function tongbu(event)
             if entity.surface.index ~= link_id % 2^6 then
                 local errorindex = link_id % 2^6;
                 entity.link_id = link_id - link_id % 2^6 + entity.surface.index
-                entity.force.print("警告！非法关联箱图层修改:"..entity.surface.index.."->"..errorindex.."(已修复)最后操作者:"..entity.last_user.name, {r = 1, g = 0.0, b = 0.0})
+                entity.force.print("警告！非法关联箱图层修改:"..entity.surface.index.."->"..errorindex.."(已修复)最后操作者:"..entity.last_user.name,{r=1,g=0,b=0})
             end
             global.checkIndex = global.checkIndex + 1
         else
