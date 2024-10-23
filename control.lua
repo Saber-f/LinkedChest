@@ -613,6 +613,7 @@ Event.addListener(defines.events.on_game_created_from_scenario,init_link)
 Event.addListener(defines.events.on_force_created,on_force_creat)
 Event.addListener(defines.events.on_player_joined_game,on_player_join)
 
+Event.addListener(defines.events.on_space_platform_built_entity,set_link)    -- 太空平台建造物品
 Event.addListener(defines.events.on_built_entity,set_link)    -- 玩家建造物品
 Event.addListener(defines.events.on_robot_built_entity,set_link)  -- 机器人建造物品
 Event.addListener(defines.events.on_gui_elem_changed, on_gui_elem_changed)
