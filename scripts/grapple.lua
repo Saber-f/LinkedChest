@@ -48,19 +48,15 @@ function Grapple.on_trigger_created_entity(event)
         width = 2,
         gap_length = 0.1,
         dash_length = 0.1,
-        from = tick_task.projectile,
-        from_offset = {0, -1},
-        to = tick_task.character,
-        to_offset = {0, -1},
+        from = {entity=tick_task.projectile, offset = {0, -1}},
+        to = {entity=tick_task.character, offset = {0, -1}},
         surface = tick_task.projectile.surface
       }
       rendering.draw_line{
         color = {r=0,g=0,b=0,a=1},
         width = 1,
-        from = tick_task.projectile,
-        from_offset = {0, -1},
-        to = tick_task.character,
-        to_offset = {0, -1},
+        from = {entity=tick_task.projectile, offset = {0, -1}},
+        to = {entity=tick_task.character, offset = {0, -1}},
         surface = tick_task.projectile.surface
       }
     end
