@@ -293,24 +293,8 @@ function on_gui_opened(event)
 end
 --打开GUI界面on_gui_opened
 
-
--- 同步数据
-function tongbu(event)
-    -- 狗爪
-    if global.tick_tasks then
-        for _, tick_task in pairs(global.tick_tasks) do
-        if tick_task.type == "grappling-gun" then
-            Grapple.tick_task_grappling_gun(tick_task)
-        else
-            tick_task.valid = false
-        end
-        if not tick_task.valid then
-            global.tick_tasks[tick_task.id] = nil
-        end
-        end
-    end
-
-    -- 检查关
+-- 检查跨图层关联
+local function check_linkbox(checkCount)
     local is_circulate = false;
     if global.linkboxs == nil then
         global.linkboxs = {}
@@ -320,7 +304,7 @@ function tongbu(event)
         global.checkIndex = 1
     end
 
-    for i = 1, settings.global["checkCount"].value, 1 do
+    for i = 1, checkCount, 1 do
         if global.checkIndex > #global.linkboxs then
             global.checkIndex = 1
             if is_circulate then
@@ -342,6 +326,30 @@ function tongbu(event)
         else
             table.remove(global.linkboxs, global.checkIndex)
         end
+    end
+end
+
+
+-- 同步数据
+function tongbu(event)
+    -- 狗爪
+    if global.tick_tasks then
+        for _, tick_task in pairs(global.tick_tasks) do
+        if tick_task.type == "grappling-gun" then
+            Grapple.tick_task_grappling_gun(tick_task)
+        else
+            tick_task.valid = false
+        end
+        if not tick_task.valid then
+            global.tick_tasks[tick_task.id] = nil
+        end
+        end
+    end
+
+    -- 检查跨图层关联
+    local checkCount = settings.global["checkCount"].value
+    if checkCount > 0 then
+        check_linkbox(checkCount)
     end
 end
 

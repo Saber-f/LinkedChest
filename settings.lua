@@ -53,13 +53,13 @@ data:extend({
         default_value = 10000,
         minimum_value = 1,
         maximum_value = 100000
-    },{  -- 每帧检测的关联箱数量
+    },{  -- 跨图层关联箱每帧检测数量
         type = "int-setting",
         name = "checkCount",
         setting_type = "runtime-global",
         default_value = 100,
-        minimum_value = 1,
-        maximum_value = 10000
+        minimum_value = 0,
+        maximum_value = 100000
     },{ -- 是否允许蓝图
         type = "bool-setting",
         name = "canBluePrint",
