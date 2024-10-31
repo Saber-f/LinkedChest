@@ -210,7 +210,7 @@ function on_gui_elem_changed(event)
                 local linkbox = global.players_Linked[player.name].Linked
                 number = name2id(force.name,item.name, linkbox.surface)
 				linkbox.link_id = number
-                force.print({"",player.name.."手动设置关联ID:"..number.."->",{item.localised_name[1]}},{r = 0, g = 0.75, b = 0.0})
+                force.print({"",player.name.."手动设置关联ID:"..number.."->[item="..item.name.."]"},{r = 0, g = 0.75, b = 0.0})
                 return
             end
 		end
