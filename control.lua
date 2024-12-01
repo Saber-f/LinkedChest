@@ -360,8 +360,10 @@ function set_link(event)
         if entity.link_id == 0 then
             auto_set_link(entity)
         end
-        local link_id = entity.link_id - entity.link_id % 2^6 + entity.surface.index
-        entity.link_id = link_id
+        if (settings.global["checkCount"].value > 0) then
+            local link_id = entity.link_id - entity.link_id % 2^6 + entity.surface.index
+            entity.link_id = link_id
+        end
         table.insert(global.linkboxs, entity)   -- 添加到关联箱列表
     end
 end
