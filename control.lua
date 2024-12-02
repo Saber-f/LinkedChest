@@ -364,7 +364,15 @@ function set_link(event)
             local link_id = entity.link_id - entity.link_id % 2^6 + entity.surface.index
             entity.link_id = link_id
         end
-        table.insert(global.linkboxs, entity)   -- 添加到关联箱列表
+        local checkCount = settings.global["checkCount"].value
+        if checkCount > 0 then
+            if global.linkboxs == nil then
+                global.linkboxs = {}
+            end
+            table.insert(global.linkboxs, entity)   -- 添加到关联箱列表
+        else
+            global.linkboxs = {}
+        end
     end
 end
 
