@@ -136,7 +136,11 @@ function name2id(force,name,surface)
     else
         id = global.name2id[force][name]
     end
-    id = id * 2^6 + surface.index
+    local index = 1
+    if settings.global["checkCount"].value > 0 then
+        index = surface.index
+    end
+    id = id * 2^6 + index
     return id
 end
 
@@ -352,6 +356,7 @@ function tongbu(event)
         check_linkbox(checkCount)
     end
 end
+
 
 
 function set_link(event)
@@ -633,7 +638,6 @@ Event.addListener(defines.events.on_player_joined_game,on_player_join)
 
 Event.addListener(defines.events.on_space_platform_built_entity,set_link)    -- 太空平台建造物品
 Event.addListener(defines.events.on_built_entity,set_link)    -- 玩家建造物品
-Event.addListener(defines.events.on_robot_built_entity,set_link)  -- 机器人建造物品
 Event.addListener(defines.events.on_gui_elem_changed, on_gui_elem_changed)
 Event.addListener(defines.events.on_gui_opened, on_gui_opened)
 Event.addListener(defines.events.on_tick, tongbu)
