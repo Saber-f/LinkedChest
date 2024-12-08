@@ -65,5 +65,10 @@ data:extend({
         name = "canBluePrint",
         setting_type = "runtime-global",
         default_value = true
+    },{ -- 是否禁用钩爪
+        type = "bool-setting",
+        name = "disableGrapplingHook",
+        setting_type = "startup",
+        default_value = false
     }
 })

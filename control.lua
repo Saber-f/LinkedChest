@@ -337,7 +337,7 @@ end
 -- 同步数据
 function tongbu(event)
     -- 狗爪
-    if global.tick_tasks then
+    if not settings.startup["disableGrapplingHook"].value and global.tick_tasks then
         for _, tick_task in pairs(global.tick_tasks) do
         if tick_task.type == "grappling-gun" then
             Grapple.tick_task_grappling_gun(tick_task)

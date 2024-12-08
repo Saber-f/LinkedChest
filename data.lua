@@ -38,6 +38,8 @@ data:extend({
   },
 })
 
-require("prototypes/entity/weapon-grappling")
-require("prototypes/item/weapon-grappling")
-require("prototypes/recipe/weapon-grappling")
+if not settings.startup["disableGrapplingHook"].value then
+  require("prototypes/entity/weapon-grappling")
+  require("prototypes/item/weapon-grappling")
+  require("prototypes/recipe/weapon-grappling")
+end
