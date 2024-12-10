@@ -364,7 +364,12 @@ function get_short_parts(machine,pickup_or_drop)
         for _, part in pairs(recipe.products) do
             if part.type ~= "fluid" then
                 table.insert(parts, {name = part.name, quality = quality_prototype.name})
-                if quality_prototype.next then
+            end
+        end
+        
+        if quality_prototype.next then
+            for _, part in pairs(recipe.products) do
+                if part.type ~= "fluid" then
                     table.insert(parts, {name = part.name, quality = quality_prototype.next.name})
                 end
             end
