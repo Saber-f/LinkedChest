@@ -53,8 +53,12 @@ local function name2id(type,name,quality,surface)
         storage.name2id = {}
     end
 
-    local full_name = type_str .. name  .. quality_str
+    -- 兼容旧设置
+    if quality_str == "normal" then
+        quality_str = ""
+    end
 
+    local full_name = type_str .. name  .. quality_str
     if storage.name2id[full_name] == nil then
         local n = 0
         for i=1,#full_name do
