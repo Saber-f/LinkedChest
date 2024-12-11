@@ -95,7 +95,7 @@ local function on_gui_elem_changed(event)
 
 	local player = game.players[event.player_index]
 
-    if storage.players_Linked == nil or storage.players_Linked[player.name] == nil then
+    if storage.players_Linked == nil or storage.players_Linked[player.name] == nil or elem_value == nil then
         return
     end
     local linkbox = storage.players_Linked[player.name].Linked
