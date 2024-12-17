@@ -119,7 +119,9 @@ local function set_link_show(player, frame, gui_name, entity)
     end
     link_id = (link_id-index) / 2^6 -- 还原
     
-    field.elem_value = storage.name2id[link_id]
+    if (storage.name2id) then
+        field.elem_value = storage.name2id[link_id]
+    end
 end
 
 
