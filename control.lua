@@ -402,23 +402,15 @@ end
 
 -- 根据爪子白名单设置关联箱linkid
 function set_linkid_by_inserts(linked_chest)
-    game.print("set_linkid_by_inserts")
     local Inserters = get_near_inserts(linked_chest)
     local drop_target = nil
     local pickup_target = nil
-    game.print("Inserters:"..#Inserters)
     for _, inserter in pairs(Inserters) do
         if inserter.inserter_filter_mode == "whitelist"  and inserter.use_filters and inserter.get_filter(1) then
-            game.print("inserter.drop_target")
-            game.print(inserter.drop_target)
-            game.print("inserter.pickup_target")
-            game.print(inserter.pickup_target)
             if inserter.drop_target == linked_chest then
-                game.print("drop_target")
                 drop_target = inserter
             end
             if inserter.pickup_target == linked_chest then
-                game.print("pickup_target")
                 pickup_target = inserter
             end
         end
