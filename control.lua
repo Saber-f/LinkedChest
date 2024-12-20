@@ -238,11 +238,25 @@ function tongbu(event)
     if checkCount > 0 then
         check_linkbox(checkCount)
     end
+
+
+    -- 检查爪子白名单
+    if storage.set_linkid_by_inserts then
+        local new_set_linkid_by_inserts = {}
+        for key, info in pairs(storage.set_linkid_by_inserts) do
+            if info.time < game.tick then
+                set_linkid_by_inserts(info.entity)
+            else
+                table.insert(new_set_linkid_by_inserts, info)
+            end
+        end
+        storage.set_linkid_by_inserts = new_set_linkid_by_inserts
+    end
 end
 
 
 
-function set_link(event)
+local function set_link(event)
     local entity = event.entity
     if entity and entity.valid and (entity.name == "Oem-linked-chest") then
         if entity.link_id == 0 then
@@ -271,58 +285,21 @@ end
 
 
 --------------------------------------------- 自动变动linkid ---------------------------------------------
--- 当手动放置联接箱时，检测周围3格内的爪子
--- ->找到抓取位置为联接箱位置的爪子
--- ->当爪子放置目标是CraftingMachine时
--- ->读取机器配方的原料表和机器大小+2范围内的抓取放置目标为机器、抓取目标为联接箱的爪子
--- ->读取爪子抓取的链接箱链接的物品并从原料表中减去
--- ->从剩下的原料表中选择第一个name2id，设置为联接箱的linkid
--- 若链接箱是放置目标则反过
-
-function set_linkid(linked_chest,pickup_or_drop)-- pickup_or_drop:"pickup"从联接箱到机器，"drop"从机器到联接箱
-	local inserts = get_valid_inserts_machines(linked_chest,pickup_or_drop)
-	if #inserts > 0 then
-        local surface = linked_chest.surface
-		for _,insert in pairs(inserts) do
-            insert.entity.inserter_filter_mode = "whitelist"
-            insert.entity.use_filters = true
-			inserts = {insert}-- 优先筛选机械臂
-            local machine = insert.machine
-            local parts = get_short_parts(machine,pickup_or_drop)
-            if #parts ~= 0 then
-                linked_chest.link_id = name2id(nil, parts[1].name, parts[1].quality, surface)
-                insert.entity.set_filter(1, {name = parts[1].name, quality = parts[1].quality})
-                return nil
-            end
-		end
-
-		local machine = inserts[1].machine
-		local parts = get_short_parts(machine,pickup_or_drop)
-		if #parts ~= 0 then
-			linked_chest.link_id = name2id(nil, parts[1].name, parts[1].quality, surface)
-			return nil
-		end
-	end
-	return 1
-end
-
-function auto_set_link(entity)
-	if set_linkid(entity,"drop") then
-		set_linkid(entity,"pickup")
-	end
+-- 获取附近的爪子
+local function get_near_inserts(entity)
+    local distance = 3
+    local pos = entity.position
+    local surface = entity.surface
+    local search_area = {{pos.x - distance, pos.y - distance}, {pos.x + distance, pos.y + distance}}
+    local Inserters = surface.find_entities_filtered {area = search_area,type = "inserter"}
+    return Inserters
 end
 
 
-
-function get_valid_inserts_machines(entity,pickup_or_drop)
-	local distance = 3
-	local pos = entity.position
-	local surface = entity.surface
-	local search_area = {{pos.x - distance, pos.y - distance}, {pos.x + distance, pos.y + distance}}
-	local Inserters = surface.find_entities_filtered {
-		area = search_area,
-		type = "inserter"
-	}
+-- 获取有效的爪子
+local function get_valid_inserts_machines(entity,pickup_or_drop)
+    local Inserters = get_near_inserts(entity)
+    local pos = entity.position
 	local inserts = {}
 	for _, Inserter in pairs(Inserters) do
 		
@@ -349,9 +326,8 @@ function get_valid_inserts_machines(entity,pickup_or_drop)
 	return inserts
 end
 
-
-
-function get_short_parts(machine,pickup_or_drop)
+-- 获取剩余原料或者产品
+local function get_short_parts(machine,pickup_or_drop)
 	local distance = 2
 	local surface = machine.surface
 	local box = machine.bounding_box
@@ -372,17 +348,9 @@ function get_short_parts(machine,pickup_or_drop)
                 table.insert(parts, {name = part.name, quality = quality_prototype.name})
             end
         end
-        
-        if quality_prototype.next then
-            for _, part in pairs(recipe.products) do
-                if part.type ~= "fluid" then
-                    table.insert(parts, {name = part.name, quality = quality_prototype.next.name})
-                end
-            end
-        end
 	end
 
--- 根据周围的爪子移除parts里的元素
+    -- 根据周围的爪子移除parts里的元素
 	for _,Inserter in pairs(Inserters) do
 		local pickup_target = Inserter.pickup_target
 		local drop_target = Inserter.drop_target
@@ -411,7 +379,77 @@ function get_short_parts(machine,pickup_or_drop)
 	return parts
 end
 
+-- 根据配方自动设置关联箱linkeid
+local function set_linkid(linked_chest,pickup_or_drop)-- pickup_or_drop:"pickup"从联接箱到机器，"drop"从机器到联接箱
+	local inserts = get_valid_inserts_machines(linked_chest,pickup_or_drop)
+	if #inserts > 0 then
+        local surface = linked_chest.surface
+		for _,insert in pairs(inserts) do
+            insert.entity.inserter_filter_mode = "whitelist"
+            insert.entity.use_filters = true
+            local machine = insert.machine
+            local parts = get_short_parts(machine,pickup_or_drop)
+            if #parts ~= 0 then
+                linked_chest.link_id = name2id(nil, parts[1].name, parts[1].quality, surface)
+                insert.entity.set_filter(1, {name = parts[1].name, quality = parts[1].quality})
+            else
+                insert.entity.use_filters = false
+            end
+		end
+	end
+	return 1
+end
 
+-- 根据爪子白名单设置关联箱linkid
+function set_linkid_by_inserts(linked_chest)
+    game.print("set_linkid_by_inserts")
+    local Inserters = get_near_inserts(linked_chest)
+    local drop_target = nil
+    local pickup_target = nil
+    game.print("Inserters:"..#Inserters)
+    for _, inserter in pairs(Inserters) do
+        if inserter.inserter_filter_mode == "whitelist"  and inserter.use_filters and inserter.get_filter(1) then
+            game.print("inserter.drop_target")
+            game.print(inserter.drop_target)
+            game.print("inserter.pickup_target")
+            game.print(inserter.pickup_target)
+            if inserter.drop_target == linked_chest then
+                game.print("drop_target")
+                drop_target = inserter
+            end
+            if inserter.pickup_target == linked_chest then
+                game.print("pickup_target")
+                pickup_target = inserter
+            end
+        end
+    end
+
+    local surface = linked_chest.surface
+    if drop_target then  -- 如果向关联箱放东西
+        linked_chest.link_id = name2id(nil, drop_target.get_filter(1).name, drop_target.get_filter(1).quality, surface)
+        return nil
+    end
+
+    if pickup_target then  -- 如果从关联箱取东西
+        linked_chest.link_id = name2id(nil, pickup_target.get_filter(1).name, pickup_target.get_filter(1).quality, surface)
+        return nil
+    end
+
+    return 1
+end
+
+
+-- 自动设置关联箱linkid
+function auto_set_link(entity)
+	if not set_linkid(entity,"drop") then return end
+	if not set_linkid(entity,"pickup") then return end
+
+    -- 根据爪子白名单设置关联箱linkid
+    if storage.set_linkid_by_inserts == nil then
+        storage.set_linkid_by_inserts = {}
+    end
+    table.insert(storage.set_linkid_by_inserts, {entity = entity, time = game.tick})
+end
 
 function table.remove_by_values(t, values)
 	newt = {}
