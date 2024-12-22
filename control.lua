@@ -103,8 +103,10 @@ local function on_gui_elem_changed(event)
         return
     end
     local linkbox = storage.players_Linked[player.name].Linked
-    local number = name2id(elem_value.type,elem_value.name, elem_value.quality, linkbox.surface)
-    linkbox.link_id = number
+    if linkbox ~= nil then
+        local number = name2id(elem_value.type,elem_value.name, elem_value.quality, linkbox.surface)
+        linkbox.link_id = number
+    end
 end
 
 
