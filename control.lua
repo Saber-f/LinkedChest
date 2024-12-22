@@ -49,6 +49,7 @@ local function name2id(type,name,quality,surface)
     local type_str = type or ""
     local quality_str = quality or ""
     local id = 0
+    
     if storage.name2id == nil then
         storage.name2id = {}
     end
@@ -58,20 +59,23 @@ local function name2id(type,name,quality,surface)
         quality_str = ""
     end
 
-    local full_name = type_str .. name  .. quality_str
-    if storage.name2id[full_name] == nil then
-        local n = 0
-        for i=1,#full_name do
-            n = string.byte(string.sub(full_name,i,i))
-            id = id * n
-            id = id + n
-            id = id%2^26
+    if name ~= nil then
+        local full_name = type_str .. name  .. quality_str
+        if storage.name2id[full_name] == nil then
+            local n = 0
+            for i=1,#full_name do
+                n = string.byte(string.sub(full_name,i,i))
+                id = id * n
+                id = id + n
+                id = id%2^26
+            end
+            storage.name2id[full_name] = id
+            storage.name2id[id] = {type = type, name = name, quality = quality}
+        else
+            id = storage.name2id[full_name]
         end
-        storage.name2id[full_name] = id
-        storage.name2id[id] = {type = type, name = name, quality = quality}
-    else
-        id = storage.name2id[full_name]
     end
+
     local index = 1
     if settings.global["checkCount"].value > 0 then
         index = surface.index
