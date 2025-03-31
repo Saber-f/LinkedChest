@@ -26,10 +26,26 @@ data.raw.ammo["rocket"].ammo_type.action.action_delivery.starting_speed = 1
 data.raw.ammo["explosive-rocket"].ammo_type.action.action_delivery.starting_speed = 1
 
 
--- 特斯拉附带激光伤害
-local old = data.raw.beam["chain-tesla-turret-beam-start"].action.action_delivery.target_effects
-data.raw.beam["chain-tesla-turret-beam-start"].action.action_delivery.target_effect = table.insert(old, {type = "damage", damage = {amount = 120, type = "laser"}})
+-- 中小型电击抗性100%->0%
+--medium-metallic-asteroid
+--asteroid
 
-local old2 = data.raw.beam["chain-tesla-turret-beam-bounce"].action.action_delivery.target_effects
-data.raw.beam["chain-tesla-turret-beam-bounce"].action.action_delivery.target_effect = table.insert(old2, {type = "damage", damage = {amount = 120, type = "laser"}})
-
+local size = {"small", "medium"}
+local type = {"metallic", "carbonic", "oxide", "promethium"}
+for _, size in pairs(size) do
+    for _, type in pairs(type) do
+        local name = size .. "-" .. type .. "-asteroid"
+        local new_resistances = {}
+        for _, resistance in pairs(data.raw["asteroid"][name].resistances) do
+            if resistance.type == "electric" then
+                table.insert(new_resistances, {
+                    type = "electric",
+                    percent = 1,
+                })
+            else
+                table.insert(new_resistances, resistance)
+            end
+        end
+        data.raw["asteroid"][name].resistances = new_resistances
+    end
+end
