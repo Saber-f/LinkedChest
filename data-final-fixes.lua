@@ -49,3 +49,45 @@ for _, size in pairs(size) do
         data.raw["asteroid"][name].resistances = new_resistances
     end
 end
+
+-- 增加电线杆范围
+data.raw["electric-pole"]["small-electric-pole"].maximum_wire_distance = 16
+data.raw["electric-pole"]["small-electric-pole"].supply_area_distance = 8
+data.raw["electric-pole"]["medium-electric-pole"].maximum_wire_distance = 32
+data.raw["electric-pole"]["medium-electric-pole"].supply_area_distance = 16
+data.raw["electric-pole"]["substation"].maximum_wire_distance = 64
+data.raw["electric-pole"]["substation"].supply_area_distance = 42
+
+
+-- 增加大推力推进器
+data.raw.thruster.thruster.max_performance = {
+    fluid_volume = 1,
+    fluid_usage = 1,
+    effectivity = 1,
+}
+
+local old_name = "thruster"
+for i = 2, 9 do
+    local new_name = "thruster" .. i
+    local new_thruster = util.table.deepcopy(data.raw.thruster.thruster)
+    new_thruster.name = new_name
+    new_thruster.max_performance = {
+        fluid_volume = 1,
+        fluid_usage = 2^(i-1),
+        effectivity = 2^(i-1),
+    }
+    local new_item = util.table.deepcopy(data.raw.item.thruster)
+    new_item.name = new_name
+    new_item.place_result = new_name
+    local new_recipe = util.table.deepcopy(data.raw.recipe.thruster)
+    new_recipe.enabled = true
+    new_recipe.name = new_name
+    new_recipe.ingredients = {{type="item", name=old_name, amount=10}}
+    new_recipe.results = {{type="item", name=new_name, amount=1}}
+    old_name = new_name
+    data:extend({
+        new_thruster,
+        new_item,
+        new_recipe,
+    })
+end

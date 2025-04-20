@@ -35,7 +35,7 @@ data:extend({
       {type="item", name ="copper-plate", amount = 1},
     },
     results = {{type="item", name="Oem-linked-chest", amount=10}}
-  },
+  }
 })
 
 if not settings.startup["disableGrapplingHook"].value then
