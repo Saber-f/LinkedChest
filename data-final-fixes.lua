@@ -71,6 +71,7 @@ for i = 2, 9 do
     local new_name = "thruster" .. i
     local new_thruster = util.table.deepcopy(data.raw.thruster.thruster)
     new_thruster.name = new_name
+    new_thruster.minable.result = new_name
     new_thruster.max_performance = {
         fluid_volume = 1,
         fluid_usage = 2^(i-1),
