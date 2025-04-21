@@ -92,3 +92,160 @@ for i = 2, 9 do
         new_recipe,
     })
 end
+
+-- 增加机枪射程
+data.raw["ammo-turret"]["gun-turret"].attack_parameters.range = 24
+
+
+-- 调整边缘-破碎陨石出现
+local asteroid_spawn_definitions = data.raw['space-connection'].asteroid_spawn_definitions
+
+local spawn_points1 = {
+    [1] = {
+        distance = 0,
+        probability = 0,
+        speed = 0.05,
+    },
+    [2] = {
+        distance = 0.2,
+        probability = 0.03,
+        speed = 0.05,
+    },
+    [3] = {
+        distance = 0.201,
+        probability = 0,
+        speed = 0.05,
+    },
+    [4] = {
+        distance = 0.4,
+        probability = 0,
+        speed = 0.05,
+    },
+    [5] = {
+        distance = 0.401,
+        probability = 0.03,
+        speed = 0.05,
+    },
+    [6] = {
+        distance = 0.6,
+        probability = 0.03,
+        speed = 0.05,
+    },
+    [7] = {
+        distance = 0.601,
+        probability = 0,
+        speed = 0.05,
+    },
+    [8] = {
+        distance = 1,
+        probability = 0,
+        speed = 0.05,
+    }
+}
+local spawn_points2 = {
+    [1] = {
+        distance = 0,
+        probability = 0,
+        speed = 0.05,
+    },
+    [2] = {
+        distance = 0.2,
+        probability = 0.04,
+        speed = 0.05,
+    },
+    [3] = {
+        distance = 0.4,
+        probability = 0.04,
+        speed = 0.05,
+    },
+    [4] = {
+        distance = 0.401,
+        probability = 0,
+        speed = 0.05,
+    },
+    [5] = {
+        distance = 1,
+        probability = 0,
+        speed = 0.05,
+    }
+}
+local spawn_points3 = {
+    [1] = { 
+        distance = 0,
+        probability = 0,
+        speed = 0.05,
+    },
+    [2] = {
+        distance = 0.2,
+        probability = 0.02,
+        speed = 0.05,
+    },
+    [3] = {
+        distance = 0.201,
+        probability = 0,
+        speed = 0.05,
+    },
+    [4] = {
+        distance = 0.6,
+        probability = 0,
+        speed = 0.05,
+    },
+    [5] = {
+        distance = 0.601,
+        probability = 0.02,
+        speed = 0.05,
+    },
+    [6] = {
+        distance = 0.8,
+        probability = 0.02,
+        speed = 0.05,
+    },
+    [7] = {
+        distance = 0.801,
+        probability = 0,
+        speed = 0.05,
+    },
+    [8] = {
+        distance = 1,
+        probability = 0,
+        speed = 0.05,
+    }
+}
+local spawn_points4 = {
+    [1] = {
+        distance = 0,
+        probability = 0,
+        speed = 0.05,
+    },
+    [2] = {
+        distance = 0.5,
+        probability = 0.01,
+        speed = 0.05,
+    },
+    [3] = {
+        distance = 0.999,
+        probability = 0.05,
+        speed = 0.05,
+    },
+    [4] = {
+        distance = 1,
+        probability = 0,
+        speed = 0.05,
+    }
+}
+
+
+
+
+
+
+
+
+
+asteroid_spawn_definitions[1].spawn_points = spawn_points1  -- 金属
+asteroid_spawn_definitions[2].spawn_points = spawn_points2  -- 碳
+asteroid_spawn_definitions[3].spawn_points = spawn_points3  -- 冰
+asteroid_spawn_definitions[4].spawn_points = spawn_points4  -- 红色
+
+
+
