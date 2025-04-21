@@ -94,11 +94,13 @@ for i = 2, 9 do
 end
 
 -- 增加机枪射程
-data.raw["ammo-turret"]["gun-turret"].attack_parameters.range = 24
+data.raw["ammo-turret"]["gun-turret"].attack_parameters.range = 26
+data.raw["electric-turret"]["laser-turret"].attack_parameters.range = 26
+data.raw["electric-turret"]["tesla-turret"].attack_parameters.range = 36
 
 
 -- 调整边缘-破碎陨石出现
-local asteroid_spawn_definitions = data.raw['space-connection'].asteroid_spawn_definitions
+local asteroid_spawn_definitions = data.raw['space-connection']['solar-system-edge-shattered-planet'].asteroid_spawn_definitions
 
 local spawn_points1 = {
     [1] = {
@@ -219,12 +221,12 @@ local spawn_points4 = {
     },
     [2] = {
         distance = 0.5,
-        probability = 0.01,
+        probability = 0,
         speed = 0.05,
     },
     [3] = {
         distance = 0.999,
-        probability = 0.05,
+        probability = 0.02,
         speed = 0.05,
     },
     [4] = {
@@ -233,14 +235,6 @@ local spawn_points4 = {
         speed = 0.05,
     }
 }
-
-
-
-
-
-
-
-
 
 asteroid_spawn_definitions[1].spawn_points = spawn_points1  -- 金属
 asteroid_spawn_definitions[2].spawn_points = spawn_points2  -- 碳
