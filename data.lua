@@ -35,6 +35,78 @@ data:extend({
       {type="item", name ="copper-plate", amount = 1},
     },
     results = {{type="item", name="Oem-linked-chest", amount=10}}
+  },
+  {
+    type = "recipe",
+    name = "jellynut-seed-recipe",
+    icon = "__space-age__/graphics/icons/jellynut-seed.png",
+    enabled = true,
+    energy_required = 300,
+    ingredients =
+    {
+      {type="item", name ="stone", amount = 1000},
+    },
+    results = {{type="item", name="jellynut-seed", amount=1}}
+  },
+  {
+    type = "recipe",
+    name = "yumako-seed-recipe",
+    icon = "__space-age__/graphics/icons/yumako-seed.png",
+    enabled = true,
+    energy_required = 300,
+    ingredients =
+    {
+      {type="item", name ="stone", amount = 1000},
+    },
+    results = {{type="item", name="yumako-seed", amount=1}}
+  },
+  {
+    type = "recipe",
+    name = "tree-seed-recipe",
+    icon = "__space-age__/graphics/icons/tree-seed.png",
+    enabled = true,
+    energy_required = 300,
+    ingredients =
+    {
+      {type="item", name ="stone", amount = 1000},
+    },
+    results = {{type="item", name="tree-seed", amount=1}}
+  },
+  {
+    type = "recipe",
+    name = "pentapod-egg-recipe",
+    enabled = true,
+    energy_required = 300,
+    ingredients =
+    {
+      {type="item", name ="stone", amount = 1000},
+    },
+    results = {
+      {type="item", name="pentapod-egg", amount=1},
+    }
+  },
+  {
+    type = "item",
+    name = "biter-spwaner",
+    icon = "__base__/graphics/icons/biter-spawner.png",
+    subgroup = "storage",
+    order = "a[items]-a[Oem-linked-chest]",
+    place_result = "biter-spawner",
+    stack_size = 10
+  },
+  {
+    type = "recipe",
+    name = "spwaner-recipe",
+    enabled = true,
+    group = "storage",
+    energy_required = 300,
+    ingredients =
+    {
+      {type="item", name ="stone", amount = 1000},
+    },
+    results = {
+      {type="item", name="biter-spwaner", amount=1},
+    }
   }
 })
 

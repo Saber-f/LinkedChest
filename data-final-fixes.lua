@@ -100,6 +100,7 @@ data.raw["electric-turret"]["tesla-turret"].attack_parameters.range = 36
 
 
 -- 调整边缘-破碎陨石出现
+data.raw['space-connection']['solar-system-edge-shattered-planet'].length = 5000000
 local asteroid_spawn_definitions = data.raw['space-connection']['solar-system-edge-shattered-planet'].asteroid_spawn_definitions
 
 local spawn_points1 = {
@@ -225,11 +226,21 @@ local spawn_points4 = {
         speed = 0.05,
     },
     [3] = {
-        distance = 0.999,
+        distance = 0.95,
         probability = 0.02,
         speed = 0.05,
     },
     [4] = {
+        distance = 0.951,
+        probability = 0.5,
+        speed = 0.05,
+    },
+    [5] = {
+        distance = 0.999,
+        probability = 0.5,
+        speed = 0.05,
+    },
+    [6] = {
         distance = 1,
         probability = 0,
         speed = 0.05,
