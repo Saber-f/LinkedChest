@@ -22,13 +22,54 @@ data.raw.roboport.roboport.logistics_connection_distance = 64
 data.raw["cargo-landing-pad"]["cargo-landing-pad"].radar_range = 2
 
 -- 火箭弹初始速度
-data.raw.ammo["rocket"].ammo_type.action.action_delivery.starting_speed = 1
-data.raw.ammo["explosive-rocket"].ammo_type.action.action_delivery.starting_speed = 1
+data.raw.ammo["rocket"].ammo_type.action.action_delivery.starting_speed = 1.5
+data.raw.ammo["explosive-rocket"].ammo_type.action.action_delivery.starting_speed = 1.5
 
+-- 修改炮塔
+data.raw["ammo-turret"]["gun-turret"].rotation_speed = 0.04
+data.raw["ammo-turret"]["gun-turret"].rotation_speed = 0.2
+data.raw["ammo-turret"]["gun-turret"].rotation_speed = 0.2
 
--- 中小型电击抗性100%->0%
---medium-metallic-asteroid
---asteroid
+data.raw["electric-turret"]["laser-turret"].rotation_speed = 0.04
+data.raw["electric-turret"]["laser-turret"].rotation_speed = 0.2
+data.raw["electric-turret"]["laser-turret"].rotation_speed = 0.2
+
+local tesla_turret = data.raw["electric-turret"]["tesla-turret"]
+tesla_turret.rotation_speed = 0.03
+tesla_turret.rotation_speed = 0.15
+tesla_turret.rotation_speed = 0.15
+tesla_turret.attack_parameters.cooldown = 60
+tesla_turret.collision_box = {{-1.2, -1.2 }, {1.2, 1.2}}
+tesla_turret.selection_box = {{-1.5, -1.5 }, {1.5, 1.5}}
+tesla_turret.energy_source.input_flow_limit = "13MW"
+local layers_list = {
+    tesla_turret.folded_animation.layers,
+    tesla_turret.preparing_animation.layers,
+    tesla_turret.prepared_animation.layers,
+    tesla_turret.ending_attack_animation.layers,
+    tesla_turret.folding_animation.layers,
+    tesla_turret.energy_glow_animation.layers,
+    tesla_turret.resource_indicator_animation.layers,
+}
+for _, visualisation in pairs(tesla_turret.graphics_set.base_visualisation) do
+    table.insert(layers_list, visualisation.animation.layers)
+end
+
+for _, layers in pairs(layers_list) do
+    for _, layer in pairs(layers) do
+        layer.scale = layer.scale * 0.7
+        layer.shift = {layer.shift[1] * 0.7, layer.shift[2] * 0.7}
+    end
+end
+
+data.raw["ammo-turret"]["rocket-turret"].rotation_speed = 0.03
+data.raw["ammo-turret"]["rocket-turret"].rotation_speed = 0.15
+data.raw["ammo-turret"]["rocket-turret"].rotation_speed = 0.15
+
+data.raw["ammo-turret"]["railgun-turret"].rotation_speed = 0.03
+data.raw["ammo-turret"]["railgun-turret"].rotation_speed = 0.15
+data.raw["ammo-turret"]["railgun-turret"].rotation_speed = 0.15
+
 
 local size = {"small", "medium"}
 local type = {"metallic", "carbonic", "oxide", "promethium"}
@@ -40,7 +81,7 @@ for _, size in pairs(size) do
             if resistance.type == "electric" then
                 table.insert(new_resistances, {
                     type = "electric",
-                    percent = 1,
+                    percent = 10,
                 })
             else
                 table.insert(new_resistances, resistance)
