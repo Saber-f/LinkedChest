@@ -26,19 +26,31 @@ data.raw.ammo["rocket"].ammo_type.action.action_delivery.starting_speed = 1.5
 data.raw.ammo["explosive-rocket"].ammo_type.action.action_delivery.starting_speed = 1.5
 
 -- 修改炮塔
-data.raw["ammo-turret"]["gun-turret"].rotation_speed = 0.04
-data.raw["ammo-turret"]["gun-turret"].rotation_speed = 0.2
-data.raw["ammo-turret"]["gun-turret"].rotation_speed = 0.2
+data.raw["ammo-turret"]["gun-turret"].rotation_speed = 0.03
+data.raw["ammo-turret"]["gun-turret"].preparing_speed = 0.15
+data.raw["ammo-turret"]["gun-turret"].folding_speed = 0.15
 
-data.raw["electric-turret"]["laser-turret"].rotation_speed = 0.04
-data.raw["electric-turret"]["laser-turret"].rotation_speed = 0.2
-data.raw["electric-turret"]["laser-turret"].rotation_speed = 0.2
+data.raw["electric-turret"]["laser-turret"].rotation_speed = 0.03
+data.raw["electric-turret"]["laser-turret"].preparing_speed = 0.15
+data.raw["electric-turret"]["laser-turret"].folding_speed = 0.15
+
+data.raw["ammo-turret"]["rocket-turret"].rotation_speed = 0.02
+data.raw["ammo-turret"]["rocket-turret"].preparing_speed = 0.1
+data.raw["ammo-turret"]["rocket-turret"].folding_speed = 0.1
+
+data.raw["ammo-turret"]["railgun-turret"].rotation_speed = 0.02
+data.raw["ammo-turret"]["railgun-turret"].preparing_speed = 0.1
+data.raw["ammo-turret"]["railgun-turret"].folding_speed = 0.1
 
 local tesla_turret = data.raw["electric-turret"]["tesla-turret"]
-tesla_turret.rotation_speed = 0.03
-tesla_turret.rotation_speed = 0.15
-tesla_turret.rotation_speed = 0.15
+tesla_turret.rotation_speed = 0.02
+tesla_turret.preparing_speed = 0.1
+tesla_turret.folding_speed = 0.1
 tesla_turret.attack_parameters.cooldown = 60
+tesla_turret.attack_parameters.source_offset = {0, -0.385}
+local target_effects = tesla_turret.attack_parameters.ammo_type.action.action_delivery.target_effects
+target_effects[2].action.action_delivery.max_length = 54
+target_effects[2].action.action_delivery.source_offset = {0, -1.82}
 tesla_turret.collision_box = {{-1.2, -1.2 }, {1.2, 1.2}}
 tesla_turret.selection_box = {{-1.5, -1.5 }, {1.5, 1.5}}
 tesla_turret.energy_source.input_flow_limit = "13MW"
@@ -61,14 +73,6 @@ for _, layers in pairs(layers_list) do
         layer.shift = {layer.shift[1] * 0.7, layer.shift[2] * 0.7}
     end
 end
-
-data.raw["ammo-turret"]["rocket-turret"].rotation_speed = 0.03
-data.raw["ammo-turret"]["rocket-turret"].rotation_speed = 0.15
-data.raw["ammo-turret"]["rocket-turret"].rotation_speed = 0.15
-
-data.raw["ammo-turret"]["railgun-turret"].rotation_speed = 0.03
-data.raw["ammo-turret"]["railgun-turret"].rotation_speed = 0.15
-data.raw["ammo-turret"]["railgun-turret"].rotation_speed = 0.15
 
 
 local size = {"small", "medium"}
@@ -144,154 +148,70 @@ data.raw["electric-turret"]["tesla-turret"].attack_parameters.range = 36
 data.raw['space-connection']['solar-system-edge-shattered-planet'].length = 5000000
 local asteroid_spawn_definitions = data.raw['space-connection']['solar-system-edge-shattered-planet'].asteroid_spawn_definitions
 
-local spawn_points1 = {
-    [1] = {
-        distance = 0,
-        probability = 0,
-        speed = 0.05,
-    },
-    [2] = {
-        distance = 0.2,
-        probability = 0.03,
-        speed = 0.05,
-    },
-    [3] = {
-        distance = 0.201,
-        probability = 0,
-        speed = 0.05,
-    },
-    [4] = {
-        distance = 0.4,
-        probability = 0,
-        speed = 0.05,
-    },
-    [5] = {
-        distance = 0.401,
-        probability = 0.03,
-        speed = 0.05,
-    },
-    [6] = {
-        distance = 0.6,
-        probability = 0.03,
-        speed = 0.05,
-    },
-    [7] = {
-        distance = 0.601,
-        probability = 0,
-        speed = 0.05,
-    },
-    [8] = {
-        distance = 1,
-        probability = 0,
-        speed = 0.05,
-    }
-}
-local spawn_points2 = {
-    [1] = {
-        distance = 0,
-        probability = 0,
-        speed = 0.05,
-    },
-    [2] = {
-        distance = 0.2,
-        probability = 0.04,
-        speed = 0.05,
-    },
-    [3] = {
-        distance = 0.4,
-        probability = 0.04,
-        speed = 0.05,
-    },
-    [4] = {
-        distance = 0.401,
-        probability = 0,
-        speed = 0.05,
-    },
-    [5] = {
-        distance = 1,
-        probability = 0,
-        speed = 0.05,
-    }
-}
-local spawn_points3 = {
-    [1] = { 
-        distance = 0,
-        probability = 0,
-        speed = 0.05,
-    },
-    [2] = {
-        distance = 0.2,
-        probability = 0.02,
-        speed = 0.05,
-    },
-    [3] = {
-        distance = 0.201,
-        probability = 0,
-        speed = 0.05,
-    },
-    [4] = {
-        distance = 0.6,
-        probability = 0,
-        speed = 0.05,
-    },
-    [5] = {
-        distance = 0.601,
-        probability = 0.02,
-        speed = 0.05,
-    },
-    [6] = {
-        distance = 0.8,
-        probability = 0.02,
-        speed = 0.05,
-    },
-    [7] = {
-        distance = 0.801,
-        probability = 0,
-        speed = 0.05,
-    },
-    [8] = {
-        distance = 1,
-        probability = 0,
-        speed = 0.05,
-    }
-}
-local spawn_points4 = {
-    [1] = {
-        distance = 0,
-        probability = 0,
-        speed = 0.05,
-    },
-    [2] = {
-        distance = 0.5,
-        probability = 0,
-        speed = 0.05,
-    },
-    [3] = {
-        distance = 0.95,
-        probability = 0.02,
-        speed = 0.05,
-    },
-    [4] = {
-        distance = 0.951,
-        probability = 0.5,
-        speed = 0.05,
-    },
-    [5] = {
-        distance = 0.999,
-        probability = 0.5,
-        speed = 0.05,
-    },
-    [6] = {
-        distance = 1,
-        probability = 0,
-        speed = 0.05,
-    }
+
+-- 碳
+local p1 = {
+    {0.2, 0.16},
+    {0.4, 0.16},
+    {0.400001, 0}
 }
 
-asteroid_spawn_definitions[1].spawn_points = spawn_points1  -- 金属
-asteroid_spawn_definitions[2].spawn_points = spawn_points2  -- 碳
-asteroid_spawn_definitions[3].spawn_points = spawn_points3  -- 冰
-asteroid_spawn_definitions[4].spawn_points = spawn_points4  -- 红色
+-- 金属
+local p2 = {
+    {0.2, 0.12},
+    {0.200001, 0},
+    {0.4, 0},
+    {0.400001, 0.12},
+    {0.6, 0.12},
+    {0.600001, 0},
+}
 
+-- 冰
+local p3 = {
+    {0.2, 0.08},
+    {0.200001, 0},
+    {0.6, 0},
+    {0.600001, 0.08},
+    {0.8, 0.08},
+    {0.800001, 0},
+}
 
+-- 红色
+local p4 = {
+    {0.19,0.01},
+    {0.190001,0.05},
+    {0.2,0.05},
+    {0.200001,0.01},
+    {0.38,0.02},
+    {0.380001,0.1},
+    {0.4, 0.1},
+    {0.400001,0.02},
+    {0.57,0.04},
+    {0.570001,0.2},
+    {0.6, 0.2},
+    {0.600001,0.04},
+    {0.76,0.08},
+    {0.760001,0.4},
+    {0.8, 0.4},
+    {0.800001,0.08},
+    {0.95,0.16},
+    {0.950001,0.8},
+    {1, 0.8}
+}
 
+local get_spawn_points = function(p)
+    local spawn_points = {}
+    for i = 1, #p do
+        table.insert(spawn_points, {
+            distance = p[i][1],
+            probability = p[i][2],
+            speed = 0.05,
+        })
+    end
+    return spawn_points
+end
+
+asteroid_spawn_definitions[2].spawn_points = get_spawn_points(p1)  -- 碳
+asteroid_spawn_definitions[1].spawn_points = get_spawn_points(p2)  -- 金属
+asteroid_spawn_definitions[3].spawn_points = get_spawn_points(p3)  -- 冰
+asteroid_spawn_definitions[4].spawn_points = get_spawn_points(p4)  -- 红色
