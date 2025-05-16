@@ -76,10 +76,10 @@ data:extend({
     type = "recipe",
     name = "pentapod-egg-recipe",
     enabled = true,
-    energy_required = 300,
+    energy_required = 60,
     ingredients =
     {
-      {type="item", name ="stone", amount = 1000},
+      {type="item", name ="stone", amount = 500},
     },
     results = {
       {type="item", name="pentapod-egg", amount=1},
@@ -99,16 +99,17 @@ data:extend({
     name = "spwaner-recipe",
     enabled = true,
     group = "storage",
-    energy_required = 300,
+    energy_required = 60,
     ingredients =
     {
-      {type="item", name ="stone", amount = 1000},
+      {type="item", name ="stone", amount = 500},
     },
     results = {
       {type="item", name="biter-spwaner", amount=1},
     }
   }
 })
+
 
 if not settings.startup["disableGrapplingHook"].value then
   require("prototypes/entity/weapon-grappling")

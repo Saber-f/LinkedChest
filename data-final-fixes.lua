@@ -104,6 +104,63 @@ data.raw["electric-pole"]["substation"].maximum_wire_distance = 64
 data.raw["electric-pole"]["substation"].supply_area_distance = 42
 
 
+data:extend({
+    {
+        type = "recipe",
+        name = "pentapod-egg-recycling",
+        enabled = true,
+        hidden = true,
+        hidden_in_factoriopedia = true,
+        category = "recycling",
+        energy_required = 60,
+        ingredients =
+        {
+          {type="item", name="pentapod-egg", amount=1},
+        },
+        results = {
+          {type="item", name="pentapod-egg", probability=0.25, amount = 1},
+        }
+      },
+      {
+        type = "recipe",
+        name = "biter-spwaner-recycling",
+        enabled = true,
+        hidden = true,
+        hidden_in_factoriopedia = true,
+        category = "recycling",
+        group = "storage",
+        energy_required = 60,
+        ingredients =
+        {
+          {type="item", name="biter-spwaner", amount=1},
+        },
+        results = {
+          {type="item", name="biter-spwaner", probability=0.25, amount = 1},
+        }
+      },
+      {
+        type = "recipe",
+        name = "promethium-asteroid-chunk-recycling",
+        icon = "__space-age__/graphics/icons/promethium-asteroid-chunk.png",
+        enabled = true,
+        hidden = true,
+        hidden_in_factoriopedia = true,
+        category = "recycling",
+        energy_required = 60,
+        ingredients =
+        {
+          {type="item", name="promethium-asteroid-chunk", amount=1},
+        },
+        results = {
+        {type="item", name="tungsten-ore", probability=0.25, amount = 1},
+        {type="item", name="holmium-ore", probability=0.25, amount = 1},
+          {type="item", name="promethium-asteroid-chunk", probability=0.25, amount = 1},
+        }
+    }
+})
+
+
+
 -- 增加大推力推进器
 data.raw.thruster.thruster.max_performance = {
     fluid_volume = 1,
@@ -151,52 +208,48 @@ local asteroid_spawn_definitions = data.raw['space-connection']['solar-system-ed
 
 -- 碳
 local p1 = {
-    {0.2, 0.16},
-    {0.4, 0.16},
+    {0.2, 0.016},
+    {0.4, 0.016},
     {0.400001, 0}
 }
 
 -- 金属
 local p2 = {
-    {0.2, 0.12},
+    {0.2, 0.012},
     {0.200001, 0},
     {0.4, 0},
-    {0.400001, 0.12},
-    {0.6, 0.12},
+    {0.400001, 0.012},
+    {0.6, 0.012},
     {0.600001, 0},
 }
 
 -- 冰
 local p3 = {
-    {0.2, 0.08},
+    {0.2, 0.008},
     {0.200001, 0},
     {0.6, 0},
-    {0.600001, 0.08},
-    {0.8, 0.08},
+    {0.600001, 0.008},
+    {0.8, 0.008},
     {0.800001, 0},
 }
 
 -- 红色
 local p4 = {
-    {0.19,0.01},
-    {0.190001,0.05},
-    {0.2,0.05},
-    {0.200001,0.01},
-    {0.38,0.02},
-    {0.380001,0.1},
-    {0.4, 0.1},
-    {0.400001,0.02},
-    {0.57,0.04},
-    {0.570001,0.2},
-    {0.6, 0.2},
-    {0.600001,0.04},
-    {0.76,0.08},
-    {0.760001,0.4},
-    {0.8, 0.4},
-    {0.800001,0.08},
-    {0.95,0.16},
-    {0.950001,0.8},
-    {1, 0.8}
+    {0.38,0.001},
+    {0.380001,0.005},
+    {0.4, 0.005},
+    {0.400001,0.001},
+    {0.57,0.002},
+    {0.570001,0.01},
+    {0.6, 0.01},
+    {0.600001,0.002},
+    {0.76,0.004},
+    {0.760001,0.02},
+    {0.8, 0.02},
+    {0.800001,0.004},
+    {0.95,0.008},
+    {0.950001,0.04},
+    {1, 0.04}
 }
 
 local get_spawn_points = function(p)
