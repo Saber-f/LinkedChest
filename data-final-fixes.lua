@@ -182,18 +182,19 @@ for i = 2, 9 do
     local new_item = util.table.deepcopy(data.raw.item.thruster)
     new_item.name = new_name
     new_item.place_result = new_name
+
+    -- 新配方
     local new_recipe = util.table.deepcopy(data.raw.recipe.thruster)
-    new_recipe.enabled = true
     new_recipe.name = new_name
     new_recipe.ingredients = {{type="item", name=old_name, amount=10}}
     new_recipe.results = {{type="item", name=new_name, amount=1}}
-    local new_repice_recycling = util.table.deepcopy(data.raw.recipe["thruster-recycling"])
 
     -- 回收配方
+    local new_repice_recycling = util.table.deepcopy(data.raw.recipe["thruster-recycling"])
     new_repice_recycling.name = new_name .. "-recycling"
-    new_repice_recycling.enabled = true
     new_repice_recycling.ingredients = {{type="item", name=new_name, amount=1}}
     new_repice_recycling.results = {{type="item", name=old_name, amount_min=1, amount_max=7}}
+
     old_name = new_name
     data:extend({
         new_thruster,
@@ -202,6 +203,44 @@ for i = 2, 9 do
         new_repice_recycling,
     })
 end
+
+-- 增加大容量液体罐 volume
+old_name = "storage-tank"
+for i = 2, 4 do
+    local new_name = "storage-tank-" .. i
+    local new_entity = util.table.deepcopy(data.raw["storage-tank"][old_name])
+    new_entity.name = new_name
+    new_entity.minable.result = new_name
+    new_entity.fluid_box.volume = new_entity.fluid_box.volume * 10
+    local new_item = util.table.deepcopy(data.raw.item["storage-tank"])
+    new_item.name = new_name
+    new_item.place_result = new_name
+
+    -- 新配方
+    local new_recipe = util.table.deepcopy(data.raw.recipe["storage-tank"])
+    new_recipe.name = new_name
+    new_recipe.ingredients = {{type="item", name=old_name, amount=10}}
+    new_recipe.results = {{type="item", name=new_name, amount=1}}
+
+    -- 回收配方
+    local new_repice_recycling = util.table.deepcopy(data.raw.recipe["storage-tank-recycling"])
+    new_repice_recycling.name = new_name .. "-recycling"
+    new_repice_recycling.ingredients = {{type="item", name=new_name, amount=1}}
+    new_repice_recycling.results = {{type="item", name=old_name, amount_min=1, amount_max=7}}
+
+    old_name = new_name
+    data:extend({
+        new_entity,
+        new_item,
+        new_recipe,
+        new_repice_recycling,
+    })
+end
+
+-- 增加弹药堆叠 stack_size
+data.raw["ammo"]["rocket"].stack_size = 200
+data.raw["ammo"]["explosive-rocket"].stack_size = 200
+data.raw["ammo"]["railgun-ammo"].stack_size = 200
 
 -- 增加机枪射程
 data.raw["ammo-turret"]["gun-turret"].attack_parameters.range = 26
