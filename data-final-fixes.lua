@@ -22,23 +22,27 @@ data.raw.roboport.roboport.logistics_connection_distance = 64
 data.raw["cargo-landing-pad"]["cargo-landing-pad"].radar_range = 2
 
 -- 火箭弹初始速度
-data.raw.ammo["rocket"].ammo_type.action.action_delivery.starting_speed = 1.5
-data.raw.ammo["explosive-rocket"].ammo_type.action.action_delivery.starting_speed = 1.5
+data.raw.ammo["rocket"].ammo_type.action.action_delivery.starting_speed = 0
+data.raw.projectile["rocket"].acceleration = 0.4
+data.raw.projectile["rocket"].turn_speed = 10
+data.raw.ammo["explosive-rocket"].ammo_type.action.action_delivery.starting_speed = 0
+data.raw.projectile["explosive-rocket"].acceleration = 0.4
+data.raw.projectile["explosive-rocket"].turn_speed = 10
 
 -- 修改炮塔
-data.raw["ammo-turret"]["gun-turret"].rotation_speed = 0.03
+data.raw["ammo-turret"]["gun-turret"].rotation_speed = 0.04
 data.raw["ammo-turret"]["gun-turret"].preparing_speed = 0.15
 data.raw["ammo-turret"]["gun-turret"].folding_speed = 0.15
 
-data.raw["electric-turret"]["laser-turret"].rotation_speed = 0.03
+data.raw["electric-turret"]["laser-turret"].rotation_speed = 0.04
 data.raw["electric-turret"]["laser-turret"].preparing_speed = 0.15
 data.raw["electric-turret"]["laser-turret"].folding_speed = 0.15
 
-data.raw["ammo-turret"]["rocket-turret"].rotation_speed = 0.02
+data.raw["ammo-turret"]["rocket-turret"].rotation_speed = 0.03
 data.raw["ammo-turret"]["rocket-turret"].preparing_speed = 0.1
 data.raw["ammo-turret"]["rocket-turret"].folding_speed = 0.1
 
-data.raw["ammo-turret"]["railgun-turret"].rotation_speed = 0.02
+data.raw["ammo-turret"]["railgun-turret"].rotation_speed = 0.03
 data.raw["ammo-turret"]["railgun-turret"].preparing_speed = 0.1
 data.raw["ammo-turret"]["railgun-turret"].folding_speed = 0.1
 
@@ -173,6 +177,7 @@ for i = 2, 9 do
     local new_name = "thruster" .. i
     local new_thruster = util.table.deepcopy(data.raw.thruster.thruster)
     new_thruster.name = new_name
+    new_thruster.enabled = true
     new_thruster.minable.result = new_name
     new_thruster.max_performance = {
         fluid_volume = 1,
@@ -186,6 +191,7 @@ for i = 2, 9 do
     -- 新配方
     local new_recipe = util.table.deepcopy(data.raw.recipe.thruster)
     new_recipe.name = new_name
+    new_recipe.enabled = true
     new_recipe.ingredients = {{type="item", name=old_name, amount=10}}
     new_recipe.results = {{type="item", name=new_name, amount=1}}
 
@@ -219,12 +225,14 @@ for i = 2, 4 do
     -- 新配方
     local new_recipe = util.table.deepcopy(data.raw.recipe["storage-tank"])
     new_recipe.name = new_name
+    new_recipe.enabled = true
     new_recipe.ingredients = {{type="item", name=old_name, amount=10}}
     new_recipe.results = {{type="item", name=new_name, amount=1}}
 
     -- 回收配方
     local new_repice_recycling = util.table.deepcopy(data.raw.recipe["storage-tank-recycling"])
     new_repice_recycling.name = new_name .. "-recycling"
+    new_repice_recycling.enabled = true
     new_repice_recycling.ingredients = {{type="item", name=new_name, amount=1}}
     new_repice_recycling.results = {{type="item", name=old_name, amount_min=1, amount_max=7}}
 
