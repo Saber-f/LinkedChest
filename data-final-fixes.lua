@@ -187,11 +187,19 @@ for i = 2, 9 do
     new_recipe.name = new_name
     new_recipe.ingredients = {{type="item", name=old_name, amount=10}}
     new_recipe.results = {{type="item", name=new_name, amount=1}}
+    local new_repice_recycling = util.table.deepcopy(data.raw.recipe["thruster-recycling"])
+
+    -- 回收配方
+    new_repice_recycling.name = new_name .. "-recycling"
+    new_repice_recycling.enabled = true
+    new_repice_recycling.ingredients = {{type="item", name=new_name, amount=1}}
+    new_repice_recycling.results = {{type="item", name=old_name, amount_min=1, amount_max=7}}
     old_name = new_name
     data:extend({
         new_thruster,
         new_item,
         new_recipe,
+        new_repice_recycling,
     })
 end
 
@@ -205,6 +213,10 @@ data.raw["electric-turret"]["tesla-turret"].attack_parameters.range = 36
 data.raw['space-connection']['solar-system-edge-shattered-planet'].length = 5000000
 local asteroid_spawn_definitions = data.raw['space-connection']['solar-system-edge-shattered-planet'].asteroid_spawn_definitions
 
+
+-- 调整破碎陨石概率
+data.raw['space-location']['shattered-planet'].asteroid_spawn_definitions = {};
+data.raw['space-location']['solar-system-edge'].asteroid_spawn_definitions = {};
 
 -- 碳
 local p1 = {
@@ -235,7 +247,7 @@ local p3 = {
 
 -- 红色
 local p4 = {
-    {0.38,0.001},
+    {0.38,0},
     {0.380001,0.005},
     {0.4, 0.005},
     {0.400001,0.001},
