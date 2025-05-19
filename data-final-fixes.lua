@@ -217,7 +217,7 @@ for i = 2, 4 do
     local new_entity = util.table.deepcopy(data.raw["storage-tank"][old_name])
     new_entity.name = new_name
     new_entity.minable.result = new_name
-    new_entity.fluid_box.volume = new_entity.fluid_box.volume * 10
+    new_entity.fluid_box.volume = new_entity.fluid_box.volume * 4
     local new_item = util.table.deepcopy(data.raw.item["storage-tank"])
     new_item.name = new_name
     new_item.place_result = new_name
@@ -226,7 +226,7 @@ for i = 2, 4 do
     local new_recipe = util.table.deepcopy(data.raw.recipe["storage-tank"])
     new_recipe.name = new_name
     new_recipe.enabled = true
-    new_recipe.ingredients = {{type="item", name=old_name, amount=10}}
+    new_recipe.ingredients = {{type="item", name=old_name, amount=4}}
     new_recipe.results = {{type="item", name=new_name, amount=1}}
 
     -- 回收配方
@@ -234,7 +234,7 @@ for i = 2, 4 do
     new_repice_recycling.name = new_name .. "-recycling"
     new_repice_recycling.enabled = true
     new_repice_recycling.ingredients = {{type="item", name=new_name, amount=1}}
-    new_repice_recycling.results = {{type="item", name=old_name, amount_min=1, amount_max=7}}
+    new_repice_recycling.results = {{type="item", name=old_name, amount_min=1, amount_max=3}}
 
     old_name = new_name
     data:extend({
@@ -264,6 +264,41 @@ local asteroid_spawn_definitions = data.raw['space-connection']['solar-system-ed
 -- 调整破碎陨石概率
 data.raw['space-location']['shattered-planet'].asteroid_spawn_definitions = {};
 data.raw['space-location']['solar-system-edge'].asteroid_spawn_definitions = {};
+
+table.insert(data.raw['planet']["nauvis"].asteroid_spawn_definitions, {
+    type = "asteroid-chunk",
+    asteroid = "promethium-asteroid-chunk",
+    probability = 0.0001,
+    speed = 0.016
+})
+
+table.insert(data.raw['planet']["fulgora"].asteroid_spawn_definitions, {
+    type = "asteroid-chunk",
+    asteroid = "promethium-asteroid-chunk",
+    probability = 0.0001,
+    speed = 0.016
+})
+
+table.insert(data.raw['planet']["vulcanus"].asteroid_spawn_definitions, {
+    type = "asteroid-chunk",
+    asteroid = "promethium-asteroid-chunk",
+    probability = 0.0001,
+    speed = 0.016
+})
+
+table.insert(data.raw['planet']["gleba"].asteroid_spawn_definitions, {
+    type = "asteroid-chunk",
+    asteroid = "promethium-asteroid-chunk",
+    probability = 0.0001,
+    speed = 0.016
+})
+
+table.insert(data.raw['planet']["aquilo"].asteroid_spawn_definitions, {
+    type = "asteroid-chunk",
+    asteroid = "promethium-asteroid-chunk",
+    probability = 0.0005,
+    speed = 0.016
+})
 
 -- 碳
 local p1 = {
