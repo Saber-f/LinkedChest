@@ -15,11 +15,11 @@ end
 data.raw["linked-container"]["Oem-linked-chest"].collision_box = {{-0.15, -0.15}, {0.15, 0.15}}
 
 -- 机器人平台雷达范围
-data.raw.roboport.roboport.radar_range = 2
-data.raw.roboport.roboport.logistics_radius = 64
-data.raw.roboport.roboport.construction_radius = 64
-data.raw.roboport.roboport.logistics_connection_distance = 64
-data.raw["cargo-landing-pad"]["cargo-landing-pad"].radar_range = 2
+data.raw.roboport.roboport.radar_range = 1
+data.raw.roboport.roboport.logistics_radius = 32
+data.raw.roboport.roboport.construction_radius = 32
+data.raw.roboport.roboport.logistics_connection_distance = 32
+data.raw["cargo-landing-pad"]["cargo-landing-pad"].radar_range = 1
 
 -- 火箭弹初始速度
 data.raw.ammo["rocket"].ammo_type.action.action_delivery.starting_speed = 0
@@ -116,7 +116,7 @@ data:extend({
         hidden = true,
         hidden_in_factoriopedia = true,
         category = "recycling",
-        energy_required = 60,
+        energy_required = 6,
         ingredients =
         {
           {type="item", name="pentapod-egg", amount=1},
@@ -133,7 +133,7 @@ data:extend({
         hidden_in_factoriopedia = true,
         category = "recycling",
         group = "storage",
-        energy_required = 60,
+        energy_required = 6,
         ingredients =
         {
           {type="item", name="biter-spwaner", amount=1},
@@ -144,21 +144,20 @@ data:extend({
       },
       {
         type = "recipe",
-        name = "promethium-asteroid-chunk-recycling",
+        name = "promethium-asteroid-chunk-crushing",
         icon = "__space-age__/graphics/icons/promethium-asteroid-chunk.png",
         enabled = true,
-        hidden = true,
-        hidden_in_factoriopedia = true,
-        category = "recycling",
-        energy_required = 60,
+        subgroup = "space-crushing",
+        category = "crushing",
+        energy_required = 2,
         ingredients =
         {
           {type="item", name="promethium-asteroid-chunk", amount=1},
         },
         results = {
-        {type="item", name="tungsten-ore", probability=0.25, amount = 1},
-        {type="item", name="holmium-ore", probability=0.25, amount = 1},
-          {type="item", name="promethium-asteroid-chunk", probability=0.25, amount = 1},
+        {type="item", name="tungsten-ore", amount = 10},
+        {type="item", name="holmium-ore", amount = 10},
+          {type="item", name="promethium-asteroid-chunk", probability=0.2, amount = 1},
         }
     }
 })
@@ -275,28 +274,28 @@ table.insert(data.raw['planet']["nauvis"].asteroid_spawn_definitions, {
 table.insert(data.raw['planet']["fulgora"].asteroid_spawn_definitions, {
     type = "asteroid-chunk",
     asteroid = "promethium-asteroid-chunk",
-    probability = 0.0001,
+    probability = 0.0002,
     speed = 0.016
 })
 
 table.insert(data.raw['planet']["vulcanus"].asteroid_spawn_definitions, {
     type = "asteroid-chunk",
     asteroid = "promethium-asteroid-chunk",
-    probability = 0.0001,
+    probability = 0.0002,
     speed = 0.016
 })
 
 table.insert(data.raw['planet']["gleba"].asteroid_spawn_definitions, {
     type = "asteroid-chunk",
     asteroid = "promethium-asteroid-chunk",
-    probability = 0.0001,
+    probability = 0.0002,
     speed = 0.016
 })
 
 table.insert(data.raw['planet']["aquilo"].asteroid_spawn_definitions, {
     type = "asteroid-chunk",
     asteroid = "promethium-asteroid-chunk",
-    probability = 0.0005,
+    probability = 0.0004,
     speed = 0.016
 })
 
@@ -329,7 +328,7 @@ local p3 = {
 
 -- 红色
 local p4 = {
-    {0.38,0},
+    {0.38,0.001},
     {0.380001,0.005},
     {0.4, 0.005},
     {0.400001,0.001},
