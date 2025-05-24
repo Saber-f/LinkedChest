@@ -16,9 +16,9 @@ data.raw["linked-container"]["Oem-linked-chest"].collision_box = {{-0.15, -0.15}
 
 -- 机器人平台雷达范围
 data.raw.roboport.roboport.radar_range = 1
-data.raw.roboport.roboport.logistics_radius = 32
-data.raw.roboport.roboport.construction_radius = 32
-data.raw.roboport.roboport.logistics_connection_distance = 32
+data.raw.roboport.roboport.logistics_radius = 42
+data.raw.roboport.roboport.construction_radius = 42
+data.raw.roboport.roboport.logistics_connection_distance = 42
 data.raw["cargo-landing-pad"]["cargo-landing-pad"].radar_range = 1
 
 -- 火箭弹初始速度
