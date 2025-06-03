@@ -126,9 +126,9 @@ local function set_link_show(player, frame, gui_name, entity)
     link_id = (link_id-index) / 2^6 -- 还原
     
     if (storage.name2id) then
-        local name = storage.name2id[link_id]
-        if prototypes.item[name] then
-            field.elem_value = name
+        local info = storage.name2id[link_id]
+        if info and (info.type ~= "" or prototypes.item[info.name]) then
+            field.elem_value = info
         end
     end
 end
